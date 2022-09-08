@@ -1,0 +1,6 @@
+{
+    "jwt_key": "secret",
+    "jwt_hours": 24,
+    "users_file_path": "./users.json",
+    "log_dir_path": "./logs"
+}
