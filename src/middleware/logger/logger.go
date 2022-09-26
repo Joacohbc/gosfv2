@@ -13,16 +13,17 @@ import (
 )
 
 func MyLoggerConfig() echo.MiddlewareFunc {
+
 	err := os.MkdirAll(env.Config.LogDirPath, os.ModeDir)
 	if err != nil {
-		log.Fatal("Error al crear el directorio de logs:", err)
+		log.Fatal("Error creating log directory: ", err)
 	}
 
 	time := time.Now().Format("2006-01-02_15-04-05-999999999")
 
 	file, err := os.Create(filepath.Join(env.Config.LogDirPath, time+".log"))
 	if err != nil {
-		log.Fatal("Error al crear el archivo de log:", err)
+		log.Fatal("Error creating log file: ", err)
 	}
 
 	config := middleware.LoggerConfig{
