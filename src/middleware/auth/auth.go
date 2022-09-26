@@ -34,22 +34,21 @@ func RegisterHandler(c echo.Context) error {
 	}
 
 	if strings.TrimSpace(user.Username) == "" || strings.TrimSpace(user.Password) == "" {
-		return c.String(http.StatusBadRequest, "Username or password is empty")
+		return echo.NewHTTPError(http.StatusBadRequest, "Username or password is empty")
 	}
 
-	exist, err := users.FindUserByName(user.Username)
+	exist, err := users.FindUserByName(c.Request().Context(), user.Username)
 	if err != nil {
-		c.Error(err)
-		return c.String(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	if exist {
-		return c.String(http.StatusUnauthorized, "A user with that username already exists")
+		return echo.NewHTTPError(http.StatusUnauthorized, "A user with that username already exists")
 	}
 
-	err = users.NewUser(*user)
+	err = users.NewUser(c.Request().Context(), *user)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.String(http.StatusOK, "You have been registered successfully")
@@ -60,18 +59,16 @@ func LoginHandler(c echo.Context) error {
 
 	err := c.Bind(user)
 	if err != nil {
-		c.Error(err)
-		return c.String(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	exist, err := users.FindUser(user.Username, user.Password)
+	exist, err := users.FindUser(c.Request().Context(), user.Username, user.Password)
 	if err != nil {
-		c.Error(err)
-		return c.String(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	if !exist {
-		return c.String(http.StatusUnauthorized, "Invalid username or password")
+		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid username or password")
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, UserClaims{
@@ -83,7 +80,7 @@ func LoginHandler(c echo.Context) error {
 
 	tokenString, err := token.SignedString([]byte(env.Config.JWTKey))
 	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.String(http.StatusOK, tokenString)

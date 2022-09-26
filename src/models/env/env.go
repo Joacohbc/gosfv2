@@ -7,10 +7,13 @@ import (
 )
 
 type config struct {
-	JWTKey        string `json:"jwt_key"`
-	JWTHours      int    `json:"jwt_hours"`
-	UsersFilePath string `json:"users_file_path"`
-	LogDirPath    string `json:"log_dir_path"`
+	JWTKey     string `json:"jwt_key"`
+	JWTHours   int    `json:"jwt_hours"`
+	LogDirPath string `json:"log_dir_path"`
+	DBHost     string `json:"db_host"`
+	DBUser     string `json:"db_user"`
+	DBPassword string `json:"db_password"`
+	DBName     string `json:"db_name"`
 }
 
 var Config config
