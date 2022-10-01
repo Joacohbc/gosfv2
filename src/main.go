@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"gosfV2/src/auth"
+	"gosfV2/src/handlers"
 	"gosfV2/src/middleware/logger"
 	"net/http"
 	"os"
@@ -42,11 +43,19 @@ func main() {
 	e.GET("/logout", auth.LogoutHandler)
 
 	// Authentificated Endpoints
-	group := e.Group("/auth")
+	auths := e.Group("/auth")
 	{
-		group.GET("/", func(ctx echo.Context) error {
+		auths.GET("/", func(ctx echo.Context) error {
 			return ctx.String(http.StatusOK, "You logged sucesfully!")
 		})
+
+		files := auths.Group("/files")
+		{
+			files.POST("/", handlers.UploadFile)
+			files.GET("/", handlers.GetAllFiles)
+			files.GET("/:filename", handlers.GetFile)
+			files.DELETE("/:filename", handlers.DeleteFile)
+		}
 	}
 
 	api := e.Group("/api")

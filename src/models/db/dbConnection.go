@@ -18,17 +18,9 @@ func GetConn() *sql.DB {
 	return poolConn
 }
 
-// Retorna false si el err no es nil o sql.ErrNoRows
-func NotErrNoRows(err error) bool {
-	if err == sql.ErrNoRows {
-		return false
-	}
-
-	if err == nil {
-		return true
-	}
-
-	return false
+// Retorna True si es error (que no sea el sql.ErrNoRows)
+func IsSQLError(err error) bool {
+	return err != nil && err != sql.ErrNoRows
 }
 
 func Ping(ctx context.Context) bool {
