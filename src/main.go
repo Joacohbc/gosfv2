@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"flag"
-	"gosfV2/src/middleware/auth"
+	"gosfV2/src/auth"
 	"gosfV2/src/middleware/logger"
 	"net/http"
 	"os"
@@ -11,6 +11,7 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/labstack/gommon/log"
 )
 
 var (
@@ -24,27 +25,36 @@ func init() {
 
 func main() {
 	e := echo.New()
-	e.Debug = false
 
-	e.Use(logger.MyLoggerConfig())
+	e.Use(logger.RequestLoggerConfig())
 	e.Use(middleware.Recover())
+	e.Use(auth.JWTAuthMiddleware)
+	e.Logger = logger.Logger(log.INFO)
+
+	// Test Endpoint
+	e.GET("/ping", func(c echo.Context) error {
+		return c.String(http.StatusOK, "pong")
+	})
 
 	// Auth Endpoints
 	e.POST("/login", auth.LoginHandler)
 	e.POST("/register", auth.RegisterHandler)
+	e.GET("/logout", auth.LogoutHandler)
 
 	// Authentificated Endpoints
-	group := e.Group("/auth/api", auth.JWTMiddlewareConfigured())
+	group := e.Group("/auth")
 	{
 		group.GET("/", func(ctx echo.Context) error {
 			return ctx.String(http.StatusOK, "You logged sucesfully!")
 		})
 	}
 
-	// Test Endpoint
-	e.GET("/test", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
+	api := e.Group("/api")
+	{
+		api.GET("/", func(ctx echo.Context) error {
+			return ctx.String(http.StatusOK, "You are authenticated!")
+		})
+	}
 
 	go func() {
 		quit := make(chan os.Signal, 1)
