@@ -49,18 +49,19 @@ func (f *fileController) DeleteFile(c echo.Context) error {
 	return c.String(http.StatusOK, "File deleted successfully")
 }
 
-func (f *fileController) GetFiles(c echo.Context) error {
+func (f *fileController) GetFile(c echo.Context) error {
 	username := c.Get("username").(string)
+	filename := c.Param("filename")
 
-	if filename := c.QueryParam("filename"); filename != "" {
-
-		file, err := models.Files.GetFileByUsername(c.Request().Context(), username, filename)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-		return c.JSON(http.StatusOK, file)
-
+	file, err := models.Files.GetFileByUsername(c.Request().Context(), username, filename)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+	return c.JSON(http.StatusOK, file)
+}
+
+func (f *fileController) GetAllFiles(c echo.Context) error {
+	username := c.Get("username").(string)
 
 	files, err := models.Files.GetAllFilesByUsername(c.Request().Context(), username)
 	if err != nil {
@@ -68,4 +69,40 @@ func (f *fileController) GetFiles(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, files)
+}
+
+func (f *fileController) ShareFile(c echo.Context) error {
+	username := c.Get("username").(string)
+	filename := c.Param("filename")
+	share := c.QueryParam("share")
+
+	if share == "yes" {
+		err := models.Files.SetShared(c.Request().Context(), username, filename, true)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		return c.String(http.StatusOK, "File shared successfully")
+	} else {
+		err := models.Files.SetShared(c.Request().Context(), username, filename, false)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		return c.String(http.StatusOK, "File not shared successfully")
+	}
+}
+
+func (f *fileController) GetShareFile(c echo.Context) error {
+	username := c.QueryParam("username")
+	filename := c.QueryParam("filename")
+
+	file, err := models.Files.GetFileByUsername(c.Request().Context(), username, filename)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if !file.Shared {
+		return echo.NewHTTPError(http.StatusForbidden, "File not shared")
+	}
+
+	return c.File(models.Files.GetPathUser(username, filename))
 }

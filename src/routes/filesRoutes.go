@@ -10,19 +10,15 @@ var Files filesRoutes
 
 type filesRoutes struct{}
 
-// Agrego un nuevo Group a la API llamada Files y
-// agrega los Endpoints de Files
-func (f *filesRoutes) AddRoutes(e *echo.Echo) {
-	files := e.Group("/files")
-	files.POST("/", handlers.Files.UploadFile)
-	files.GET("/", handlers.Files.GetFiles)
-	files.DELETE("/:filename", handlers.Files.DeleteFile)
-}
-
 // Agrego los Endpoints de Files al grupo de Endpoints
 func (f *filesRoutes) AddRoutesToGroup(group *echo.Group) {
 	files := group.Group("/files")
+
+	files.GET("/", handlers.Files.GetAllFiles)
+	files.GET("/:filename", handlers.Files.GetFile)
 	files.POST("/", handlers.Files.UploadFile)
-	files.GET("/", handlers.Files.GetFiles)
-	files.DELETE("/", handlers.Files.DeleteFile)
+	files.DELETE("/:filename", handlers.Files.DeleteFile)
+
+	files.GET("/share", handlers.Files.GetShareFile)
+	files.PUT("/share/:filename", handlers.Files.ShareFile)
 }

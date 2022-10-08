@@ -37,7 +37,6 @@ func RequestLoggerConfig() echo.MiddlewareFunc {
 		CustomTimeFormat: "2006-01-02 15:04:05.00000",
 		Output:           LogWriter,
 	}
-
 	return middleware.LoggerWithConfig(config)
 }
 
