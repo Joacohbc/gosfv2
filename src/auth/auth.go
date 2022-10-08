@@ -1,11 +1,10 @@
 package auth
 
 import (
+	"gosfV2/src/models"
 	"gosfV2/src/models/env"
-	"gosfV2/src/models/users"
-	"strings"
-
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -46,7 +45,7 @@ func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		// Get user from the database
-		dbUser, err := users.FindUserByName(c.Request().Context(), claims.Username)
+		dbUser, err := models.Users.FindUserByName(c.Request().Context(), claims.Username)
 		if err != nil {
 			return err
 		}
@@ -65,7 +64,7 @@ func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 func RegisterHandler(c echo.Context) error {
-	user := new(users.User)
+	user := new(models.User)
 
 	err := c.Bind(user)
 	if err != nil {
@@ -76,7 +75,7 @@ func RegisterHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Username or password is empty")
 	}
 
-	exist, err := users.FindUserByName(c.Request().Context(), user.Username)
+	exist, err := models.Users.FindUserByName(c.Request().Context(), user.Username)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -85,7 +84,7 @@ func RegisterHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "A user with that username already exists")
 	}
 
-	err = users.NewUser(c.Request().Context(), *user)
+	err = models.Users.NewUser(c.Request().Context(), *user)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

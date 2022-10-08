@@ -1,13 +1,17 @@
 package handlers
 
 import (
-	"gosfV2/src/models/files"
+	"gosfV2/src/models"
 	"net/http"
 
 	"github.com/labstack/echo"
 )
 
-func UploadFile(c echo.Context) error {
+var Files fileController
+
+type fileController struct{}
+
+func (f *fileController) UploadFile(c echo.Context) error {
 
 	mf, err := c.MultipartForm()
 	if err != nil {
@@ -22,7 +26,7 @@ func UploadFile(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
-		if err := files.CreateFile(c.Request().Context(), f.Filename, username, src); err != nil {
+		if err := models.Files.CreateFile(c.Request().Context(), f.Filename, username, src); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
@@ -34,35 +38,34 @@ func UploadFile(c echo.Context) error {
 	return c.String(http.StatusOK, "File/s uploaded successfully")
 }
 
-func DeleteFile(c echo.Context) error {
+func (f *fileController) DeleteFile(c echo.Context) error {
 	username := c.Get("username").(string)
 	fileName := c.Param("filename")
 
-	if err := files.DeleteFile(c.Request().Context(), username, fileName); err != nil {
+	if err := models.Files.DeleteFile(c.Request().Context(), username, fileName); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.String(http.StatusOK, "File deleted successfully")
 }
 
-func GetAllFiles(c echo.Context) error {
+func (f *fileController) GetFiles(c echo.Context) error {
 	username := c.Get("username").(string)
-	files, err := files.GetAllFilesByUsername(c.Request().Context(), username)
+
+	if filename := c.QueryParam("filename"); filename != "" {
+
+		file, err := models.Files.GetFileByUsername(c.Request().Context(), username, filename)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		return c.JSON(http.StatusOK, file)
+
+	}
+
+	files, err := models.Files.GetAllFilesByUsername(c.Request().Context(), username)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, files)
-}
-
-func GetFile(c echo.Context) error {
-	username := c.Get("username").(string)
-	fileName := c.Param("filename")
-
-	file, err := files.GetFileByUsername(c.Request().Context(), username, fileName)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.File(files.GetPathUser(username, file.Filename))
 }

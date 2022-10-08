@@ -2,8 +2,8 @@ package auth
 
 import (
 	"errors"
+	"gosfV2/src/models"
 	"gosfV2/src/models/env"
-	"gosfV2/src/models/users"
 	"net/http"
 	"strings"
 	"time"
@@ -59,14 +59,14 @@ func getTokenFromCookie(c echo.Context) (string, error) {
 // El error que se genera es un error de tipo echo.HTTPError
 func generateJWTForUser(c echo.Context) (string, error) {
 
-	user := new(users.User)
+	user := new(models.User)
 
 	err := c.Bind(user)
 	if err != nil {
 		return "", echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	exist, err := users.FindUser(c.Request().Context(), user.Username, user.Password)
+	exist, err := models.Users.FindUser(c.Request().Context(), user.Username, user.Password)
 	if err != nil {
 		return "", echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

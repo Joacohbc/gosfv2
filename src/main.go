@@ -4,8 +4,8 @@ import (
 	"context"
 	"flag"
 	"gosfV2/src/auth"
-	"gosfV2/src/handlers"
 	"gosfV2/src/middleware/logger"
+	"gosfV2/src/routes"
 	"net/http"
 	"os"
 	"os/signal"
@@ -30,40 +30,17 @@ func main() {
 	e.Use(logger.RequestLoggerConfig())
 	e.Use(middleware.Recover())
 	e.Use(auth.JWTAuthMiddleware)
-	e.Logger = logger.Logger(log.INFO)
+	e.Logger = logger.Logger(log.DEBUG)
 
 	// Test Endpoint
 	e.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "pong")
 	})
 
-	// Auth Endpoints
-	e.POST("/login", auth.LoginHandler)
-	e.POST("/register", auth.RegisterHandler)
-	e.GET("/logout", auth.LogoutHandler)
-
-	// Authentificated Endpoints
-	auths := e.Group("/auth")
-	{
-		auths.GET("/", func(ctx echo.Context) error {
-			return ctx.String(http.StatusOK, "You logged sucesfully!")
-		})
-
-		files := auths.Group("/files")
-		{
-			files.POST("/", handlers.UploadFile)
-			files.GET("/", handlers.GetAllFiles)
-			files.GET("/:filename", handlers.GetFile)
-			files.DELETE("/:filename", handlers.DeleteFile)
-		}
-	}
+	routes.Auth.AddRoutes(e)
 
 	api := e.Group("/api")
-	{
-		api.GET("/", func(ctx echo.Context) error {
-			return ctx.String(http.StatusOK, "You are authenticated!")
-		})
-	}
+	routes.Files.AddRoutesToGroup(api)
 
 	go func() {
 		quit := make(chan os.Signal, 1)

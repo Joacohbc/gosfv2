@@ -16,7 +16,7 @@ import (
 var LogWriter io.Writer
 
 func init() {
-	err := os.MkdirAll(env.Config.LogDirPath, os.ModeDir)
+	err := os.MkdirAll(env.Config.LogDirPath, 0744)
 	if err != nil {
 		log.Fatal("Error creating log directory: ", err)
 	}
@@ -32,7 +32,6 @@ func init() {
 }
 
 func RequestLoggerConfig() echo.MiddlewareFunc {
-
 	config := middleware.LoggerConfig{
 		Format:           "${time_custom} => ${remote_ip} - ${method} ${uri} | ${status} - ${latency_human}\n",
 		CustomTimeFormat: "2006-01-02 15:04:05.00000",

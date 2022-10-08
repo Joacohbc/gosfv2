@@ -1,5 +1,5 @@
-
 *.sh
 .vscode/*
-src/logs/*
 src/config.json
+logs/
+files/
