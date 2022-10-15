@@ -2,33 +2,23 @@ package models
 
 import (
 	"context"
+	"errors"
 	"gosfV2/src/models/db"
 	"gosfV2/src/models/env"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
+
+	"gorm.io/gorm"
 )
 
 func init() {
-	conn := db.GetConn()
+	bd := db.GetBd()
 
-	rows, err := conn.Query(`
-	CREATE TABLE IF NOT EXISTS files (
-		id INTEGER PRIMARY KEY AUTO_INCREMENT, 
-		filename TEXT NOT NULL,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-		id_user INTEGER NOT NULL,
-		shared BOOLEAN DEFAULT FALSE,
-		UNIQUE (filename, id_user),
-		FOREIGN KEY (id_user) REFERENCES users(id)
-	);`)
-
-	if err != nil {
+	if err := bd.AutoMigrate(&File{}); err != nil {
 		log.Fatal("Error to create table files:", err)
 	}
-	rows.Close()
 
 	if err := os.MkdirAll(env.Config.FilesDirectory, 0644); err != nil {
 		log.Fatal("Error to create directory files:", err)
@@ -36,12 +26,25 @@ func init() {
 }
 
 type File struct {
-	ID       int    `json:"id"`
-	Filename string `json:"filename"`
-	Shared   bool   `json:"shared"`
+	gorm.Model
+	Filename   string `json:"filename" gorm:"not null; index:uk1,unique"`
+	Shared     bool   `json:"shared" gorm:"default:false"`
+	OwnerID    uint   `json:"owner_id" gorm:"not null; index:uk1,unique"`
+	Owner      User   `json:"owner"`
+	SharedWith []User `json:"shared_with" gorm:"many2many:file_users"`
 }
 
-var Files fileFuncs
+type FileDTO struct {
+	ID         uint      `json:"id"`
+	Filename   string    `json:"filename"`
+	Shared     bool      `json:"shared"`
+	SharedWith []UserDTO `json:"shared_with" gorm:"many2many:file_users"`
+}
+
+var (
+	Files           fileFuncs
+	ErrFileNotFound = errors.New("file/s not found")
+)
 
 type fileFuncs struct{}
 
@@ -53,46 +56,53 @@ func (f fileFuncs) GetPathUser(username, file string) string {
 	return filepath.Join(env.Config.FilesDirectory, username, file)
 }
 
-func (f fileFuncs) GetAllFilesByUsername(ctx context.Context, username string) ([]File, error) {
+func (f fileFuncs) GetAllFilesByUsername(ctx context.Context, username string) ([]FileDTO, error) {
+	bd := db.GetBdCtx(ctx)
 
-	id, err := Users.GetIdByName(ctx, username)
+	var files []FileDTO
+	err := bd.Model(&File{}).
+		Joins("JOIN users ON files.owner_id = users.id").
+		// Select("files.id, files.filename, files.shared").
+		Where("users.username = ?", username).
+		Find(&files).Error
+
 	if err != nil {
-		return nil, err
-	}
-
-	conn := db.GetConn()
-
-	rs, err := conn.Query(`SELECT id, filename, shared FROM files WHERE id_user=?`, id)
-	if err != nil {
-		return nil, err
-	}
-
-	var files []File
-	for rs.Next() {
-		var f File
-		if err := rs.Scan(&f.ID, &f.Filename, &f.Shared); err != nil {
-			return nil, err
+		if db.IsNotFound(err) {
+			return nil, ErrFileNotFound
 		}
-		f.Filename = filepath.Base(f.Filename)
-		files = append(files, f)
+		return nil, err
 	}
 
 	return files, nil
 }
 
 func (f fileFuncs) GetFileByUsername(ctx context.Context, username, filename string) (File, error) {
-
-	id, err := Users.GetIdByName(ctx, username)
-	if err != nil {
-		return File{}, err
-	}
-
-	conn := db.GetConn()
+	bd := db.GetBdCtx(ctx)
 
 	var file File
-	err = conn.QueryRow(`SELECT id, filename, shared FROM files WHERE id_user=? AND filename=?`, id, filename).Scan(&file.ID, &file.Filename, &file.Shared)
+	err := bd.Joins("JOIN users ON files.owner_id = users.id").
+		Where("users.username = ? AND files.filename = ?", username, filename).
+		First(&file).Error
+
 	if err != nil {
-		return File{}, err
+		if db.IsNotFound(err) {
+			return file, ErrFileNotFound
+		}
+		return file, err
+	}
+
+	return file, nil
+}
+
+func (f fileFuncs) GetFileById(ctx context.Context, id string) (File, error) {
+	bd := db.GetBdCtx(ctx)
+
+	var file File
+	if err := bd.First(&file, id).Error; err != nil {
+		if db.IsNotFound(err) {
+			return file, ErrFileNotFound
+		}
+		return file, err
 	}
 
 	return file, nil
@@ -100,21 +110,15 @@ func (f fileFuncs) GetFileByUsername(ctx context.Context, username, filename str
 
 func (f fileFuncs) CreateFile(ctx context.Context, filename string, username string, src io.Reader) error {
 
-	// Obtengo el ID del usuario
-	id, err := Users.GetIdByName(ctx, username)
-	if err != nil {
-		return err
-	}
+	// Inicio una transaccion
+	tx := db.GetBdCtx(ctx).Begin()
 
-	conn := db.GetConn()
+	err := tx.Create(&File{
+		Filename: filename,
+		Owner:    User{Username: username},
+		Shared:   false,
+	}).Error
 
-	tx, err := conn.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-
-	// Genero el nuevo registro en la Tabla
-	_, err = tx.Exec(`INSERT INTO files (filename, id_user) VALUES (?, ?)`, filename, id)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -145,8 +149,7 @@ func (f fileFuncs) CreateFile(ctx context.Context, filename string, username str
 		return err
 	}
 
-	// Si todo salio bien hago el Commit a la BD
-	if err := tx.Commit(); err != nil {
+	if err := tx.Commit().Error; err != nil {
 		return err
 	}
 
@@ -155,34 +158,33 @@ func (f fileFuncs) CreateFile(ctx context.Context, filename string, username str
 
 func (f fileFuncs) DeleteFile(ctx context.Context, username, filename string) error {
 
-	id, err := Users.GetIdByName(ctx, username)
-	if err != nil {
-		return err
-	}
+	// Inicio una transaccion
+	tx := db.GetBdCtx(ctx).Begin()
 
-	conn := db.GetConn()
+	res := tx.Unscoped().
+		Where(File{
+			Filename: filename,
+			Owner:    User{Username: username}}).
+		Delete(&File{})
 
-	tx, err := conn.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-
-	// Genero el nuevo registro en la Tabla
-	_, err = tx.Exec(`DELETE FROM files WHERE filename=? AND id_user=?`, filename, id)
-	if err != nil {
+	if res.Error != nil {
 		tx.Rollback()
-		return err
+		return res.Error
 	}
 
-	// Creo el Directorio de archivos del usuario
+	if res.RowsAffected == 0 {
+		tx.Rollback()
+		return ErrFileNotFound
+	}
+
+	// Creo el archivo (en Local)
 	path := f.GetPathUser(username, filename)
 	if err := os.Remove(path); err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	// Si todo salio bien hago el Commit a la BD
-	if err := tx.Commit(); err != nil {
+	if err := tx.Commit().Error; err != nil {
 		return err
 	}
 
@@ -190,35 +192,18 @@ func (f fileFuncs) DeleteFile(ctx context.Context, username, filename string) er
 }
 
 func (f fileFuncs) SetShared(ctx context.Context, username, filename string, shared bool) error {
+	res := db.GetBdCtx(ctx).Model(&File{}).
+		Where(File{
+			Filename: filename,
+			Owner:    User{Username: username}}).
+		Update("shared", shared)
 
-	file, err := f.GetFileByUsername(ctx, username, filename)
-	if err != nil {
-		return err
+	if res.Error != nil {
+		return res.Error
 	}
 
-	conn := db.GetConn()
-
-	tx, err := conn.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-
-	var sql string
-	if shared {
-		sql = `UPDATE files SET shared=true WHERE filename=? AND id_user=?`
-	} else {
-		sql = `UPDATE files SET shared=false WHERE filename=? AND id_user=?`
-	}
-
-	_, err = tx.Exec(sql, file.Filename, file.ID)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// Si todo salio bien hago el Commit a la BD
-	if err := tx.Commit(); err != nil {
-		return err
+	if res.RowsAffected == 0 {
+		return ErrFileNotFound
 	}
 
 	return nil

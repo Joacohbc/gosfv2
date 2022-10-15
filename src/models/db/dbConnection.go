@@ -2,50 +2,42 @@ package db
 
 import (
 	"context"
-	"database/sql"
+	"errors"
 	"fmt"
 	"gosfV2/src/models/env"
 	"log"
-	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 // Dejar la conexion en Singleton
-var poolConn *sql.DB
+var db *gorm.DB
 
-func GetConn() *sql.DB {
-	return poolConn
+func GetBd() *gorm.DB {
+	return db
 }
 
-// Retorna True si es error (que no sea el sql.ErrNoRows)
-func IsSQLError(err error) bool {
-	return err != nil && err != sql.ErrNoRows
+func GetBdCtx(cxt context.Context) *gorm.DB {
+	return db.WithContext(cxt)
 }
 
-func Ping(ctx context.Context) bool {
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
-	defer cancel()
+// Retorna true si es gorm.ErrRecordNotFound)
+func IsNotFound(err error) bool {
+	return errors.Is(err, gorm.ErrRecordNotFound)
 
-	if err := poolConn.PingContext(ctx); err != nil {
-		return false
-	}
-
-	return true
 }
 
 func init() {
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local", env.Config.DBUser, env.Config.DBPassword, env.Config.DBHost, env.Config.BDPort, env.Config.DBName, env.Config.BDCharset)
+
 	var err error
-	poolConn, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s", env.Config.DBUser, env.Config.DBPassword, env.Config.DBHost, env.Config.DBName))
+	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+
+	// var err error
+	// db, err = gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
 	if err != nil {
-		log.Fatal("Error to connect to database:", err)
-	}
-
-	poolConn.SetConnMaxLifetime(time.Minute * 3)
-	poolConn.SetMaxOpenConns(10)
-	poolConn.SetMaxIdleConns(10)
-
-	if err := poolConn.Ping(); err != nil {
 		log.Fatal("Error to connect to database:", err)
 	}
 }

@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"gosfV2/src/models"
 	"gosfV2/src/models/env"
 	"net/http"
@@ -27,14 +28,14 @@ func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		if strings.HasPrefix(c.Path(), "/api") {
 			t, err := getTokenFromHeader(c)
 			if err != nil {
-				return err
+				return errors.New(err.Error() + " (header)")
 			}
 			token = t
 
 		} else if strings.HasPrefix(c.Path(), "/auth") {
 			t, err := getTokenFromCookie(c)
 			if err != nil {
-				return err
+				return errors.New(err.Error() + " (cookie)")
 			}
 			token = t
 		}
@@ -45,7 +46,7 @@ func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		// Get user from the database
-		dbUser, err := models.Users.FindUserByName(c.Request().Context(), claims.Username)
+		dbUser, err := models.Users.ExistUserByName(c.Request().Context(), claims.Username)
 		if err != nil {
 			return err
 		}
@@ -66,8 +67,7 @@ func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 func RegisterHandler(c echo.Context) error {
 	user := new(models.User)
 
-	err := c.Bind(user)
-	if err != nil {
+	if err := c.Bind(user); err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
@@ -75,13 +75,13 @@ func RegisterHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Username or password is empty")
 	}
 
-	exist, err := models.Users.FindUserByName(c.Request().Context(), user.Username)
+	exist, err := models.Users.ExistUserByName(c.Request().Context(), user.Username)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	if exist {
-		return echo.NewHTTPError(http.StatusUnauthorized, "A user with that username already exists")
+		return echo.NewHTTPError(http.StatusBadRequest, "Username already exists")
 	}
 
 	err = models.Users.NewUser(c.Request().Context(), *user)

@@ -14,6 +14,8 @@ type config struct {
 	DBUser         string `json:"db_user"`
 	DBPassword     string `json:"db_password"`
 	DBName         string `json:"db_name"`
+	BDPort         int    `json:"db_port"`
+	BDCharset      string `json:"db_charset"`
 	FilesDirectory string `json:"files_directory"`
 }
 

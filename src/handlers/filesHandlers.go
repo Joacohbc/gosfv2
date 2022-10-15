@@ -11,6 +11,29 @@ var Files fileController
 
 type fileController struct{}
 
+func (f *fileController) DeleteFile(c echo.Context) error {
+	username := c.Get("username").(string)
+	fileName := c.Param("filename")
+
+	if err := models.Files.DeleteFile(c.Request().Context(), username, fileName); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.String(http.StatusOK, "File deleted successfully")
+}
+
+func (f *fileController) GetFile(c echo.Context) error {
+	username := c.Get("username").(string)
+	filename := c.Param("filename")
+
+	file, err := models.Files.GetFileByUsername(c.Request().Context(), username, filename)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.File(models.Files.GetPathUser(username, file.Filename))
+}
+
 func (f *fileController) UploadFile(c echo.Context) error {
 
 	mf, err := c.MultipartForm()
@@ -36,28 +59,6 @@ func (f *fileController) UploadFile(c echo.Context) error {
 	}
 
 	return c.String(http.StatusOK, "File/s uploaded successfully")
-}
-
-func (f *fileController) DeleteFile(c echo.Context) error {
-	username := c.Get("username").(string)
-	fileName := c.Param("filename")
-
-	if err := models.Files.DeleteFile(c.Request().Context(), username, fileName); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.String(http.StatusOK, "File deleted successfully")
-}
-
-func (f *fileController) GetFile(c echo.Context) error {
-	username := c.Get("username").(string)
-	filename := c.Param("filename")
-
-	file, err := models.Files.GetFileByUsername(c.Request().Context(), username, filename)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-	return c.JSON(http.StatusOK, file)
 }
 
 func (f *fileController) GetAllFiles(c echo.Context) error {
@@ -94,10 +95,20 @@ func (f *fileController) ShareFile(c echo.Context) error {
 func (f *fileController) GetShareFile(c echo.Context) error {
 	username := c.QueryParam("username")
 	filename := c.QueryParam("filename")
+	id := c.QueryParam("id")
 
-	file, err := models.Files.GetFileByUsername(c.Request().Context(), username, filename)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	var err error
+	var file models.File
+	if id != "" {
+		file, err = models.Files.GetFileByUsername(c.Request().Context(), username, filename)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+	} else {
+		file, err = models.Files.GetFileById(c.Request().Context(), id)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 	}
 
 	if !file.Shared {

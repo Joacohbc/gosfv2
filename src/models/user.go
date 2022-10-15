@@ -2,121 +2,123 @@ package models
 
 import (
 	"context"
-	"database/sql"
+	"errors"
 	"gosfV2/src/models/db"
 	"log"
+
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type User struct {
+	gorm.Model
+	Username string `json:"username" gorm:"unique; not null; type: varchar(30)"`
+	Password string `json:"password" gorm:"not null; type: longtext"`
+}
+
+type UserDTO struct {
+	ID       uint   `json:"id"`
 	Username string `json:"username"`
-	Password string `json:"password"`
 }
 
 func init() {
-	conn := db.GetConn()
-
-	rows, err := conn.Query(`
-		CREATE TABLE IF NOT EXISTS users (
-			id INT AUTO_INCREMENT PRIMARY KEY, 
-			username VARCHAR(255) UNIQUE NOT NULL, 
-			password BLOB NOT NULL
-		)
-	`)
-	if err != nil {
-		log.Fatal("Error to create table users:", err)
+	if err := db.GetBd().AutoMigrate(&User{}); err != nil {
+		log.Fatal("Error to create User table:", err)
 	}
-	rows.Close()
 }
 
-var Users users
+var (
+	Users           users
+	ErrUserNotFound = errors.New("user/s not found")
+)
 
 type users struct{}
 
-func (u users) GetAllUsers(ctx context.Context) ([]User, error) {
-	conn := db.GetConn()
-
-	rows, err := conn.QueryContext(ctx, `SELECT * FROM users`)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var users []User
-	for rows.Next() {
-		var user User
-		err := rows.Scan(&user.Username, &user.Password)
-		if err != nil {
-			return nil, err
-		}
-		users = append(users, user)
-	}
-
-	return users, nil
-}
-
-func (u users) NewUser(ctx context.Context, user User) error {
-	conn := db.GetConn()
-
-	tx, err := conn.BeginTx(ctx, nil)
+// Inscrita el password con AES y retorna la cadena encriptada
+func generatePassowrd(password *string) error {
+	hash, err := bcrypt.GenerateFromPassword([]byte(*password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
-
-	_, err = tx.Exec(`INSERT INTO users (username, password) VALUES (?, aes_encrypt(?,?))`, user.Username, user.Password, user.Password)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-
+	*password = string(hash)
 	return nil
 }
 
-func (u users) FindUser(ctx context.Context, username string, password string) (bool, error) {
-	conn := db.GetConn()
+func checkPassword(passoword, bdHash string) (bool, error) {
+	if err := bcrypt.CompareHashAndPassword([]byte(bdHash), []byte(passoword)); err != nil {
+		return false, err
+	}
+	return true, nil
+}
 
-	row, err := conn.QueryContext(ctx, `SELECT id FROM users WHERE username = ? AND password = aes_encrypt(?, ?)`, username, password, password)
-	if db.IsSQLError(err) {
+func (u users) GetAllUsers(ctx context.Context) ([]User, error) {
+	var users []User
+	if err := db.GetBdCtx(ctx).Find(&users).Error; err != nil {
+		if db.IsNotFound(err) {
+			return nil, ErrUserNotFound
+		}
+		return nil, err
+	}
+	return users, nil
+}
+
+// Crea un nuevo usuario
+func (u users) NewUser(ctx context.Context, user User) error {
+	if err := generatePassowrd(&user.Password); err != nil {
+		return err
+	}
+	return db.GetBd().Create(&user).Error
+}
+
+// Devuelve el primer usuario que encuentre con el nombre de usuario y la contraseña
+// Si no encuentra ninguno, no devuelve error (solo retorna false)
+func (u users) ExistUser(ctx context.Context, username string, password string) (bool, error) {
+
+	user, err := u.FindUserByName(ctx, username)
+	if err != nil {
+		if err == ErrUserNotFound {
+			return false, nil
+		}
 		return false, err
 	}
 
-	if err == sql.ErrNoRows {
-		return false, nil
-	}
-
-	return row.Next(), nil
-}
-
-func (u users) FindUserByName(ctx context.Context, username string) (bool, error) {
-	conn := db.GetConn()
-
-	row, err := conn.QueryContext(ctx, `SELECT id FROM users WHERE username = ?`, username)
-	if db.IsSQLError(err) {
+	ok, err := checkPassword(password, user.Password)
+	if err != nil {
 		return false, err
 	}
 
-	if err == sql.ErrNoRows {
+	if !ok {
 		return false, nil
 	}
 
-	return row.Next(), nil
+	return true, nil
 }
 
-func (u users) GetIdByName(ctx context.Context, username string) (int, error) {
-	conn := db.GetConn()
+// Devuelve el usuario con el nombre de usuario
+// Si no encuentra ninguno, devuelve ErrUserNotFound
+func (u users) FindUserByName(ctx context.Context, username string) (User, error) {
+	bd := db.GetBdCtx(ctx)
 
-	var id int
-	err := conn.QueryRowContext(ctx, `SELECT id FROM users WHERE username = ?`, username).Scan(&id)
-	if db.IsSQLError(err) {
-		return 0, err
+	var user User
+	if err := bd.Where(User{Username: username}).First(&user).Error; err != nil {
+		if db.IsNotFound(err) {
+			return User{}, ErrUserNotFound
+		}
+		return User{}, err
 	}
 
-	if err == sql.ErrNoRows {
-		return 0, nil
-	}
+	return user, nil
+}
 
-	return id, nil
+// Devuelve el usuario con el nombre de usuario
+// Si no encuentra ninguno, no devuelve error (solo retorna false)
+func (u users) ExistUserByName(ctx context.Context, username string) (bool, error) {
+	_, err := u.FindUserByName(ctx, username)
+	if err != nil {
+		if err == ErrUserNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }

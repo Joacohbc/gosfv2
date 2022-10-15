@@ -61,12 +61,11 @@ func generateJWTForUser(c echo.Context) (string, error) {
 
 	user := new(models.User)
 
-	err := c.Bind(user)
-	if err != nil {
+	if err := c.Bind(user); err != nil {
 		return "", echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	exist, err := models.Users.FindUser(c.Request().Context(), user.Username, user.Password)
+	exist, err := models.Users.ExistUser(c.Request().Context(), user.Username, user.Password)
 	if err != nil {
 		return "", echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
