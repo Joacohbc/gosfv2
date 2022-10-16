@@ -3,7 +3,7 @@ module gosfV2
 go 1.19
 
 require (
-	github.com/go-sql-driver/mysql v1.6.0
+	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/labstack/echo v3.3.10+incompatible
 	gorm.io/gorm v1.24.0
 )

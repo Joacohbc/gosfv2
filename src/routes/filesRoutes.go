@@ -14,11 +14,19 @@ type filesRoutes struct{}
 func (f *filesRoutes) AddRoutesToGroup(group *echo.Group) {
 	files := group.Group("/files")
 
+	// Consultas
 	files.GET("/", handlers.Files.GetAllFiles)
-	files.GET("/:filename", handlers.Files.GetFile)
-	files.POST("/", handlers.Files.UploadFile)
-	files.DELETE("/:filename", handlers.Files.DeleteFile)
+	files.GET("/:id", handlers.Files.GetFile)
 
-	files.GET("/share", handlers.Files.GetShareFile)
-	files.PUT("/share/:filename", handlers.Files.ShareFile)
+	// Creación
+	files.POST("/", handlers.Files.UploadFile)
+
+	// Borrar
+	files.DELETE("/:id", handlers.Files.DeleteFile)
+
+	// Modicacion
+	files.PUT("/:id", handlers.Files.UpdateFile)
+
+	// Opciones de Share
+	files.GET("/share/:id", handlers.Files.GetSharedFile)
 }
