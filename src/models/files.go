@@ -36,6 +36,14 @@ type File struct {
 	SharedWith []User `json:"shared_with,omitempty" gorm:"many2many:file_users"`
 }
 
+type FileDTO struct {
+	ID         uint      `json:"id"`
+	OwnerID    uint      `json:"owner_id,omitempty"`
+	Filename   string    `json:"filename"`
+	Shared     bool      `json:"shared"`
+	SharedWith []UserDTO `json:"shared_with,omitempty"`
+}
+
 var (
 	ErrFileNotFound = errors.New("file/s not found")
 )
@@ -64,6 +72,22 @@ func (f FileFuncs) GetPath(file string) string {
 
 func (f FileFuncs) GetPathFromUser(user, file string) string {
 	return filepath.Join(env.Config.FilesDirectory, user, file)
+}
+
+func (f FileFuncs) ToListDTO(user []File) []FileDTO {
+	var files []FileDTO
+
+	for _, file := range user {
+		files = append(files, FileDTO{
+			ID:         file.ID,
+			OwnerID:    file.OwnerID,
+			Filename:   file.Filename,
+			Shared:     file.Shared,
+			SharedWith: Users.ToListDTO(file.SharedWith),
+		})
+	}
+
+	return files
 }
 
 //

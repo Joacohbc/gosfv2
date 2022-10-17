@@ -10,29 +10,11 @@ import (
 	"gorm.io/gorm"
 )
 
-type User struct {
-	gorm.Model
-	Username string `json:"username" gorm:"unique; not null; type: varchar(30)"`
-	Password string `json:"password" gorm:"not null; type: longtext"`
-}
-
-type UserDTO struct {
-	ID       uint   `json:"id"`
-	Username string `json:"username"`
-}
-
 func init() {
 	if err := db.GetBd().AutoMigrate(&User{}); err != nil {
 		log.Fatal("Error to create User table:", err)
 	}
 }
-
-var (
-	Users           users
-	ErrUserNotFound = errors.New("user/s not found")
-)
-
-type users struct{}
 
 // Inscrita el password con AES y retorna la cadena encriptada
 func generatePassowrd(password *string) error {
@@ -49,6 +31,39 @@ func checkPassword(passoword, bdHash string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+var (
+	Users           users
+	ErrUserNotFound = errors.New("user/s not found")
+)
+
+type User struct {
+	gorm.Model
+	Username string `json:"username" gorm:"unique; not null; type: varchar(30)"`
+	Password string `json:"password" gorm:"not null; type: longtext"`
+}
+
+type UserDTO struct {
+	ID       uint   `json:"id"`
+	Username string `json:"username"`
+}
+
+type users struct{}
+
+func (u users) ToDTO(user User) UserDTO {
+	return UserDTO{
+		ID:       user.ID,
+		Username: user.Username,
+	}
+}
+
+func (u users) ToListDTO(users []User) []UserDTO {
+	var usersDTO []UserDTO
+	for _, user := range users {
+		usersDTO = append(usersDTO, u.ToDTO(user))
+	}
+	return usersDTO
 }
 
 func (u users) GetAllUsers(ctx context.Context) ([]User, error) {
