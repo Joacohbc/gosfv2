@@ -1,10 +1,12 @@
 {
-    "jwt_key": "<The JWT Key to create the tokens>", 
-    "jwt_hours": 24,
+    "jwt_key": "<The JWT Key to create the tokens>",
+    "jwt_hours": 10,
     "log_dir_path": "./logs",
-    "db_host": "localhost",
-    "db_user":"example",
-	"db_password":"example",
-    "db_name":"example",
+    "db_host": "",
+    "db_user":"user",
+	"db_password":"password",
+    "db_name":"db",
+    "db_port": 3306,
+    "db_charset": "utf8",
     "files_directory": "./files"
 }
