@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"errors"
 	"gosfV2/src/models/db"
 	"gosfV2/src/models/env"
@@ -30,16 +31,9 @@ type File struct {
 	gorm.Model
 	Filename   string `json:"filename" gorm:"not null; index:uk1,unique"`
 	Shared     bool   `json:"shared" gorm:"default:false"`
-	OwnerID    uint   `json:"owner_id" gorm:"not null; index:uk1,unique"`
-	Owner      User   `json:"owner"`
-	SharedWith []User `json:"shared_with" gorm:"many2many:file_users"`
-}
-
-type FileDTO struct {
-	ID         uint      `json:"id"`
-	Filename   string    `json:"filename"`
-	Shared     bool      `json:"shared"`
-	SharedWith []UserDTO `json:"shared_with" gorm:"many2many:file_users"`
+	OwnerID    uint   `json:"owner_id,omitempty" gorm:"not null; index:uk1,unique"`
+	Owner      User   `json:"-"` // No quiero que nunca se muestre la Info del Owner
+	SharedWith []User `json:"shared_with,omitempty" gorm:"many2many:file_users"`
 }
 
 var (
@@ -47,12 +41,13 @@ var (
 )
 
 func Files(c echo.Context) FileFuncs {
-	return FileFuncs{BD: db.GetBdCtx(c.Request().Context()), Owner: c.Get("username").(string)}
+	return FileFuncs{BD: db.GetBdCtx(c.Request().Context()), Context: c.Request().Context(), Owner: c.Get("username").(string)}
 }
 
 type FileFuncs struct {
-	Owner string
-	BD    *gorm.DB
+	Owner   string
+	Context context.Context
+	BD      *gorm.DB
 }
 
 func (f FileFuncs) getUser() User {
@@ -71,10 +66,18 @@ func (f FileFuncs) GetPathFromUser(user, file string) string {
 	return filepath.Join(env.Config.FilesDirectory, user, file)
 }
 
-func (f FileFuncs) GetAll() ([]FileDTO, error) {
+//
+// Consultas
+//
 
-	var files []FileDTO
-	err := f.BD.Model(&File{}).
+func (f FileFuncs) GetAll() ([]File, error) {
+
+	var files []File
+	err := f.BD.
+		Model(&File{}).
+		Omit("Owner").
+		Omit("OwnerID").
+		Preload("SharedWith").
 		Joins("JOIN users ON files.owner_id = users.id").
 		Where("users.username = ?", f.Owner).
 		Find(&files).Error
@@ -89,14 +92,15 @@ func (f FileFuncs) GetAll() ([]FileDTO, error) {
 	return files, nil
 }
 
-func (f FileFuncs) GetById(id uint) (File, error) {
+func (f FileFuncs) GetById(fileId uint) (File, error) {
 	var file File
 
-	err := f.BD.Preload("Owner").
+	err := f.BD.
+		Preload("Owner").
 		Preload("SharedWith").
 		Joins("JOIN users ON files.owner_id = users.id").
-		Where("users.username = ? AND files.id = ?", f.Owner, id).
-		First(&file, id).Error
+		Where("users.username = ?", f.Owner).
+		First(&file, fileId).Error
 
 	if err != nil {
 		if db.IsNotFound(err) {
@@ -108,21 +112,9 @@ func (f FileFuncs) GetById(id uint) (File, error) {
 	return file, nil
 }
 
-func (f FileFuncs) GetShareFile(id uint) (File, error) {
-	var file File
-
-	err := f.BD.Preload("Owner").
-		Preload("SharedWith").
-		First(&file, id).Error
-
-	if err != nil {
-		if db.IsNotFound(err) {
-			return File{}, ErrFileNotFound
-		}
-		return File{}, err
-	}
-	return file, nil
-}
+//
+// Inserts
+//
 
 func (f FileFuncs) Create(filename string, src io.Reader) error {
 
@@ -172,6 +164,10 @@ func (f FileFuncs) Create(filename string, src io.Reader) error {
 	return nil
 }
 
+//
+// Deletes
+//
+
 func (f FileFuncs) Delete(fileId uint) error {
 
 	tx := f.BD.Begin()
@@ -198,6 +194,10 @@ func (f FileFuncs) Delete(fileId uint) error {
 
 	return nil
 }
+
+//
+// Updates
+//
 
 func (f FileFuncs) SetShared(fileId uint, shared bool) error {
 
@@ -237,47 +237,66 @@ func (f FileFuncs) Rename(fileId uint, newName string) error {
 	return nil
 }
 
-// func (f FileFuncs) IsSharedWith(ctx context.Context, user string, fileId uint) (bool, error) {
-// 	tx := db.GetBdCtx(ctx)
+//
+// Shared Options
+//
 
-// 	err := tx.Model(&File{Model: gorm.Model{ID: fileId}}).
-// 		Association("SharedWith").
-// 		Find(&User{Username: user})
+func (f FileFuncs) GetFileNotOfOwner(fileId uint) (File, error) {
+	var file File
 
-// 	if err != nil {
-// 		if db.IsNotFound(err) {
-// 			return false, nil
-// 		}
-// 		return false, err
-// 	}
+	err := f.BD.
+		Preload("Owner").
+		Preload("SharedWith").
+		First(&file, fileId).Error
 
-// 	return true, nil
-// }
+	if err != nil {
+		if db.IsNotFound(err) {
+			return File{}, ErrFileNotFound
+		}
+		return File{}, err
+	}
 
-// func (f FileFuncs) AddSharedWith(ctx context.Context, user string, fileId uint) error {
-// 	tx := db.GetBdCtx(ctx)
+	return file, nil
+}
 
-// 	err := tx.Model(&File{Model: gorm.Model{ID: fileId}}).
-// 		Association("SharedWith").
-// 		Append(User{Username: user})
+func (f FileFuncs) IsSharedMe(fileId uint) (bool, error) {
 
-// 	if err != nil {
-// 		return err
-// 	}
+	err := f.BD.
+		Joins("JOIN file_users fu ON files.id = fu.file_id").
+		Joins("JOIN users ON users.id = fu.user_id").
+		Where("users.username = ? AND files.id = ?", f.Owner, fileId).
+		First(&File{}).Error
 
-// 	return nil
-// }
+	if err != nil {
+		if db.IsNotFound(err) {
+			return false, nil
+		}
+		return false, err
+	}
 
-// func (f FileFuncs) RemoveSharedWith(ctx context.Context, user string, fileId uint) error {
-// 	tx := db.GetBdCtx(ctx)
+	return true, nil
+}
 
-// 	err := tx.Model(&File{Model: gorm.Model{ID: fileId}}).
-// 		Association("SharedWith").
-// 		Delete((User{Username: user}))
+func (f FileFuncs) AddSharedWith(userId, fileId uint) error {
+	err := f.BD.Model(&File{Model: gorm.Model{ID: fileId}}).
+		Association("SharedWith").
+		Append(&User{Model: gorm.Model{ID: userId}})
 
-// 	if err != nil {
-// 		return err
-// 	}
+	if err != nil {
+		return err
+	}
 
-// 	return nil
-// }
+	return nil
+}
+
+func (f FileFuncs) RemoveSharedWith(userId, fileId uint) error {
+	err := f.BD.Model(&File{Model: gorm.Model{ID: fileId}}).
+		Association("SharedWith").
+		Delete(User{Model: gorm.Model{ID: userId}})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
