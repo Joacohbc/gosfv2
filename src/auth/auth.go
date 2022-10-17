@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"errors"
 	"gosfV2/src/models"
 	"gosfV2/src/models/env"
 	"net/http"
@@ -28,14 +27,14 @@ func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		if strings.HasPrefix(c.Path(), "/api") {
 			t, err := getTokenFromHeader(c)
 			if err != nil {
-				return errors.New(err.Error() + " (header)")
+				return err
 			}
 			token = t
 
 		} else if strings.HasPrefix(c.Path(), "/auth") {
 			t, err := getTokenFromCookie(c)
 			if err != nil {
-				return errors.New(err.Error() + " (cookie)")
+				return err
 			}
 			token = t
 		}
