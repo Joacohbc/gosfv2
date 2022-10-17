@@ -22,7 +22,7 @@ func init() {
 		log.Fatal("Error to create table files:", err)
 	}
 
-	if err := os.MkdirAll(env.Config.FilesDirectory, 0644); err != nil {
+	if err := os.MkdirAll(env.Config.FilesDirectory, 0744); err != nil {
 		log.Fatal("Error to create directory files:", err)
 	}
 }

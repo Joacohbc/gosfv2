@@ -34,9 +34,6 @@ func init() {
 
 	var err error
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
-
-	// var err error
-	// db, err = gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Error to connect to database:", err)
 	}
