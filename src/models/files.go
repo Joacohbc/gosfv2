@@ -27,15 +27,17 @@ func init() {
 	}
 }
 
+// File: Representa un archivo de un usuario
 type File struct {
 	gorm.Model
 	Filename   string `json:"filename" gorm:"not null; index:uk1,unique"`
 	Shared     bool   `json:"shared" gorm:"default:false"`
 	OwnerID    uint   `json:"owner_id,omitempty" gorm:"not null; index:uk1,unique"`
-	Owner      User   `json:"-"` // No quiero que nunca se muestre la Info del Owner
+	Owner      User   `json:"owner"`
 	SharedWith []User `json:"shared_with,omitempty" gorm:"many2many:file_users"`
 }
 
+// FileDTO: Representa un archivo en el sistema pero sin la información de su Owner
 type FileDTO struct {
 	ID         uint      `json:"id"`
 	OwnerID    uint      `json:"owner_id,omitempty"`
@@ -74,20 +76,22 @@ func (f FileFuncs) GetPathFromUser(user, file string) string {
 	return filepath.Join(env.Config.FilesDirectory, user, file)
 }
 
-func (f FileFuncs) ToListDTO(user []File) []FileDTO {
-	var files []FileDTO
-
-	for _, file := range user {
-		files = append(files, FileDTO{
-			ID:         file.ID,
-			OwnerID:    file.OwnerID,
-			Filename:   file.Filename,
-			Shared:     file.Shared,
-			SharedWith: Users.ToListDTO(file.SharedWith),
-		})
+func (f FileFuncs) ToDTO(file File) FileDTO {
+	return FileDTO{
+		ID:         file.ID,
+		OwnerID:    file.OwnerID,
+		Filename:   file.Filename,
+		Shared:     file.Shared,
+		SharedWith: Users.ToListDTO(file.SharedWith),
 	}
+}
 
-	return files
+func (f FileFuncs) ToListDTO(files []File) []FileDTO {
+	var dtos []FileDTO
+	for _, file := range files {
+		dtos = append(dtos, f.ToDTO(file))
+	}
+	return dtos
 }
 
 //
@@ -142,7 +146,7 @@ func (f FileFuncs) GetById(fileId uint) (File, error) {
 
 func (f FileFuncs) Create(filename string, src io.Reader) error {
 
-	// Inicio una transaccion
+	// Inicio una transacción
 	tx := f.BD.Begin()
 
 	file := File{
