@@ -27,7 +27,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "localhost:8080/api/files/share/69",
+									"raw": "localhost:8080/api/files/share/10",
 									"host": [
 										"localhost"
 									],
@@ -36,7 +36,7 @@
 										"api",
 										"files",
 										"share",
-										"69"
+										"10"
 									]
 								}
 							},
@@ -74,11 +74,11 @@
 									"variable": [
 										{
 											"key": "idFile",
-											"value": "69"
+											"value": "8"
 										},
 										{
 											"key": "idUser",
-											"value": "45"
+											"value": "3"
 										}
 									]
 								}
@@ -117,11 +117,11 @@
 									"variable": [
 										{
 											"key": "idFile",
-											"value": "69"
+											"value": "8"
 										},
 										{
 											"key": "idUser",
-											"value": "45"
+											"value": "2"
 										}
 									]
 								}
@@ -162,6 +162,166 @@
 									"value": "213955.png",
 									"disabled": true
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get File",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/files/8",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"files",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Info",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "    {\n        \"filename\": \"NotShare.png\",\n        \"shared\": false\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/files/8/info",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"files",
+								"8",
+								"info"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/files/9?force=yes",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"files",
+								"9"
+							],
+							"query": [
+								{
+									"key": "force",
+									"value": "yes"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filename\": \"ShareWithAll.png\",\n    \"shared\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/files/10",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"files",
+								"10"
 							]
 						}
 					},
@@ -213,105 +373,6 @@
 						}
 					},
 					"response": []
-				},
-				{
-					"name": "Delete",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
-						"header": [],
-						"url": {
-							"raw": "localhost:8080/api/files/52",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"files",
-								"52"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "localhost:8080/api/files/33",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"files",
-								"33"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "    {\n        \"filename\": \"NotShare.png\",\n        \"shared\": false\n    }",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "localhost:8080/api/files/69",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"files",
-								"69"
-							]
-						}
-					},
-					"response": []
 				}
 			]
 		},
@@ -322,7 +383,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"username\":\"Joaco\",\n    \"password\":\"1234\"\n}",
+					"raw": "{\n    \"username\":\"Cande\",\n    \"password\":\"1234\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
