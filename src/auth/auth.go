@@ -17,6 +17,15 @@ type UserClaims struct {
 	jwt.RegisteredClaims
 }
 
+// Maneja los errores de los archivos, si el error ErrUserNotFound
+// o si es un error desconocido (base de datos), devuelve un error 500
+func HandleUserError(err error) error {
+	if err == models.ErrUserNotFound {
+		return echo.NewHTTPError(http.StatusNotFound, err.Error())
+	}
+	return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+}
+
 func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
@@ -68,7 +77,7 @@ func RegisterHandler(c echo.Context) error {
 
 	exist, err := models.Users(c).ExistUserByName(user.Username)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return HandleUserError(err)
 	}
 
 	if exist {

@@ -41,29 +41,30 @@ func init() {
 
 // File: Representa un archivo de un usuario
 type File struct {
-	ID         uint         `json:"id" db:"file_id"`
-	CreateAt   time.Time    `json:"create_at" db:"created_at"`
-	UpdateAt   sql.NullTime `json:"update_at" db:"update_at"`
-	Filename   string       `json:"filename"`
-	Shared     bool         `json:"shared"`
-	UserID     uint         `json:"owner_id" db:"user_id"`
-	User       User         `json:"owner" bd:"user"`
-	SharedWith []User       `json:"shared_with,omitempty"`
+	ID       uint         `json:"id" db:"file_id"`
+	CreateAt time.Time    `json:"create_at" db:"created_at"`
+	UpdateAt sql.NullTime `json:"update_at" db:"update_at"`
+	Filename string       `json:"filename"`
+
+	// Shared: Indica que esta compartido con TODOS los usuarios
+	Shared     bool   `json:"shared"`
+	UserID     uint   `json:"owner_id" db:"user_id"`
+	User       User   `json:"owner" bd:"user"`                        // "user" es un prefix para usar sqlx.Get y sqlx.Select con una sola consulta
+	SharedWith []User `json:"shared_with,omitempty" db:"shared_with"` // "shared_with" es un prefix para usar sqlx.Get y sqlx.Select con una sola consulta
 }
 
 var (
+	// Error: "file/s not found"
 	ErrFileNotFound = errors.New("file/s not found")
 )
 
 type FileFuncs struct {
-	Context context.Context
 	BD      *sqlx.DB
-	Cancel  context.CancelFunc
+	Context context.Context
 }
 
 func Files(c echo.Context) FileFuncs {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	return FileFuncs{BD: database.GetBd(), Context: ctx, Cancel: cancel}
+	return FileFuncs{BD: database.GetBd(), Context: c.Request().Context()}
 }
 
 func (f FileFuncs) MakeUserDir(user string) error {
@@ -78,10 +79,14 @@ func (f FileFuncs) GetPath(file, user string) string {
 // Consultas
 //
 
-func (f FileFuncs) GetAll(userId uint) ([]File, error) {
+func (f FileFuncs) GetAllFromUser(userId uint) ([]File, error) {
 	var files []File
 
-	err := f.BD.SelectContext(f.Context, &files, `SELECT * FROM files WHERE user_id = ?`, userId)
+	err := f.BD.SelectContext(f.Context, &files, `
+	SELECT 
+		f.* 
+	FROM files f 
+	WHERE user_id = ?`, userId)
 	if err != nil {
 		if database.IsNotFound(err) {
 			return nil, ErrFileNotFound
@@ -90,6 +95,30 @@ func (f FileFuncs) GetAll(userId uint) ([]File, error) {
 	}
 
 	return files, nil
+}
+
+func (f FileFuncs) GetFilePath(fileId, userId uint) (string, error) {
+
+	var path struct {
+		Filename string `db:"filename"`
+		Username string `db:"username"`
+	}
+
+	err := f.BD.GetContext(f.Context, &path, `
+	SELECT 
+		f.filename,
+		u.username
+	FROM files f
+	JOIN users u ON f.user_id  = u.user_id
+	WHERE f.file_id = ? AND f.user_id = ?`, fileId, userId)
+	if err != nil {
+		if database.IsNotFound(err) {
+			return "", ErrFileNotFound
+		}
+		return "", err
+	}
+
+	return f.GetPath(path.Filename, path.Username), nil
 }
 
 func (f FileFuncs) GetByIdFromUser(fileId, userId uint) (File, error) {
@@ -112,11 +141,11 @@ func (f FileFuncs) GetByIdFromUser(fileId, userId uint) (File, error) {
 		return File{}, err
 	}
 
-	user, err := UsersC(f.Context).FindUserById(file.UserID)
+	users, err := f.GetAllUserFromFile(fileId)
 	if err != nil {
 		return File{}, err
 	}
-	file.User = user
+	file.SharedWith = users
 
 	return file, nil
 }
@@ -201,7 +230,7 @@ func (f FileFuncs) Delete(fileId uint) error {
 		return err
 	}
 
-	if _, err := tx.Exec("DELETE FROM users WHERE file_id = ?", fileId); err != nil {
+	if _, err := tx.Exec("DELETE FROM files WHERE file_id = ?", fileId); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -268,6 +297,27 @@ func (f FileFuncs) Rename(fileId uint, newName string) error {
 // Shared Options
 //
 
+func (f FileFuncs) GetAllUserFromFile(filedId uint) ([]User, error) {
+
+	var users []User
+	err := f.BD.Select(&users, `
+	SELECT 
+		u.user_id, 
+		u.username 
+	FROM users u
+	JOIN file_users fu ON u.user_id = fu.user_id 
+	WHERE fu.file_id = ?;`, filedId)
+
+	if err != nil {
+		if database.IsNotFound(err) {
+			return nil, ErrFileNotFound
+		}
+		return nil, err
+	}
+
+	return users, nil
+}
+
 func (f FileFuncs) GetById(fileId uint) (File, error) {
 	var file File
 
@@ -292,7 +342,15 @@ func (f FileFuncs) GetById(fileId uint) (File, error) {
 
 func (f FileFuncs) IsSharedWith(fileId, userId uint) (bool, error) {
 
-	err := f.BD.QueryRowContext(f.Context, "SELECT f.file_id FROM files f JOIN file_users fu ON f.file_id = fu.file_id WHERE f.file_id = ? AND f.user_id = ?", fileId, userId).Err()
+	var foo uint
+	err := f.BD.QueryRowContext(f.Context, `
+	SELECT 
+		f.file_id
+	FROM files f 
+	JOIN file_users fu ON f.file_id = fu.file_id 
+	WHERE f.file_id = ? AND fu.user_id = ?`,
+		fileId, userId).Scan(&foo)
+
 	if err != nil {
 		if database.IsNotFound(err) {
 			return false, nil

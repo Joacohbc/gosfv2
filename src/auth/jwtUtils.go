@@ -84,7 +84,7 @@ func generateJWTForUser(c echo.Context) (string, error) {
 
 	dbUser, err := models.Users(c).FindUserByName(user.Username)
 	if err != nil {
-		return "", echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return "", HandleUserError(err)
 	}
 
 	ok, err := checkPassword(user.Password, dbUser.Password)

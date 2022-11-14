@@ -17,6 +17,7 @@ func (f *filesRoutes) AddRoutesToGroup(group *echo.Group) {
 	// Consultas
 	files.GET("/", handlers.Files.GetAllFiles)
 	files.GET("/:id", handlers.Files.GetFile)
+	files.GET("/:id/info", handlers.Files.GetInfo)
 
 	// Creación
 	files.POST("/", handlers.Files.UploadFile)
@@ -24,7 +25,7 @@ func (f *filesRoutes) AddRoutesToGroup(group *echo.Group) {
 	// Borrar
 	files.DELETE("/:id", handlers.Files.DeleteFile)
 
-	// Modicacion
+	// Modificación
 	files.PUT("/:id", handlers.Files.UpdateFile)
 
 	// Opciones de Share
