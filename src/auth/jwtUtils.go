@@ -10,16 +10,33 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const (
-
 	// Bearer es el tipo de Header de autenticación que se utiliza en JWT
 	authScheme string = "Bearer"
 
 	// token es el nombre de la Cookie donde se buscara el JWT
 	cookieName string = "token"
 )
+
+// Inscrita el password con AES y retorna la cadena encriptada
+func generatePassword(password *string) error {
+	hash, err := bcrypt.GenerateFromPassword([]byte(*password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	*password = string(hash)
+	return nil
+}
+
+func checkPassword(password, bdHash string) (bool, error) {
+	if err := bcrypt.CompareHashAndPassword([]byte(bdHash), []byte(password)); err != nil {
+		return false, err
+	}
+	return true, nil
+}
 
 func getTokenFromHeader(c echo.Context) (string, error) {
 
@@ -29,12 +46,12 @@ func getTokenFromHeader(c echo.Context) (string, error) {
 		return "", echo.NewHTTPError(http.StatusUnauthorized, "invalid authorization header")
 	}
 
-	// Si el tipo de Heaeder de autorización es diferente a Bearer, se devuelve un error
+	// Si el tipo de Header de autorización es diferente a Bearer, se devuelve un error
 	if auth[0] != authScheme {
 		return "", echo.NewHTTPError(http.StatusUnauthorized, "invalid authorization header, must be a "+authScheme+" token")
 	}
 
-	// Si el Token esta vacio
+	// Si el Token esta vació
 	if auth[1] == "" {
 		return "", echo.NewHTTPError(http.StatusUnauthorized, "missing or malformed jwt")
 	}
@@ -55,7 +72,7 @@ func getTokenFromCookie(c echo.Context) (string, error) {
 	return ck.Value, nil
 }
 
-// Genera un JWT para el usuario que se está logueando.
+// Genera un JWT para el usuario que se está logueado.
 // El error que se genera es un error de tipo echo.HTTPError
 func generateJWTForUser(c echo.Context) (string, error) {
 
@@ -65,17 +82,23 @@ func generateJWTForUser(c echo.Context) (string, error) {
 		return "", echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	exist, err := models.Users.ExistUser(c.Request().Context(), user.Username, user.Password)
+	dbUser, err := models.Users(c).FindUserByName(user.Username)
 	if err != nil {
 		return "", echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	if !exist {
+	ok, err := checkPassword(user.Password, dbUser.Password)
+	if err != nil {
+		return "", echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if !ok {
 		return "", echo.NewHTTPError(http.StatusUnauthorized, "Invalid username or password")
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, UserClaims{
-		Username: user.Username,
+		UserID:   dbUser.ID,
+		Username: dbUser.Username,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * time.Duration(env.Config.JWTHours))),
 			NotBefore: jwt.NewNumericDate(time.Now()),

@@ -2,121 +2,97 @@ package models
 
 import (
 	"context"
+	"database/sql"
 	"errors"
-	"gosfV2/src/models/db"
-	"log"
+	"gosfV2/src/models/database"
 
-	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
+	"time"
+
+	"github.com/jmoiron/sqlx"
+	"github.com/labstack/echo"
 )
 
 func init() {
-	if err := db.GetBd().AutoMigrate(&User{}); err != nil {
-		log.Fatal("Error to create User table:", err)
-	}
+	database.GetBd().MustExec(`
+	CREATE TABLE IF NOT EXISTS users (
+		user_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+		username VARCHAR(255) NOT NULL UNIQUE,
+		password VARCHAR(255) NOT NULL,
+		update_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+		created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+	) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+	`)
+
 }
 
-// Inscrita el password con AES y retorna la cadena encriptada
-func generatePassowrd(password *string) error {
-	hash, err := bcrypt.GenerateFromPassword([]byte(*password), bcrypt.DefaultCost)
-	if err != nil {
-		return err
-	}
-	*password = string(hash)
-	return nil
-}
-
-func checkPassword(passoword, bdHash string) (bool, error) {
-	if err := bcrypt.CompareHashAndPassword([]byte(bdHash), []byte(passoword)); err != nil {
-		return false, err
-	}
-	return true, nil
+type User struct {
+	ID       uint         `json:"id" db:"user_id"`
+	Username string       `json:"username"`
+	Password string       `json:"password"`
+	CreateAt time.Time    `json:"create_at" db:"created_at"`
+	UpdateAt sql.NullTime `json:"update_at" db:"update_at"`
 }
 
 var (
-	Users           users
 	ErrUserNotFound = errors.New("user/s not found")
 )
 
-type User struct {
-	gorm.Model
-	Username string `json:"username" gorm:"unique; not null; type: varchar(30)"`
-	Password string `json:"password" gorm:"not null; type: longtext"`
+type UsersFuncs struct {
+	DB      *sqlx.DB
+	Context context.Context
 }
 
-type UserDTO struct {
-	ID       uint   `json:"id"`
-	Username string `json:"username"`
+func Users(c echo.Context) UsersFuncs {
+	return UsersFuncs{DB: database.GetBd(), Context: c.Request().Context()}
 }
 
-type users struct{}
-
-func (u users) ToDTO(user User) UserDTO {
-	return UserDTO{
-		ID:       user.ID,
-		Username: user.Username,
-	}
+func UsersC(ctx context.Context) UsersFuncs {
+	return UsersFuncs{DB: database.GetBd(), Context: ctx}
 }
 
-func (u users) ToListDTO(users []User) []UserDTO {
-	var usersDTO []UserDTO
-	for _, user := range users {
-		usersDTO = append(usersDTO, u.ToDTO(user))
-	}
-	return usersDTO
-}
-
-func (u users) GetAllUsers(ctx context.Context) ([]User, error) {
+func (u UsersFuncs) GetAllUsers() ([]User, error) {
 	var users []User
-	if err := db.GetBdCtx(ctx).Find(&users).Error; err != nil {
-		if db.IsNotFound(err) {
+	err := u.DB.SelectContext(u.Context, &users, "SELECT * FROM users")
+	if err != nil {
+		if database.IsNotFound(err) {
 			return nil, ErrUserNotFound
 		}
 		return nil, err
 	}
+
 	return users, nil
 }
 
 // Crea un nuevo usuario
-func (u users) NewUser(ctx context.Context, user User) error {
-	if err := generatePassowrd(&user.Password); err != nil {
-		return err
-	}
-	return db.GetBd().Create(&user).Error
-}
-
-// Devuelve el primer usuario que encuentre con el nombre de usuario y la contraseña
-// Si no encuentra ninguno, no devuelve error (solo retorna false)
-func (u users) ExistUser(ctx context.Context, username string, password string) (bool, error) {
-
-	user, err := u.FindUserByName(ctx, username)
-	if err != nil {
-		if err == ErrUserNotFound {
-			return false, nil
-		}
-		return false, err
-	}
-
-	ok, err := checkPassword(password, user.Password)
-	if err != nil {
-		return false, err
-	}
-
-	if !ok {
-		return false, nil
-	}
-
-	return true, nil
+func (u UsersFuncs) NewUser(user User) error {
+	_, err := u.DB.ExecContext(u.Context, "INSERT INTO users (username, password) VALUES (?, ?)", user.Username, user.Password)
+	return err
 }
 
 // Devuelve el usuario con el nombre de usuario
 // Si no encuentra ninguno, devuelve ErrUserNotFound
-func (u users) FindUserByName(ctx context.Context, username string) (User, error) {
-	bd := db.GetBdCtx(ctx)
+func (u UsersFuncs) FindUserByName(username string) (User, error) {
 
 	var user User
-	if err := bd.Where(User{Username: username}).First(&user).Error; err != nil {
-		if db.IsNotFound(err) {
+	err := u.DB.GetContext(u.Context, &user, "SELECT * FROM users WHERE username = ?", username)
+	if err != nil {
+		if database.IsNotFound(err) {
+			return User{}, ErrUserNotFound
+		}
+		return User{}, err
+	}
+
+	return user, nil
+}
+
+// Devuelve el usuario con el nombre de usuario
+// Si no encuentra ninguno, devuelve ErrUserNotFound
+func (u UsersFuncs) FindUserById(id uint) (User, error) {
+
+	var user User
+	err := u.DB.GetContext(u.Context, &user, "SELECT * FROM users WHERE user_id = ?", id)
+	if err != nil {
+		if database.IsNotFound(err) {
 			return User{}, ErrUserNotFound
 		}
 		return User{}, err
@@ -127,8 +103,8 @@ func (u users) FindUserByName(ctx context.Context, username string) (User, error
 
 // Devuelve el usuario con el nombre de usuario
 // Si no encuentra ninguno, no devuelve error (solo retorna false)
-func (u users) ExistUserByName(ctx context.Context, username string) (bool, error) {
-	_, err := u.FindUserByName(ctx, username)
+func (u UsersFuncs) ExistUserByName(username string) (bool, error) {
+	_, err := u.FindUserByName(username)
 	if err != nil {
 		if err == ErrUserNotFound {
 			return false, nil

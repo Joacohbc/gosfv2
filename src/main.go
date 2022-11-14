@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"flag"
+	"fmt"
 	"gosfV2/src/auth"
 	"gosfV2/src/middleware/logger"
 	"gosfV2/src/routes"
@@ -24,7 +26,22 @@ func init() {
 	flag.Parse()
 }
 
+type User struct {
+	ID        int          `db:"id"`
+	Username  string       `db:"username"`
+	Password  string       `db:"password"`
+	UpdateAt  sql.NullTime `db:"updated_at"`
+	DeletedAt sql.NullTime `db:"deleted_at"`
+	CreateAt  sql.NullTime `db:"created_at"`
+}
+
 func main() {
+
+	if r := recover(); r != nil {
+		fmt.Println(r)
+		os.Exit(1)
+	}
+
 	e := echo.New()
 
 	e.Use(logger.RequestLoggerConfig())

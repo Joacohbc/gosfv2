@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"gosfV2/src/dtos"
 	"gosfV2/src/models"
 	"net/http"
 	"strconv"
@@ -26,22 +27,22 @@ func (f *fileController) GetFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid id")
 	}
 
-	file, err := models.Files(c).GetById(uint(idNum))
+	file, err := models.Files(c).GetByIdFromUser(uint(idNum), c.Get("user_id").(uint))
 	if err != nil {
 		return f.handleFileError(err)
 	}
 
-	return c.File(models.Files(c).GetPath(file.Filename))
+	return c.File(models.Files(c).GetPath(file.Filename, c.Get("username").(string)))
 }
 
 func (f *fileController) GetAllFiles(c echo.Context) error {
 
-	files, err := models.Files(c).GetAll()
+	files, err := models.Files(c).GetAll(c.Get("user_id").(uint))
 	if err != nil {
 		return f.handleFileError(err)
 	}
 
-	return c.JSON(http.StatusOK, models.Files(c).ToListDTO(files))
+	return c.JSON(http.StatusOK, dtos.ToFileListDTO(files))
 }
 
 func (f *fileController) GetSharedFile(c echo.Context) error {
@@ -50,29 +51,30 @@ func (f *fileController) GetSharedFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid id")
 	}
 
-	file, err := models.Files(c).GetFileNotOfOwner(uint(idNum))
+	file, err := models.Files(c).GetById(uint(idNum))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return f.handleFileError(err)
 	}
 
-	if file.Owner.Username == c.Get("username").(string) {
-		return c.File(models.Files(c).GetPath(file.Filename))
+	if file.UserID == c.Get("user_id").(uint) {
+		c.Logger().Debug(models.Files(c).GetPath(file.Filename, file.User.Username))
+		return c.File(models.Files(c).GetPath(file.Filename, file.User.Username))
 	}
 
 	if !file.Shared {
 		return echo.NewHTTPError(http.StatusForbidden, "File not shared")
 	}
 
-	sharedWithMe, err := models.Files(c).IsSharedMe(file.ID)
+	sharedWithMe, err := models.Files(c).IsSharedWith(file.ID, c.Get("user_id").(uint))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return f.handleFileError(err)
 	}
 
 	if !sharedWithMe {
 		return echo.NewHTTPError(http.StatusForbidden, "File not shared with you")
 	}
 
-	return c.File(models.Files(c).GetPathFromUser(file.Owner.Username, file.Filename))
+	return c.File(models.Files(c).GetPath(file.Filename, file.User.Username))
 }
 
 func (f *fileController) UploadFile(c echo.Context) error {
@@ -89,7 +91,9 @@ func (f *fileController) UploadFile(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
-		if err := models.Files(c).Create(f.Filename, src); err != nil {
+		c.Logger().Info(c.Get("user_id").(uint))
+
+		if err := models.Files(c).Create(f.Filename, c.Get("user_id").(uint), src); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
@@ -154,7 +158,16 @@ func (f *fileController) AddUserToFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid user id")
 	}
 
-	if err := models.Files(c).AddSharedWith(uint(idUserNum), uint(idFileNum)); err != nil {
+	file, err := models.Files(c).GetById(uint(idFileNum))
+	if err != nil {
+		return f.handleFileError(err)
+	}
+
+	if file.UserID != c.Get("user_id").(uint) {
+		return echo.NewHTTPError(http.StatusForbidden, "You are not the owner of the file")
+	}
+
+	if err := models.Files(c).AddUserToFile(uint(idUserNum), uint(idFileNum)); err != nil {
 		return f.handleFileError(err)
 	}
 
@@ -177,7 +190,16 @@ func (f *fileController) RemoveUserFromFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid user id")
 	}
 
-	if err := models.Files(c).RemoveSharedWith(uint(idUserNum), uint(idFileNum)); err != nil {
+	file, err := models.Files(c).GetById(uint(idFileNum))
+	if err != nil {
+		return f.handleFileError(err)
+	}
+
+	if file.UserID != c.Get("user_id").(uint) {
+		return echo.NewHTTPError(http.StatusForbidden, "You are not the owner of the file")
+	}
+
+	if err := models.Files(c).RemoveUserFromFile(uint(idUserNum), uint(idFileNum)); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 

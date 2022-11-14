@@ -12,6 +12,7 @@ import (
 )
 
 type UserClaims struct {
+	UserID   uint
 	Username string
 	jwt.RegisteredClaims
 }
@@ -45,9 +46,10 @@ func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		// Set user in the echo context
+		c.Set("user_id", claims.UserID)
 		c.Set("username", claims.Username)
 		c.Set("claims", claims)
-		c.Set("token", token)
+		c.Set(cookieName, token)
 
 		return next(c)
 	}
@@ -64,7 +66,7 @@ func RegisterHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Username or password is empty")
 	}
 
-	exist, err := models.Users.ExistUserByName(c.Request().Context(), user.Username)
+	exist, err := models.Users(c).ExistUserByName(user.Username)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -73,7 +75,11 @@ func RegisterHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Username already exists")
 	}
 
-	err = models.Users.NewUser(c.Request().Context(), *user)
+	if err := generatePassword(&user.Password); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	err = models.Users(c).NewUser(*user)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -82,12 +88,11 @@ func RegisterHandler(c echo.Context) error {
 }
 
 func LoginHandler(c echo.Context) error {
-
-	if ck, err := c.Cookie("token"); err == nil {
+	if ck, err := c.Cookie(cookieName); err == nil {
 
 		if _, err := ValidJWT(ck.Value); err != nil {
 			c.SetCookie(&http.Cookie{
-				Name:   "token",
+				Name:   cookieName,
 				MaxAge: -1, // Poniendo -1 se borra la cookie
 			})
 			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid Cookie: "+err.Error())
@@ -102,10 +107,10 @@ func LoginHandler(c echo.Context) error {
 	}
 
 	c.SetCookie(&http.Cookie{
-		Name:    "token",
+		Name:    cookieName,
 		Value:   tokenString,
 		Expires: time.Now().Add(time.Hour * time.Duration(env.Config.JWTHours)),
-		MaxAge:  3600 * env.Config.JWTHours, // El MaxAge se piede en segundos (3600s = 1 hora)
+		MaxAge:  3600 * env.Config.JWTHours, // El MaxAge se pide en segundos (3600s = 1 hora)
 	})
 
 	return c.String(http.StatusOK, tokenString)
@@ -113,12 +118,12 @@ func LoginHandler(c echo.Context) error {
 
 func LogoutHandler(c echo.Context) error {
 
-	if _, err := c.Cookie("token"); err != nil {
+	if _, err := c.Cookie(cookieName); err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "You are not logged in")
 	}
 
 	c.SetCookie(&http.Cookie{
-		Name:   "token",
+		Name:   cookieName,
 		MaxAge: -1, // Poniendo -1 se borra la cookie
 	})
 	return c.String(http.StatusOK, "You have been logged out")
