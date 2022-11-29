@@ -1,18 +1,11 @@
-/* HEADER CSS */
-
 body {
     background-color: #000000;
 }
 
-header {
-    width: 100%;
-    margin: 0;
-    margin-bottom: 1em;
-}
-
+/* HEADER CSS */
 .header-title {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     color: white;
 }
 
@@ -36,37 +29,23 @@ header {
     font-size: 1.1em;
 }
 
-label {
-    cursor: pointer;
-}
-
 /* FILES CSS */
-.files {
-    margin: auto;
-    width: 90%;
-    height: 100%;
+.files-container {
+    display: flex;
+    justify-content: center;
     border-radius: 10px;
-    background-color: #0A0A0A;
-    font-family: monospace;
-}
-
-thead {
     color: #ffff;
     text-align: center;
-    background-color: #000000;
-}
-
-tfoot {
-    background-color: #000000;
+    overflow-wrap: break-word;
+    text-overflow: ellipsis;
+    width: 70%;
+    margin: auto;
 }
 
 .file td {
     border: 1px solid white;
     color: gray;
-    text-justify: auto;
     padding: 10px;
-    text-align: center;
-    overflow-wrap: break-word;
     font-size: 1em;
 }
 
@@ -89,11 +68,16 @@ tfoot {
     color: white;
 }
 
+.files-table-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 #btn-upload {
-    background-color: transparent;
     color: white;
-    padding: 10px;
     border-radius: 5px;
+    padding: 10px;
 }
 
 #btn-upload:hover {

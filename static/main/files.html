@@ -27,31 +27,30 @@
             <h1>Gosf</h1>
         </div>
         <button id="btn-logout" class="header-btn">Logout</button>
+        <button id="btn-logout" class="header-btn">User Info</button>
+        <button id="btn-logout" class="header-btn">Share Info</button>
     </header>
     
-    <table class="files">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Filename</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            <!-- Aquí se cargan los Files -->
-        </tbody>
-
-        <tfoot>
-            <th colspan="3">
-                <form>
-                    <label for="input-upload" id="btn-upload">Upload file/s   </label>
-                    <input id="input-upload" type="file" style="display: none;" multiple>
-                    <label id="message"></label>
-                </form>
-            </th>
-        </tfoot>
-    </table>
-
+    <div class="files-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Filename</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+    
+            <tbody>
+                <!-- Aquí se cargan los Files -->
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="files-table-buttons">
+        <label for="input-upload" id="btn-upload" class="header-btn">Upload file/s</label>
+        <input id="input-upload" type="file" style="display: none;" multiple>
+        <label id="message" style="cursor: pointer;"></label>
+    </div>
 </body>
 </html>
