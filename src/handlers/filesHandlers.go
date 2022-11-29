@@ -5,6 +5,7 @@ import (
 	"gosfV2/src/auth"
 	"gosfV2/src/dtos"
 	"gosfV2/src/models"
+	"gosfV2/src/utils"
 	"net/http"
 	"strconv"
 
@@ -149,9 +150,7 @@ func (f *fileController) UploadFile(c echo.Context) error {
 		}
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{
-		"message": fmt.Sprintf("%d was file/s uploaded successfully", len(mf.File["files"])),
-	})
+	return c.JSON(http.StatusOK, utils.ToJSON(fmt.Sprintf("%d was file/s uploaded successfully", len(mf.File["files"]))))
 }
 
 // Obtiene los archivos subidos desde el Body (Formulario)
@@ -183,9 +182,7 @@ func (f *fileController) UpdateFile(c echo.Context) error {
 		return HandleFileError(err)
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{
-		"message": fmt.Sprintf("File %d updated successfully", idFile),
-	})
+	return c.JSON(http.StatusOK, utils.ToJSON(fmt.Sprintf("File %d updated successfully", idFile)))
 }
 
 // Elimina el archivo de la base de datos y del disco
@@ -228,9 +225,7 @@ func (f *fileController) DeleteFile(c echo.Context) error {
 		return HandleFileError(err)
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{
-		"message": fmt.Sprintf("File %d deleted successfully", idNum),
-	})
+	return c.JSON(http.StatusOK, utils.ToJSON(fmt.Sprintf("File %d deleted successfully", idNum)))
 }
 
 // Agrega un usuario a la lista de usuarios con los que se comparte el archivo
@@ -270,9 +265,7 @@ func (f *fileController) AddUserToFile(c echo.Context) error {
 		return HandleFileError(err)
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{
-		"message": fmt.Sprintf("User %d added to file %d successfully", userId, fileId),
-	})
+	return c.JSON(http.StatusOK, utils.ToJSON(fmt.Sprintf("User %d added to file %d successfully", userId, fileId)))
 }
 
 // Remueve un usuario a la lista de usuarios con los que se comparte el archivo
@@ -316,7 +309,5 @@ func (f *fileController) RemoveUserFromFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{
-		"message": fmt.Sprintf("User %d removed from file %d successfully", userId, fileId),
-	})
+	return c.JSON(http.StatusOK, utils.ToJSON(fmt.Sprintf("User %d removed from file %d successfully", userId, fileId)))
 }

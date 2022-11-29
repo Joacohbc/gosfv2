@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"gosfV2/src/utils"
+
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo"
 )
@@ -108,7 +110,7 @@ func RegisterHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.String(http.StatusOK, "You have been registered successfully")
+	return c.JSON(http.StatusOK, utils.ToJSON("User created successfully"))
 }
 
 func LoginHandler(c echo.Context) error {
@@ -155,5 +157,5 @@ func LogoutHandler(c echo.Context) error {
 		MaxAge: -1, // Poniendo -1 se borra la cookie
 	})
 
-	return c.String(http.StatusOK, "You have been logged out")
+	return c.JSON(http.StatusOK, utils.ToJSON("You have been logged out successfully"))
 }
