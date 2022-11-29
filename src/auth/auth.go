@@ -34,19 +34,34 @@ func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		var token string
-		if strings.HasPrefix(c.Path(), "/api") {
+
+		// Si tiene un Header Authorization, se toma el token de ahí
+		if c.Request().Header.Get(echo.HeaderAuthorization) != "" {
 			t, err := getTokenFromHeader(c)
 			if err != nil {
 				return err
 			}
 			token = t
 
-		} else if strings.HasPrefix(c.Path(), "/auth") {
+			// Si no tiene un Header Authorization, se busca el Token en el URL
+		} else if c.Param(queryName) != "" {
+			t, err := getTokenAsQueryParam(c)
+			if err != nil {
+				return err
+			}
+			token = t
+
+			// Si no tiene el URL, se busca el Token en una Cookie
+		} else if _, err := c.Cookie(cookieName); err == nil {
 			t, err := getTokenFromCookie(c)
 			if err != nil {
 				return err
 			}
 			token = t
+
+			// Si no tiene Token lo informo
+		} else {
+			return echo.NewHTTPError(http.StatusUnauthorized, "Not token provided")
 		}
 
 		claims, err := ValidJWT(token)

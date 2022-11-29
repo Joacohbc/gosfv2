@@ -19,6 +19,9 @@ const (
 
 	// token es el nombre de la Cookie donde se buscara el JWT
 	cookieName string = "token"
+
+	// api-token es el nombre de la Cookie donde se buscara el JWT
+	queryName string = "api-token"
 )
 
 // Inscrita el password con AES y retorna la cadena encriptada
@@ -57,6 +60,14 @@ func getTokenFromHeader(c echo.Context) (string, error) {
 	}
 
 	return auth[1], nil
+}
+
+func getTokenAsQueryParam(c echo.Context) (string, error) {
+	token := c.Param(queryName)
+	if strings.TrimSpace(token) == "" {
+		return "", echo.NewHTTPError(http.StatusUnauthorized, "missing or malformed jwt")
+	}
+	return token, nil
 }
 
 func getTokenFromCookie(c echo.Context) (string, error) {
