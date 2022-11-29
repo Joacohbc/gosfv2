@@ -1,4 +1,4 @@
-import { showError, showSuccess} from "/static/modules/message.js";
+import { showError, showSuccess, showInfo} from "/static/modules/message.js";
 import { getToken } from '/static/modules/request.js';
 
 class File {
@@ -29,16 +29,7 @@ class File {
     }
 
     open() {
-        axios.get(`/api/files/${this._id}`, {
-            responseType: 'blob'
-        })
-        .then(blob => {
-            let url = window.URL.createObjectURL(blob.data);
-            window.open(url, '_blank');
-        })
-        .catch(err => {
-            showError(err.response.data.message);
-        });
+        window.open(`${this.link}`, '_blank');
     }
 
     download() {
@@ -162,7 +153,8 @@ class File {
 
             let filename = prompt("Enter the new filename", this._filename);
             let shared = confirm("Do you want to share this file?");
-            if(filename === null) {
+            if(filename === null || shared === null) {
+                showInfo("You have canceled the update");
                 return;
             }
 
@@ -188,19 +180,19 @@ function reloadTable() {
         document.querySelector('tbody').appendChild(files);
     })
     .catch(err => {
-        console.log(err);
-        if(err.request.status == 401) {
-            alert(err.response.data.message);
-            window.location.href = '/static/login/login.html';
-        }
+        showError(err.response.data.message);
     });
 }
 
 window.addEventListener('DOMContentLoaded', function() {
-    // Si tengo el Token, lo agrego al header de las peticiones
-    axios.defaults.headers.Authorization = "Bearer " + getToken();
-    axios.defaults.baseURL = window.location.origin;
 
+    // Verifico que el Token este en la Cookie
+    if (getToken() === null) {
+        // Si no esta lo devuelvo al Login
+        window.location.href = '/static/login/login.html';
+    }
+
+    axios.defaults.baseURL = window.location.origin;
     reloadTable();
 
     document.querySelector(`#btn-logout`).addEventListener('click', (e) => {
