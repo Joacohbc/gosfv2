@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Gosf</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+    <!-- Cargo el Icono de la pagina -->
+    <link rel="icon" href="/static/images/server.png">
+
+    <!-- Cargo la librería de Axios y Bootstrap -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+
+    <!-- Cargo mi JS y mi CSS -->
+    <link rel='stylesheet' type='text/css' media='screen' href='/static/main/files.css'>
+    <script src='/static/main/files.js' type="module"></script>
+    <script src="/static/modules/request.js" type="module"></script>
+    <script src="/static/modules/message.js" type="module"></script>
+</head>
+<body> 
+
+    <header>
+        <div class="header-title">
+            <img src="/static/images/server.png" alt="server">
+            <h1>Gosf</h1>
+        </div>
+        <button id="btn-logout" class="header-btn">Logout</button>
+    </header>
+    
+    <table class="files">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Filename</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <!-- Aquí se cargan los Files -->
+        </tbody>
+
+        <tfoot>
+            <th colspan="3">
+                <form>
+                    <label for="input-upload" id="btn-upload">Upload file/s   </label>
+                    <input id="input-upload" type="file" style="display: none;" multiple>
+                    <label id="message"></label>
+                </form>
+            </th>
+        </tfoot>
+    </table>
+
+</body>
+</html>

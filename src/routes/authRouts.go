@@ -14,5 +14,5 @@ type authRoutes struct{}
 func (a *authRoutes) AddRoutes(e *echo.Echo) {
 	e.POST("/login", auth.LoginHandler)
 	e.POST("/register", auth.RegisterHandler)
-	e.GET("/logout", auth.LogoutHandler)
+	e.POST("/logout", auth.LogoutHandler)
 }

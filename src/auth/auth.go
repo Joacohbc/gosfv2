@@ -29,7 +29,7 @@ func HandleUserError(err error) error {
 func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
-		if c.Path() == "/register" || c.Path() == "/login" || c.Path() == "/logout" {
+		if c.Path() == "/register" || c.Path() == "/login" || c.Path() == "/logout" || strings.HasPrefix(c.Path(), "/static") {
 			return next(c)
 		}
 
@@ -107,7 +107,9 @@ func LoginHandler(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid Cookie: "+err.Error())
 		}
 
-		return c.String(http.StatusOK, ck.Value)
+		return c.JSON(http.StatusOK, echo.Map{
+			"token": ck.Value,
+		})
 	}
 
 	tokenString, err := generateJWTForUser(c)
@@ -122,7 +124,9 @@ func LoginHandler(c echo.Context) error {
 		MaxAge:  3600 * env.Config.JWTHours, // El MaxAge se pide en segundos (3600s = 1 hora)
 	})
 
-	return c.String(http.StatusOK, tokenString)
+	return c.JSON(http.StatusOK, echo.Map{
+		"token": tokenString,
+	})
 }
 
 func LogoutHandler(c echo.Context) error {
@@ -135,5 +139,6 @@ func LogoutHandler(c echo.Context) error {
 		Name:   cookieName,
 		MaxAge: -1, // Poniendo -1 se borra la cookie
 	})
+
 	return c.String(http.StatusOK, "You have been logged out")
 }

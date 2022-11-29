@@ -1,0 +1,14 @@
+.login {
+    position: relative;
+    padding: 10%;
+    margin: 0 auto;
+    width: 50%;
+    height: 50%;
+    background-color: skyblue;
+    border-radius: 10px;
+}
+
+#message {
+    color: tomato;
+    text-align: center;
+}

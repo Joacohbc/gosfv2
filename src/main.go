@@ -22,7 +22,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&port, "port", "8080", "Port to listen on")
+	flag.StringVar(&port, "port", "3000", "Port to listen on")
 	flag.Parse()
 }
 
@@ -43,6 +43,8 @@ func main() {
 	}
 
 	e := echo.New()
+
+	e.Static("/static", "../static")
 
 	e.Use(logger.RequestLoggerConfig())
 	e.Use(middleware.Recover())

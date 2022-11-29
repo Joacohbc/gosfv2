@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"gosfV2/src/models/database"
+	"regexp"
 
 	"time"
 
@@ -31,6 +32,25 @@ type User struct {
 	Password string       `json:"password"`
 	CreateAt time.Time    `json:"create_at" db:"created_at"`
 	UpdateAt sql.NullTime `json:"update_at" db:"update_at"`
+}
+
+func (u User) Validate() error {
+
+	if len(u.Username) > 255 {
+		return errors.New("invalid username, the name is too long (max 255)")
+	}
+
+	matched, err := regexp.MatchString("[a-zA-Z0-9]+", u.Username)
+	if !matched || err != nil {
+		return errors.New("invalid username, the name must be alphanumeric")
+	}
+
+	matched, err = regexp.MatchString(".*[a-z]+.*.*[A-Z]+.*.*[0-9]+.*.*[#!?{}!?*^%@#$]+.*", u.Password)
+	if !matched || err != nil {
+		return errors.New(`invalid password, the password must have at least one lowercase, one uppercase, one number and one special character ("#", "!", "?", "{", "}", "!", "?", "*", "^", "%", "@", "#", "$")`)
+	}
+
+	return nil
 }
 
 var (

@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -51,6 +52,15 @@ type File struct {
 	UserID     uint   `json:"owner_id" db:"user_id"`
 	User       User   `json:"owner" bd:"user"`                        // "user" es un prefix para usar sqlx.Get y sqlx.Select con una sola consulta
 	SharedWith []User `json:"shared_with,omitempty" db:"shared_with"` // "shared_with" es un prefix para usar sqlx.Get y sqlx.Select con una sola consulta
+}
+
+func (f *File) Validate() error {
+	match, err := regexp.MatchString(`[a-zA-Z0-9_-]+(\.)[a-z]+`, "Image.png")
+	if !match || err != nil {
+		return errors.New(`invalid filename format, only letters, numbers, "-" and "_" are allowed`)
+	}
+
+	return nil
 }
 
 var (
