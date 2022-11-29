@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"gosfV2/src/auth"
 	"gosfV2/src/middleware/logger"
+	"gosfV2/src/models/env"
 	"gosfV2/src/routes"
 	"net/http"
 	"os"
@@ -44,7 +45,7 @@ func main() {
 
 	e := echo.New()
 
-	e.Static("/static", "../static")
+	e.Static("/static", env.Config.StaticFiles)
 
 	e.Use(logger.RequestLoggerConfig())
 	e.Use(middleware.Recover())

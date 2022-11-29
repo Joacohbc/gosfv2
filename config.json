@@ -8,5 +8,6 @@
     "db_name":"db",
     "db_port": 3306,
     "db_charset": "utf8",
-    "files_directory": "./files"
+    "files_directory": "./files",
+    "static_files": "./static"
 }

@@ -17,6 +17,7 @@ type config struct {
 	BDPort         int    `json:"db_port"`
 	BDCharset      string `json:"db_charset"`
 	FilesDirectory string `json:"files_directory"`
+	StaticFiles    string `json:"static_files"`
 }
 
 var Config config
