@@ -96,6 +96,10 @@ class File {
         const filename = document.createElement('td');
         filename.classList.add('file-filename');
         filename.innerHTML = this._filename;
+        filename.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.open();
+        });
         part.appendChild(filename);
         
         const actions = document.createElement('td');
@@ -114,25 +118,25 @@ class File {
         });
         actions.appendChild(link);
 
-        const open = document.createElement('button');
-        open.classList.add(btnAttribute);
-        open.classList.add('file-open-btn');
-        open.innerHTML = 'Open';
-        open.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.open();
-        });
-        actions.appendChild(open);
+        // const open = document.createElement('button');
+        // open.classList.add(btnAttribute);
+        // open.classList.add('file-open-btn');
+        // open.innerHTML = 'Open';
+        // open.addEventListener('click', (e) => {
+        //     e.preventDefault();
+        //     this.open();
+        // });
+        // actions.appendChild(open);
 
-        const getShared = document.createElement('button');
-        getShared.classList.add(btnAttribute);
-        getShared.classList.add('file-share-btn');
-        getShared.innerHTML = 'Share';
-        getShared.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.getShared();
-        });
-        actions.appendChild(getShared);
+        // const getShared = document.createElement('button');
+        // getShared.classList.add(btnAttribute);
+        // getShared.classList.add('file-share-btn');
+        // getShared.innerHTML = 'Share';
+        // getShared.addEventListener('click', (e) => {
+        //     e.preventDefault();
+        //     this.getShared();
+        // });
+        // actions.appendChild(getShared);
 
         const deleteBtn = document.createElement('button');
         deleteBtn.classList.add(btnAttribute);
@@ -171,7 +175,23 @@ class File {
 function reloadTable() {
     axios.get("/api/files/")
     .then(req => {
+    
         document.querySelector('tbody').innerHTML = '';
+
+        // Si no hay archivos que ingrese un mensaje personalizado
+        // en el head de la tabla
+        if(req.data == null) {
+            document.querySelector('thead').innerHTML = "No files, wait for upload c:";
+            return;
+        }
+        
+        document.querySelector('thead').innerHTML = `
+        <tr>
+            <th>ID</th>
+            <th>Filename</th>
+            <th>Actions</th>
+        </tr>
+        `;
 
         const files = document.createDocumentFragment();
         req.data.forEach(element => {
@@ -192,10 +212,14 @@ window.addEventListener('DOMContentLoaded', function() {
         window.location.href = '/static/login/login.html';
     }
 
+    // Defino el URL base de las peticiones
     axios.defaults.baseURL = window.location.origin;
+
+    // Cargo la tabla de archivos
     reloadTable();
 
-    document.querySelector(`#btn-logout`).addEventListener('click', (e) => {
+    // Agrego funcionamiento a los botones
+    document.querySelector("#btn-logout").addEventListener('click', (e) => {
         e.preventDefault();
         axios.post('/logout')
         .then(res => {
@@ -229,5 +253,13 @@ window.addEventListener('DOMContentLoaded', function() {
         .catch(err => {
             showError(err.response.data.message); 
         });
+    });
+
+    document.querySelector("#btn-share-info").addEventListener('click', (e) => {
+        e.preventDefault();
+    });
+
+    document.querySelector("#btn-user-info").addEventListener('click', (e) => {
+        e.preventDefault();
     });
 });

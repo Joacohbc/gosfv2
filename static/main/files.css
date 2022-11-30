@@ -1,5 +1,6 @@
 body {
     background-color: #000000;
+    font-family: monospace;
 }
 
 /* HEADER CSS */
@@ -52,6 +53,10 @@ body {
 .file:hover td {
     background-color: #540375;
     color: white;
+}
+
+.file-filename:hover {
+    text-decoration: underline;
 }
 
 .file-actions-item {
