@@ -64,7 +64,6 @@ class File {
     update(filename, shared) {
         axios.put(`/api/files/${this._id}`, {
             filename: filename,
-            shared: shared
         })
         .then(res => {
             showSuccess(res.data.message);
@@ -118,26 +117,6 @@ class File {
         });
         actions.appendChild(link);
 
-        // const open = document.createElement('button');
-        // open.classList.add(btnAttribute);
-        // open.classList.add('file-open-btn');
-        // open.innerHTML = 'Open';
-        // open.addEventListener('click', (e) => {
-        //     e.preventDefault();
-        //     this.open();
-        // });
-        // actions.appendChild(open);
-
-        // const getShared = document.createElement('button');
-        // getShared.classList.add(btnAttribute);
-        // getShared.classList.add('file-share-btn');
-        // getShared.innerHTML = 'Share';
-        // getShared.addEventListener('click', (e) => {
-        //     e.preventDefault();
-        //     this.getShared();
-        // });
-        // actions.appendChild(getShared);
-
         const deleteBtn = document.createElement('button');
         deleteBtn.classList.add(btnAttribute);
         deleteBtn.classList.add('file-delete-btn');
@@ -156,13 +135,11 @@ class File {
             e.preventDefault();
 
             let filename = prompt("Enter the new filename", this._filename);
-            let shared = confirm("Do you want to share this file?");
-            if(filename === null || shared === null) {
+            if(filename === null || filename == "") {
                 showInfo("You have canceled the update");
                 return;
             }
-
-            this.update(filename, shared);
+            this.update(filename);
         });
         actions.appendChild(updateBtn);
         
@@ -175,16 +152,16 @@ class File {
 function reloadTable() {
     axios.get("/api/files/")
     .then(req => {
-    
         document.querySelector('tbody').innerHTML = '';
 
         // Si no hay archivos que ingrese un mensaje personalizado
-        // en el head de la tabla
+        // en el head de la tabla que indique que no hay archivos
         if(req.data == null) {
-            document.querySelector('thead').innerHTML = "No files, wait for upload c:";
+            document.querySelector('thead').innerHTML = "No files, start uploading files c:";
             return;
         }
-        
+
+        // Si hay archivos que agregue las columnas a la tabla
         document.querySelector('thead').innerHTML = `
         <tr>
             <th>ID</th>
@@ -193,6 +170,7 @@ function reloadTable() {
         </tr>
         `;
 
+        // Y cargue las filas de la tabla
         const files = document.createDocumentFragment();
         req.data.forEach(element => {
             files.appendChild(File.fromJSON(element).getHTML());
@@ -257,9 +235,11 @@ window.addEventListener('DOMContentLoaded', function() {
 
     document.querySelector("#btn-share-info").addEventListener('click', (e) => {
         e.preventDefault();
+        alert("Working in progress!");
     });
 
     document.querySelector("#btn-user-info").addEventListener('click', (e) => {
         e.preventDefault();
+        alert("Working in progress!");
     });
 });
