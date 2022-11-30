@@ -1,14 +1,51 @@
+body {
+    background-color: #000000;
+    font-family: monospace;
+}
+
 .login {
     position: relative;
     padding: 10%;
     margin: 0 auto;
     width: 50%;
     height: 50%;
-    background-color: skyblue;
+    background-color: #0A0A0A;
     border-radius: 10px;
 }
 
-#message {
-    color: tomato;
+.login input {
+    background-color: black;
+    border: none;
+}
+
+.login input:focus, .login input:hover{
+    background-color: #0A0A0A;
+    border: 1px solid white;
+}
+
+label {
+    color: white;
+    padding: 10px;
+}
+
+.login-title {
+    color: white;
+    font-size: 2em;
     text-align: center;
+}
+
+.login-title:hover {
+    text-decoration: underline;
+}
+
+#btn-login {
+    background-color: black;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+#btn-login:hover {
+    background-color: brown;
 }
