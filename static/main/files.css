@@ -1,35 +1,3 @@
-body {
-    background-color: #000000;
-    font-family: monospace;
-}
-
-/* HEADER CSS */
-.header-title {
-    display: flex;
-    align-items: flex-end;
-    color: white;
-}
-
-.header-title img {
-    padding: 10px;
-    width: 4em;
-    height: 4em;
-}
-
-.header-btn {
-    color: gray;
-    background-color: transparent;
-    border: none;
-    outline: none;
-    border-radius: 5px;
-}
-
-.header-btn:hover {
-    background-color: brown;
-    color: white;
-    font-size: 1.1em;
-}
-
 /* FILES CSS */
 .files-container {
     display: flex;
@@ -74,6 +42,12 @@ body {
 }
 
 .files-table-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#message {
     display: flex;
     justify-content: center;
     align-items: center;

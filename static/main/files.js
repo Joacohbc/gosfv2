@@ -1,5 +1,4 @@
 import { showError, showSuccess, showInfo} from "/static/modules/message.js";
-import { getToken } from '/static/modules/request.js';
 
 class File {
     constructor(id, filename, shared) {
@@ -183,30 +182,9 @@ function reloadTable() {
 }
 
 window.addEventListener('DOMContentLoaded', function() {
-
-    // Verifico que el Token este en la Cookie
-    if (getToken() === null) {
-        // Si no esta lo devuelvo al Login
-        window.location.href = '/static/login/login.html';
-    }
-
-    // Defino el URL base de las peticiones
-    axios.defaults.baseURL = window.location.origin;
-
+    
     // Cargo la tabla de archivos
     reloadTable();
-
-    // Agrego funcionamiento a los botones
-    document.querySelector("#btn-logout").addEventListener('click', (e) => {
-        e.preventDefault();
-        axios.post('/logout')
-        .then(res => {
-            window.location.href = '/static/index.html';
-        })
-        .catch(err => {
-            alert(err.response.data.message);
-        });
-    });
 
     document.querySelector("#input-upload").addEventListener('change', (e) => {
         e.preventDefault();
@@ -231,15 +209,5 @@ window.addEventListener('DOMContentLoaded', function() {
         .catch(err => {
             showError(err.response.data.message); 
         });
-    });
-
-    document.querySelector("#btn-share-info").addEventListener('click', (e) => {
-        e.preventDefault();
-        alert("Working in progress!");
-    });
-
-    document.querySelector("#btn-user-info").addEventListener('click', (e) => {
-        e.preventDefault();
-        alert("Working in progress!");
     });
 });

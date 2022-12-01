@@ -15,22 +15,13 @@
 
     <!-- Cargo mi JS y mi CSS -->
     <link rel='stylesheet' type='text/css' media='screen' href='/static/main/files.css'>
-    <script src='/static/main/files.js' type="module"></script>
+    <link rel='stylesheet' type='text/css' media='screen' href='/static/main/header.css'>
+    <script src="/static/main/header.js" type="module"></script>
     <script src="/static/modules/request.js" type="module"></script>
     <script src="/static/modules/message.js" type="module"></script>
+    <script src='/static/main/files.js' type="module"></script>
 </head>
-<body> 
-
-    <header>
-        <div class="header-title">
-            <img src="/static/images/server.png" alt="server">
-            <h1>Gosf</h1>
-        </div>
-        <button id="btn-logout" class="header-btn">Logout</button>
-        <button id="btn-user-info" class="header-btn">User Info</button>
-        <button id="btn-share-info" class="header-btn">Share Info</button>
-    </header>
-    
+<body>     
     <div class="files-container">
         <table>
             <thead>
@@ -46,7 +37,8 @@
     <div class="files-table-buttons">
         <label for="input-upload" id="btn-upload" class="header-btn">Upload file/s</label>
         <input id="input-upload" type="file" style="display: none;" multiple>
-        <label id="message" style="cursor: pointer;"></label>
     </div>
+    
+    <label id="message" style="cursor: pointer;"></label>
 </body>
 </html>

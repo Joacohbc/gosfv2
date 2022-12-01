@@ -1,0 +1,43 @@
+body {
+    background-color: #000000;
+    font-family: monospace;
+}
+
+img {
+    margin: 0 auto;
+    width: 9em;
+    height: 3em;
+}
+
+header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2em;
+    margin-top: .5em;
+    border-radius: 10px;
+    gap: 1em;
+}
+
+/* HEADER CSS */
+.header-title {
+    display: flex;
+    justify-content: center;
+    margin: 0 auto;
+    margin-top: 1em;
+}
+
+.header-btn {
+    color: gray;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.header-btn:hover {
+    background-color: brown;
+    color: white;
+    font-size: 1.1em;
+}
