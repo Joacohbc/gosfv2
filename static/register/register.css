@@ -3,45 +3,45 @@ body {
     font-family: monospace;
 }
 
-/* Login Container */
-.login {
+/* Register Container */
+.register {
     position: relative;
+    margin: auto;
     padding: 10%;
-    margin: 0 auto;
     width: 65%;
     background-color: #0A0A0A;
     border-radius: 10px;
 }
 
-/* Login Titles */
-.login-title {
+/* Register Titles */
+.register-title {
     color: white;
     font-size: 2em;
     text-align: center;
 }
 
-.login-title:hover {
+.register-title:hover {
     text-decoration: underline;
 }
 
-/* Login Fields */
-.login label {
+/* Register Fields */
+.register label {
     color: white;
     padding: 10px;
 }
 
-.login input {
+.register input {
     background-color: black;
     color: white;
 }
 
-.login input:focus, .login input:hover {
+.register input:focus, .register input:hover {
     background-color: #0A0A0A;
     border: 1px solid white;
 }
 
-/* Login Buttons */
-#btn-login {
+/* Register Button */
+.btn-menu {
     background-color: black;
     color: white;
     border: none;
@@ -49,10 +49,11 @@ body {
     padding: 10px;
 }
 
-#btn-login:hover {
+.btn-menu:hover {
     background-color: brown;
 }
 
 .link {
     margin-top: 1em;
 }
+
