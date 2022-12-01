@@ -1,10 +1,22 @@
 import { showError, showSuccess, showInfo} from "/static/modules/message.js";
 
 class File {
-    constructor(id, filename, shared) {
+    constructor(id, filename, shared, shared_with) {
         this._id = id;
         this._filename = filename;
         this._shared = shared;
+        this._shared_with = shared_with;
+    }
+
+    static searchById(fileId) {
+        axios.get(`/api/files/${fileId}/info`)
+        .then(res => {
+            return new File(fileId, res.data.filename, res.data.shared, res.data.shared_with);
+        })
+        .catch(err => {
+            showError(err.response.data.message);
+            return null;
+        });
     }
 
     static fromJSON(json) {
@@ -60,9 +72,10 @@ class File {
         });
     }
 
-    update(filename, shared) {
+    update(filename, shared = this._shared) {
         axios.put(`/api/files/${this._id}`, {
             filename: filename,
+            shared: shared
         })
         .then(res => {
             showSuccess(res.data.message);
@@ -74,15 +87,35 @@ class File {
     }
 
     getShared() {
-        if(this._shared === false) {
-            alert("This file not shared!");
+        if(this._shared === true) {
+            navigator.clipboard.writeText(`${window.location.origin}/api/files/share/${this._id}`)            
+            .then(() => {
+                showInfo("The link has been copied to the clipboard");
+            })
+            .catch(err => {
+                showError("Error copying the link");
+                console.log(err);
+            });
+            return;
+        }
+        
+        if(this._shared_with === null) {
+            showError("This file is not shared");
             return;
         }
 
-        alert(`${window.location.origin}/api/files/share/${this._id}`);
+        navigator.clipboard.writeText(`${window.location.origin}/api/files/share/${this._id}`)
+        .then(() => {
+            showInfo("The link has been copied to the clipboard");
+        })
+        .catch(err => {
+            showError("Error copying the link");
+            console.log(err);
+        });
+        showInfo("The link has been copied to the clipboard");
     }
 
-    getHTML() {
+    toTableRow() {
         const part = document.createElement('tr');
         part.setAttribute("class", "file");
 
@@ -106,15 +139,15 @@ class File {
         // La propiedad que tendrán los botones
         const btnAttribute = 'file-actions-item';
 
-        const link = document.createElement('button');
-        link.classList.add(btnAttribute);
-        link.classList.add('file-download-btn');
-        link.innerHTML = 'Download';
-        link.addEventListener('click', (e) => {
+        const download = document.createElement('button');
+        download.classList.add(btnAttribute);
+        download.classList.add('file-download-btn');
+        download.innerHTML = 'Download';
+        download.addEventListener('click', (e) => {
             e.preventDefault();
             this.download();
         });
-        actions.appendChild(link);
+        actions.appendChild(download);
 
         const deleteBtn = document.createElement('button');
         deleteBtn.classList.add(btnAttribute);
@@ -142,6 +175,17 @@ class File {
         });
         actions.appendChild(updateBtn);
         
+        const shareBtn = document.createElement('button');
+        shareBtn.classList.add(btnAttribute);
+        shareBtn.classList.add('file-share-btn');
+        shareBtn.innerHTML = 'Copy Link';
+        shareBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.getShared();
+        });
+        actions.appendChild(shareBtn);
+
+
         part.appendChild(actions);
 
         return part;
@@ -172,7 +216,7 @@ function reloadTable() {
         // Y cargue las filas de la tabla
         const files = document.createDocumentFragment();
         req.data.forEach(element => {
-            files.appendChild(File.fromJSON(element).getHTML());
+            files.appendChild(File.fromJSON(element).toTableRow());
         });
         document.querySelector('tbody').appendChild(files);
     })

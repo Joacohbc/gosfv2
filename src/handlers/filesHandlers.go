@@ -70,7 +70,7 @@ func (f *fileController) GetInfo(c echo.Context) error {
 		return HandleFileError(err)
 	}
 
-	return c.JSON(http.StatusOK, file)
+	return c.JSON(http.StatusOK, dtos.ToFileDTO(file))
 }
 
 // Obtiene todos los archivos del usuario (Su información)

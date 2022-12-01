@@ -16,29 +16,36 @@
     <!-- Cargo mi JS y mi CSS -->
     <link rel='stylesheet' type='text/css' media='screen' href='/static/main/files.css'>
     <link rel='stylesheet' type='text/css' media='screen' href='/static/main/header.css'>
-    <script src="/static/main/header.js" type="module"></script>
     <script src="/static/modules/request.js" type="module"></script>
     <script src="/static/modules/message.js" type="module"></script>
-    <script src='/static/main/files.js' type="module"></script>
+    <script src='/static/main/header.js' type="module"></script>
+    <script src="/static/main/share.js" type="module"></script>
 </head>
-<body>     
+<body> 
+    
+    <div class="files-table-buttons">
+        <input id="input-file-id" type="number" placeholder="Enter the File ID" min="0">
+        <button id="btn-search-file"> Search </button>    
+    </div>
+    
     <div class="files-container">
         <table>
             <thead>
-                
+                <tr>
+                </tr>
             </thead>
     
             <tbody>
-                <!-- Aquí se cargan los Files -->
+                <!-- Aquí se cargan los Usuarios -->
             </tbody>
         </table>
+        
     </div>
     
     <div class="files-table-buttons">
-        <label for="input-upload" id="btn-upload" class="header-btn">Upload file/s</label>
-        <input id="input-upload" type="file" style="display: none;" multiple>
+        <input id="input-user-id" type="number" min="0" placeholder="Enter a User ID">
+        <button id="btn-add-user"> Add User </button>
     </div>
-    
+
     <label id="message"></label>
-</body>
 </html>
