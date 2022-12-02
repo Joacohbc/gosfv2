@@ -13,19 +13,6 @@ import (
 	"github.com/labstack/echo"
 )
 
-func init() {
-	database.GetBd().MustExec(`
-	CREATE TABLE IF NOT EXISTS users (
-		user_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-		username VARCHAR(255) NOT NULL UNIQUE,
-		password VARCHAR(255) NOT NULL,
-		update_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-		created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-	) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-	`)
-
-}
-
 type User struct {
 	ID       uint         `json:"id" db:"user_id"`
 	Username string       `json:"username"`

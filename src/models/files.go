@@ -17,29 +17,6 @@ import (
 	"github.com/labstack/echo"
 )
 
-func init() {
-
-	database.GetBd().MustExec(`
-	CREATE TABLE IF NOT EXISTS files (
-		file_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-		filename TEXT NOT NULL UNIQUE,
-		shared BOOLEAN NOT NULL DEFAULT false,
-		update_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-		created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-		user_id INT UNSIGNED NOT NULL,
-		FOREIGN KEY (user_id) REFERENCES users(user_id)
-	) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`)
-
-	database.GetBd().MustExec(`
-	CREATE TABLE IF NOT EXISTS file_users (
-		user_id INT UNSIGNED NOT NULL PRIMARY KEY,
-		file_id INT UNSIGNED NOT NULL,
-		FOREIGN KEY (user_id) REFERENCES users(user_id),
-		FOREIGN KEY (file_id) REFERENCES files(file_id)
-	) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`)
-
-}
-
 // File: Representa un archivo de un usuario
 type File struct {
 	ID       uint         `json:"id" db:"file_id"`
