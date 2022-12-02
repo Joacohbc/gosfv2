@@ -1,10 +1,12 @@
+@import url("/static/main.css");
+
 input {
     border: none;
-    background-color: black;
-    color: white;
+    background-color: var(--color-background);
+    color: var(--color-text);
 }
 
 input:focus, input:hover {
-    background-color: #0A0A0A;
-    border: 1px solid white;
+    background-color: var(--color-background-light);
+    border: 1px solid var(--color-text);
 }

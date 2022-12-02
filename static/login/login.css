@@ -1,7 +1,5 @@
-body {
-    background-color: #000000;
-    font-family: monospace;
-}
+@import url("/static/main.css");
+
 
 /* Login Container */
 .login {
@@ -9,13 +7,13 @@ body {
     padding: 10%;
     margin: 0 auto;
     width: 65%;
-    background-color: #0A0A0A;
+    background-color: var(--color-background-light);
     border-radius: 10px;
 }
 
 /* Login Titles */
 .login-title {
-    color: white;
+    color: var(--color-text);
     font-size: 2em;
     text-align: center;
 }
@@ -26,31 +24,31 @@ body {
 
 /* Login Fields */
 .login label {
-    color: white;
+    color: var(--color-text);
     padding: 10px;
 }
 
 .login input {
-    background-color: black;
-    color: white;
+    background-color: var(--color-background);
+    color: var(--color-text);
 }
 
 .login input:focus, .login input:hover {
-    background-color: #0A0A0A;
-    border: 1px solid white;
+    background-color: var(--color-background-light);
+    border: 1px solid var(--color-text);
 }
 
 /* Login Buttons */
 #btn-login {
-    background-color: black;
-    color: white;
+    background-color: var(--color-background);
+    color: var(--color-text);
     border: none;
     border-radius: 5px;
     padding: 10px;
 }
 
 #btn-login:hover {
-    background-color: brown;
+    background-color: var(--color-hover);
 }
 
 .link {

@@ -1,7 +1,4 @@
-body {
-    background-color: #000000;
-    font-family: monospace;
-}
+@import url("/static/main.css");
 
 img {
     margin: 0 auto;
@@ -37,7 +34,7 @@ header {
 }
 
 .header-btn:hover {
-    background-color: brown;
-    color: white;
+    background-color: var(--color-hover);
+    color: var(--color-text);
     font-size: 1.1em;
 }

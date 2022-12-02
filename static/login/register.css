@@ -1,7 +1,5 @@
-body {
-    background-color: #000000;
-    font-family: monospace;
-}
+@import url("/static/main.css");
+
 
 /* Register Container */
 .register {
@@ -9,13 +7,13 @@ body {
     margin: auto;
     padding: 10%;
     width: 65%;
-    background-color: #0A0A0A;
+    background-color: var(--color-background-light);
     border-radius: 10px;
 }
 
 /* Register Titles */
 .register-title {
-    color: white;
+    color: var(--color-text);
     font-size: 2em;
     text-align: center;
 }
@@ -26,31 +24,31 @@ body {
 
 /* Register Fields */
 .register label {
-    color: white;
+    color: var(--color-text);
     padding: 10px;
 }
 
 .register input {
-    background-color: black;
-    color: white;
+    background-color: var(--color-background);
+    color: var(--color-text);
 }
 
 .register input:focus, .register input:hover {
-    background-color: #0A0A0A;
-    border: 1px solid white;
+    background-color: var(--color-background-light);
+    border: 1px solid var(--color-text);
 }
 
 /* Register Button */
 .btn-menu {
-    background-color: black;
-    color: white;
+    background-color: var(--color-background);
+    color: var(--color-text);
     border: none;
     border-radius: 5px;
     padding: 10px;
 }
 
 .btn-menu:hover {
-    background-color: brown;
+    background-color: var(--color-hover);
 }
 
 .link {

@@ -1,9 +1,11 @@
+@import url("/static/main.css");
+
 /* FILES CSS */
 .table-container {
     display: flex;
     justify-content: center;
     border-radius: 10px;
-    color: #ffff;
+    color: var(--color-text);
     text-align: center;
     overflow-wrap: break-word;
     text-overflow: ellipsis;
@@ -12,15 +14,15 @@
 }
 
 .file td {
-    border: 1px solid white;
+    border: 1px solid var(--color-text);
     color: gray;
     padding: 10px;
     font-size: 1em;
 }
 
 .file:hover td {
-    background-color: #540375;
-    color: white;
+    background-color: var(--color-row-selected);
+    color: var(--color-text);
 }
 
 .file-filename:hover {
@@ -37,8 +39,8 @@
 }
 
 .file-actions-item:hover {
-    background-color: brown;
-    color: white;
+    background-color: var(--color-hover);
+    color: var(--color-text);
 }
 
 .table-buttons {
@@ -54,11 +56,11 @@
 }
 
 #btn-upload {
-    color: white;
+    color: var(--color-text);
     border-radius: 5px;
     padding: 10px;
 }
 
 #btn-upload:hover {
-    background-color: brown;
+    background-color: var(--color-hover);
 }
