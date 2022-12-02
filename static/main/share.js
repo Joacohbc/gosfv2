@@ -78,6 +78,8 @@ function reloadTable(fileId) {
 
     axios.get(`/api/files/${fileId}/info`)
     .then(req => {
+        addUser.removeAttribute("hidden");
+        
         // Si no hay archivos que ingrese un mensaje personalizado
         // en el head de la tabla que indique que no hay archivos
         if(req.data.shared_with == null) {
@@ -101,7 +103,6 @@ function reloadTable(fileId) {
         });
 
         tbody.appendChild(users);
-        addUser.removeAttribute("hidden");
     }).catch(err => {
         showError(err.response.data.message);
     });

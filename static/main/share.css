@@ -10,3 +10,9 @@ input:focus, input:hover {
     background-color: var(--color-background-light);
     border: 1px solid var(--color-text);
 }
+
+/* Sino esta mostrando el placeholder, osea si tiene texto */
+input:not(:placeholder-shown) {
+    background-color: var(--color-background-light);
+    border: 1px solid var(--color-text);
+}

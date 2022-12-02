@@ -18,7 +18,7 @@ window.addEventListener('DOMContentLoaded', function() {
                 password: document.querySelector("#password").value
         })
         .then(req => {
-            window.location.href = '/static/login.html';
+            showError(req.response.data.message);
         })
         .catch(err => {
             showError(err.response.data.message);
