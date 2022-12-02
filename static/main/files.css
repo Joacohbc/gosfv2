@@ -1,5 +1,5 @@
 /* FILES CSS */
-.files-container {
+.table-container {
     display: flex;
     justify-content: center;
     border-radius: 10px;
@@ -41,7 +41,7 @@
     color: white;
 }
 
-.files-table-buttons {
+.table-buttons {
     display: flex;
     justify-content: center;
     align-items: center;

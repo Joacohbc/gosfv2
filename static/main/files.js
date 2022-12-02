@@ -87,24 +87,7 @@ class File {
     }
 
     getShared() {
-        if(this._shared === true) {
-            navigator.clipboard.writeText(`${window.location.origin}/api/files/share/${this._id}`)            
-            .then(() => {
-                showInfo("The link has been copied to the clipboard");
-            })
-            .catch(err => {
-                showError("Error copying the link");
-                console.log(err);
-            });
-            return;
-        }
-        
-        if(this._shared_with === null) {
-            showError("This file is not shared");
-            return;
-        }
-
-        navigator.clipboard.writeText(`${window.location.origin}/api/files/share/${this._id}`)
+        navigator.clipboard.writeText(`${window.location.origin}/api/files/share/${this._id}`)            
         .then(() => {
             showInfo("The link has been copied to the clipboard");
         })
@@ -112,7 +95,6 @@ class File {
             showError("Error copying the link");
             console.log(err);
         });
-        showInfo("The link has been copied to the clipboard");
     }
 
     toTableRow() {
@@ -178,7 +160,7 @@ class File {
         const shareBtn = document.createElement('button');
         shareBtn.classList.add(btnAttribute);
         shareBtn.classList.add('file-share-btn');
-        shareBtn.innerHTML = 'Copy Link';
+        shareBtn.innerHTML = 'Share';
         shareBtn.addEventListener('click', (e) => {
             e.preventDefault();
             this.getShared();

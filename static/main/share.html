@@ -16,6 +16,7 @@
     <!-- Cargo mi JS y mi CSS -->
     <link rel='stylesheet' type='text/css' media='screen' href='/static/main/files.css'>
     <link rel='stylesheet' type='text/css' media='screen' href='/static/main/header.css'>
+    <link rel='stylesheet' type='text/css' media='screen' href='/static/main/share.css'>
     <script src="/static/modules/request.js" type="module"></script>
     <script src="/static/modules/message.js" type="module"></script>
     <script src='/static/main/header.js' type="module"></script>
@@ -23,26 +24,23 @@
 </head>
 <body> 
     
-    <div class="files-table-buttons">
+    <div class="table-buttons">
         <input id="input-file-id" type="number" placeholder="Enter the File ID" min="0">
-        <button id="btn-search-file"> Search </button>    
     </div>
     
-    <div class="files-container">
+    <div class="table-container">
         <table>
             <thead>
-                <tr>
-                </tr>
+                <!-- Aquí se cargan las cabeceras -->
             </thead>
     
             <tbody>
                 <!-- Aquí se cargan los Usuarios -->
             </tbody>
         </table>
-        
     </div>
     
-    <div class="files-table-buttons">
+    <div class="table-buttons" id="add-user-btn" hidden>
         <input id="input-user-id" type="number" min="0" placeholder="Enter a User ID">
         <button id="btn-add-user"> Add User </button>
     </div>

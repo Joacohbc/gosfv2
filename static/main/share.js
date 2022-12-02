@@ -43,27 +43,11 @@ class User {
         
         // La propiedad que tendrán los botones
         const btnAttribute = 'file-actions-item';
-
-        const getShare = document.createElement('button');
-        getShare.setAttribute('class', btnAttribute);
-        getShare.innerText = 'Copy link';
-        getShare.addEventListener('click', () => {
-            navigator.clipboard.writeText(window.location.origin + "/api/files/share/"+fileId)
-            .then(() => {
-                showInfo("The link has been copied to the clipboard");
-            })
-            .catch(err => {
-                showError("Error copying the link");
-                console.log(err);
-            });
-        });
-        actions.appendChild(getShare);
-
-        const stopShare = document.createElement('button');
-        stopShare.classList.add(btnAttribute);
-        stopShare.classList.add('user-stop-share-btn');
-        stopShare.innerHTML = 'Stop Share';
-        stopShare.addEventListener('click', () => {
+        const removeUser = document.createElement('button');
+        removeUser.classList.add(btnAttribute);
+        removeUser.classList.add('user-stop-share-btn');
+        removeUser.innerHTML = 'Remove';
+        removeUser.addEventListener('click', () => {
             axios.delete(`/api/files/share/${fileId}/user/${this._id}`)
             .then(res => {
                 showSuccess(res.data.message);
@@ -74,7 +58,7 @@ class User {
             });
         });
     
-        actions.appendChild(stopShare);
+        actions.appendChild(removeUser);
         
         part.appendChild(actions);
         return part;
@@ -82,20 +66,27 @@ class User {
 }
 
 
-function reloadTable(fileId) {
+function reloadTable(fileId) { 
+    const thead = document.querySelector('thead');
+    thead.innerHTML = '';
+
+    const tbody = document.querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    const addUser = document.querySelector("#add-user-btn");
+    addUser.setAttribute("hidden", "true");
+
     axios.get(`/api/files/${fileId}/info`)
     .then(req => {
-        document.querySelector('tbody').innerHTML = '';
-
         // Si no hay archivos que ingrese un mensaje personalizado
         // en el head de la tabla que indique que no hay archivos
         if(req.data.shared_with == null) {
-            document.querySelector('thead').innerHTML = "The file is not shared with anyone";
+            thead.innerHTML = "The file is not shared with anyone";
             return;
         }
 
         // Si hay archivos que agregue las columnas a la tabla
-        document.querySelector('thead').innerHTML = `
+        thead.innerHTML = `
         <tr>
             <th>ID</th>
             <th>Username</th>
@@ -108,24 +99,25 @@ function reloadTable(fileId) {
         req.data.shared_with.forEach(user => {
             users.appendChild(User.fromJSON(user).getRowWithButton(fileId));
         });
-        document.querySelector('tbody').appendChild(users);
-    })
-    .catch(err => {
+
+        tbody.appendChild(users);
+        addUser.removeAttribute("hidden");
+    }).catch(err => {
         showError(err.response.data.message);
     });
 }
 
 window.addEventListener('DOMContentLoaded', () => {
 
-    document.querySelector("#btn-search-file").addEventListener('click', () => {
-        const fileId = document.querySelector("#input-file-id").value;
-        if(fileId == "") {
+    document.querySelector("#input-file-id").addEventListener('change', (e) => { 
+        if(e.target.value == "" || e.target.value <= e.target.min) {
             showError("Please enter a file id");
             return;
         }
-    
-        reloadTable(fileId);
+
+        reloadTable(e.target.value);
     });
+
 
     document.querySelector("#btn-add-user").addEventListener('click', () => {
         const fileId = document.querySelector("#input-file-id").value;
@@ -138,6 +130,7 @@ window.addEventListener('DOMContentLoaded', () => {
         axios.post(`/api/files/share/${fileId}/user/${userId}`)
         .then(res => {
             showSuccess(res.data.message);
+            const userId = document.querySelector("#input-user-id").value = "";
             reloadTable(fileId);
         })
         .catch(err => {
