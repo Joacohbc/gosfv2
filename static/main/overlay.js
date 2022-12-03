@@ -1,4 +1,5 @@
-import { showError, showSuccess, showInfo, setMessageId} from "/static/modules/message.js";
+import { Message } from "/static/modules/message.js";
+const message = new Message("overlay-message");
 
 class User {
     constructor(id,  username) {
@@ -35,11 +36,11 @@ function getUserDiv(user, file) {
     btnDelete.addEventListener('click', () => {
         axios.delete(`/api/files/share/${file.id}/user/${user.id}`)
         .then(res => {
-            showSuccess(res.data.message);
+            message.showSuccess(res.data.message);
             reloadUsers(file);
         })
         .catch(err => {
-            showError(err.response.data.message);
+            message.showError(err.response.data.message);
         });
     });
     userShare.appendChild(btnDelete);
@@ -48,15 +49,8 @@ function getUserDiv(user, file) {
 
 // Obtiene el div con los Usuarios con acceso al archivo
 function createOverlayShare(file) {
-    // Si no existe el overlayShare lo crea
-    let overlayShare = document.querySelector(".overlay-share");
-    if(overlayShare == null) {
-        overlayShare = document.createElement('div');
-        overlayShare.classList.add("overlay-share");
-    } else {
-        overlayShare.innerHTML = "";
-    }
-
+    const overlayShare = document.createElement('div');
+    overlayShare.classList.add("overlay-share");
     axios.get(`/api/files/${file.id}/info`)
     .then(req => {
         
@@ -76,7 +70,7 @@ function createOverlayShare(file) {
 
     }).catch(err => {
         console.log(err);
-        showError(err.response.data.message);
+        message.showError(err.response.data.message);
     });
 
     return overlayShare;
@@ -107,7 +101,7 @@ function reloadUsers(file) {
 
     }).catch(err => {
         console.log(err);
-        showError(err.response.data.message);
+        message.showError(err.response.data.message);
     });
 }
 
@@ -127,18 +121,18 @@ function createOverlayBody(file) {
     btnAddUser.addEventListener('click', () => {
         const userId = document.getElementById('user-id').value;
         if(userId == "") {
-            showError("Please enter a User ID");
+            message.showError("Please enter a User ID");
             return;
         }
     
         axios.post(`/api/files/share/${file.id}/user/${userId}`)
         .then(res => {
-            showSuccess(res.data.message);
-            createOverlayShare(file);
+            message.showSuccess(res.data.message);
+            reloadUsers(file);
         })
         .catch(err => {
             console.log(err);
-            showError(err.response.data.message);
+            message.showError(err.response.data.message);
         });
     });
     overlayBody.appendChild(btnAddUser);
@@ -168,7 +162,16 @@ function createOverlayFooter(file) {
     checkbox.id = "share-anyone";
     checkbox.checked = file.shared;
     checkbox.addEventListener('change', () => {
-        file.update(file.filename, checkbox.checked);
+        axios.put(`/api/files/${file.id}`, {
+            filename: file.filename,
+            shared: checkbox.checked
+        })
+        .then(res => {
+            message.showSuccess(res.data.message);
+        })
+        .catch(err => {
+            message.showError(err.response.data.message);
+        });
     });
 
     overlayFooter.appendChild(checkbox);
@@ -181,11 +184,11 @@ function createOverlayFooter(file) {
     inputLink.addEventListener('click', () => {
         navigator.clipboard.writeText(getShareLink(file))            
         .then(() => {
-            showInfo("The link has been copied to the clipboard");
+            message.showInfo("The link has been copied to the clipboard");
         })
         .catch(err => {
             console.log(err);
-            showError("Error copying the link");
+            message.showError("Error copying the link");
         });
     });
     overlayFooter.appendChild(inputLink);
@@ -196,7 +199,6 @@ function createOverlayFooter(file) {
     btnClose.innerText = "Close";
     btnClose.addEventListener('click', () => {
         document.querySelector(".overlay-background").setAttribute("hidden", "");
-        setMessageId("message");
     });
     overlayFooter.appendChild(btnClose);
     
@@ -219,6 +221,5 @@ export function createOverlay(file) {
     overlayContent.appendChild(createOverlayFooter(file));
 
     overlay.appendChild(overlayContent);
-    setMessageId("overlay-message");
 }
 

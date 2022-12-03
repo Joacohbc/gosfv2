@@ -1,6 +1,6 @@
-import { showError, showSuccess, showInfo, setMessageId } from "/static/modules/message.js";
+import { Message } from "/static/modules/message.js";
 import { createOverlay } from "/static/main/overlay.js";
-setMessageId("message");
+const message = new Message("message");
 
 class File {
     constructor(id, filename, shared, shared_with) {
@@ -16,7 +16,7 @@ class File {
             return new File(fileId, res.data.filename, res.data.shared, res.data.shared_with);
         })
         .catch(err => {
-            showError(err.response.data.message);
+            message.showError(err.response.data.message);
             return null;
         });
     }
@@ -57,7 +57,7 @@ class File {
             a.click();
         })
         .catch(err => {
-            showError(err.response.data.message);
+            message.showError(err.response.data.message);
         });
 
     }
@@ -66,11 +66,11 @@ class File {
         axios.delete(`/api/files/${this._id}`)
         .then(res => {
             reloadTable();
-            showSuccess(res.data.message);
+            message.showSuccess(res.data.message);
         })
         .catch(err => {
             console.log(err);
-            showError(err.response.data.message);
+            message.showError(err.response.data.message);
         });
     }
 
@@ -80,21 +80,21 @@ class File {
             shared: shared
         })
         .then(res => {
-            showSuccess(res.data.message);
+            message.showSuccess(res.data.message);
             reloadTable();
         })
         .catch(err => {
-            showError(err.response.data.message);
+            message.showError(err.response.data.message);
         });
     }
 
     getShared() {
         navigator.clipboard.writeText(`${window.location.origin}/api/files/share/${this._id}`)            
         .then(() => {
-            showInfo("The link has been copied to the clipboard");
+            message.showInfo("The link has been copied to the clipboard");
         })
         .catch(err => {
-            showError("Error copying the link");
+            message.showError("Error copying the link");
             console.log(err);
         });
     }
@@ -152,7 +152,7 @@ class File {
 
             let filename = prompt("Enter the new filename", this._filename);
             if(filename === null || filename == "") {
-                showInfo("You have canceled the update");
+                message.showInfo("You have canceled the update");
                 return;
             }
             this.update(filename);
@@ -205,7 +205,7 @@ function reloadTable() {
         document.querySelector('tbody').appendChild(files);
     })
     .catch(err => {
-        showError(err.response.data.message);
+        message.showError(err.response.data.message);
     });
 }
 
@@ -232,10 +232,10 @@ window.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 reloadTable();
             });
-            showSuccess(req.data.message);
+            message.showSuccess(req.data.message);
         })
         .catch(err => {
-            showError(err.response.data.message); 
+            message.showError(err.response.data.message); 
         });
     });
 });
