@@ -1,4 +1,6 @@
-import { showError, showSuccess, showInfo} from "/static/modules/message.js";
+import { showError, showSuccess, showInfo, setMessageId } from "/static/modules/message.js";
+import { createOverlay } from "/static/main/overlay.js";
+setMessageId("message");
 
 class File {
     constructor(id, filename, shared, shared_with) {
@@ -163,7 +165,7 @@ class File {
         shareBtn.innerHTML = 'Share';
         shareBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            this.getShared();
+            createOverlay(this);
         });
         actions.appendChild(shareBtn);
 
@@ -212,7 +214,7 @@ window.addEventListener('DOMContentLoaded', function() {
     // Cargo la tabla de archivos
     reloadTable();
 
-    document.querySelector("#input-upload").addEventListener('change', (e) => {
+    document.getElementById("input-upload").addEventListener('change', (e) => {
         e.preventDefault();
 
         const files = e.target.files;

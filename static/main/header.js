@@ -20,7 +20,6 @@ window.addEventListener('DOMContentLoaded', function() {
     <header>
         <button id="btn-files" class="header-btn">Files</button>
         <button id="btn-user-info" class="header-btn">User Info</button>
-        <button id="btn-share-info" class="header-btn">Share Info</button>
         <button id="btn-logout" class="header-btn">Logout</button>
     </header>
     ` + document.body.innerHTML;
@@ -40,11 +39,6 @@ window.addEventListener('DOMContentLoaded', function() {
     document.querySelector("#btn-files").addEventListener('click', (e) => {
         e.preventDefault();
         window.location.href = '/static/main/files.html';
-    });
-
-    document.querySelector("#btn-share-info").addEventListener('click', (e) => {
-        e.preventDefault();
-        window.location.href = '/static/main/share.html';
     });
 
     document.querySelector("#btn-user-info").addEventListener('click', (e) => {

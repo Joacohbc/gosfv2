@@ -15,7 +15,7 @@
 
 .file td {
     border: 1px solid var(--color-text);
-    color: gray;
+    color: var(--color-text-dark);
     padding: 10px;
     font-size: 1em;
 }
@@ -31,7 +31,7 @@
 
 .file-actions-item {
     border-radius: 5px;
-    color: gray;
+    color: var(--color-text-dark);
     margin-right: 5px;
     background-color: transparent;
     border: none;

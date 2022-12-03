@@ -16,16 +16,24 @@
     <!-- Cargo mi JS y mi CSS -->
     <link rel='stylesheet' type='text/css' media='screen' href='/static/main/files.css'>
     <link rel='stylesheet' type='text/css' media='screen' href='/static/main/header.css'>
+    <link rel='stylesheet' type='text/css' media='screen' href='/static/main/overlay.css'>
     <script src="/static/main/header.js" type="module"></script>
     <script src="/static/modules/request.js" type="module"></script>
     <script src="/static/modules/message.js" type="module"></script>
     <script src='/static/main/files.js' type="module"></script>
 </head>
-<body>     
+
+<body>
+    <div class="overlay-background" hidden>
+        <div class="overlay-content">
+
+        </div>
+    </div>
+
     <div class="table-container">
         <table>
             <thead>
-                
+                <!-- Aquí se cargan Headers -->
             </thead>
     
             <tbody>
