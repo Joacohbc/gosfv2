@@ -1,5 +1,6 @@
 import { getToken } from '/static/modules/request.js';
-import { showError}  from '/static/modules/message.js';
+import { Message }  from '/static/modules/message.js';
+const message = new Message("message");
 
 if(getToken() != null) {
     // Si esta logueado, lo redirijo a la pagina principal
@@ -21,7 +22,7 @@ window.addEventListener('DOMContentLoaded', function() {
             window.location.href = '/static/main/files.html';
         })
         .catch(err => {
-            showError(err.response.data.message);
+            message. showError(err.response.data.message);
         });
     });
 });

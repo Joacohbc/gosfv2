@@ -1,5 +1,6 @@
 import { getToken } from '/static/modules/request.js';
-import { showError}  from '/static/modules/message.js';
+import { Message }  from '/static/modules/message.js';
+const message = new Message("message");
 
 if(getToken() != null) {
     // Si esta logueado, lo redirijo a la pagina principal
@@ -18,10 +19,12 @@ window.addEventListener('DOMContentLoaded', function() {
                 password: document.getElementById("password").value
         })
         .then(req => {
-            showError(req.response.data.message);
+            console.log(req);
+            message.showSuccess(req.data.message);
         })
         .catch(err => {
-            showError(err.response.data.message);
+            console.log(err);
+            message.showError(err.response.data.message);
         });
     });
 });
