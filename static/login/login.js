@@ -8,14 +8,14 @@ if(getToken() != null) {
 
 window.addEventListener('DOMContentLoaded', function() {
     // Agrego el evento click al botón de Login
-    this.document.querySelector('#btn-login').addEventListener('click', function(e) {
+    this.document.getElementById('btn-login').addEventListener('click', function(e) {
         e.preventDefault();
 
         let url = window.location.origin + '/login';
 
         axios.post(url,{
-                username: document.querySelector("#username").value,
-                password: document.querySelector("#password").value
+                username: document.getElementById("username").value,
+                password: document.getElementById("password").value
         })
         .then(req => {
             window.location.href = '/static/main/files.html';
