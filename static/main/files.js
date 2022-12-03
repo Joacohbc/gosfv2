@@ -33,21 +33,6 @@ class FileCustom {
     }
 
     delete() {
-        if(this.file.shared_with || this.file.shared) {
-            if(confirm("This file is shared, are you sure you want to delete this file?")) {
-                axios.delete(`/api/files/${this.file.id}?force=yes`)
-                .then(res => {
-                    reloadTable();
-                    message.showSuccess(res.data.message);
-                })
-                .catch(err => {
-                    console.log(err);
-                    message.showError(err.response.data.message);
-                });
-                return;
-            }
-        }
-
         axios.delete(`/api/files/${this.file.id}`)
         .then(res => {
             reloadTable();
