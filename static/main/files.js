@@ -1,59 +1,29 @@
 import { Message } from "/static/modules/message.js";
 import { createOverlay } from "/static/main/overlay.js";
+import { File } from "/static/models/file.js";
+
+
 const message = new Message("message");
 
-class File {
-    constructor(id, filename, shared, shared_with) {
-        this._id = id;
-        this._filename = filename;
-        this._shared = shared;
-        this._shared_with = shared_with;
-    }
+class FileCustom {
 
-    static searchById(fileId) {
-        axios.get(`/api/files/${fileId}/info`)
-        .then(res => {
-            return new File(fileId, res.data.filename, res.data.shared, res.data.shared_with);
-        })
-        .catch(err => {
-            message.showError(err.response.data.message);
-            return null;
-        });
-    }
-
-    static fromJSON(json) {
-        return new File(json.id, json.filename, json.shared);
-    }
-    
-    get id() {
-        return this._id;
-    }
-
-    get filename() {
-        return this._filename;
-    }
-
-    get shared() {
-        return this._shared;
-    }
-
-    get link() {
-        return `/api/files/${this._id}`;
+    constructor(fileJson) {
+        this.file = File.fromJSON(fileJson);
     }
 
     open() {
-        window.open(`${this.link}`, '_blank');
+        window.open(`${this.file.link}`, '_blank');
     }
 
     download() {
-        axios.get(`/api/files/${this._id}`, {
+        axios.get(`/api/files/${this.file.id}`, {
             responseType: 'blob'
         })
         .then(blob => {
             let url = window.URL.createObjectURL(blob.data);
             let a = document.createElement('a');
             a.href = url;
-            a.download = this._filename;
+            a.download = this.file.filename;
             a.click();
         })
         .catch(err => {
@@ -63,7 +33,22 @@ class File {
     }
 
     delete() {
-        axios.delete(`/api/files/${this._id}`)
+        if(this.file.shared_with || this.file.shared) {
+            if(confirm("This file is shared, are you sure you want to delete this file?")) {
+                axios.delete(`/api/files/${this.file.id}?force=yes`)
+                .then(res => {
+                    reloadTable();
+                    message.showSuccess(res.data.message);
+                })
+                .catch(err => {
+                    console.log(err);
+                    message.showError(err.response.data.message);
+                });
+                return;
+            }
+        }
+
+        axios.delete(`/api/files/${this.file.id}`)
         .then(res => {
             reloadTable();
             message.showSuccess(res.data.message);
@@ -74,8 +59,8 @@ class File {
         });
     }
 
-    update(filename, shared = this._shared) {
-        axios.put(`/api/files/${this._id}`, {
+    update(filename, shared = this.file.shared) {
+        axios.put(`/api/files/${this.file.id}`, {
             filename: filename,
             shared: shared
         })
@@ -89,7 +74,7 @@ class File {
     }
 
     getShared() {
-        navigator.clipboard.writeText(`${window.location.origin}/api/files/share/${this._id}`)            
+        navigator.clipboard.writeText(`${window.location.origin}/api/files/share/${this.file.id}`)            
         .then(() => {
             message.showInfo("The link has been copied to the clipboard");
         })
@@ -105,12 +90,12 @@ class File {
 
         const id = document.createElement('td');
         id.classList.add('file-id');
-        id.innerText = this._id;
+        id.innerText = this.file.id;
         part.appendChild(id);
 
         const filename = document.createElement('td');
         filename.classList.add('file-filename');
-        filename.innerHTML = this._filename;
+        filename.innerHTML = this.file.filename;
         filename.addEventListener('click', (e) => {
             e.preventDefault();
             this.open();
@@ -150,7 +135,7 @@ class File {
         updateBtn.addEventListener('click', (e) => {
             e.preventDefault();
 
-            let filename = prompt("Enter the new filename", this._filename);
+            let filename = prompt("Enter the new filename", this.file.filename);
             if(filename === null || filename == "") {
                 message.showInfo("You have canceled the update");
                 return;
@@ -165,7 +150,7 @@ class File {
         shareBtn.innerHTML = 'Share';
         shareBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            createOverlay(this);
+            createOverlay(this.file.id);
         });
         actions.appendChild(shareBtn);
 
@@ -200,7 +185,7 @@ function reloadTable() {
         // Y cargue las filas de la tabla
         const files = document.createDocumentFragment();
         req.data.forEach(element => {
-            files.appendChild(File.fromJSON(element).toTableRow());
+            files.appendChild(new FileCustom(element).toTableRow());
         });
         document.querySelector('tbody').appendChild(files);
     })

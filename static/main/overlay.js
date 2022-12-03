@@ -1,24 +1,8 @@
 import { Message } from "/static/modules/message.js";
+import { File } from "/static/models/file.js";
+import { User } from "/static/models/user.js";
+
 const message = new Message("overlay-message");
-
-class User {
-    constructor(id,  username) {
-        this._id = id;
-        this._username = username;
-    }
-
-    static fromJSON(json) {
-        return new User(json.id, json.username);
-    }
-
-    get id() {
-        return this._id;
-    }
-
-    get username() {
-        return this._username;
-    }    
-}
 
 // Obtiene el div con los Datos del Usuario (el Username)
 // y el botón para eliminar el acceso al archivo)
@@ -210,16 +194,25 @@ function createOverlayFooter(file) {
 }
 
 // Crea el overlay y lo agrega al DOM
-export function createOverlay(file) {
-    const overlay = document.querySelector(".overlay-background");
-    overlay.removeAttribute("hidden");
-
-    const overlayContent = document.querySelector(".overlay-content");
-    overlayContent.innerHTML = "";
-    overlayContent.appendChild(createOverlayBody(file));
-    overlayContent.appendChild(createOverlayShare(file));
-    overlayContent.appendChild(createOverlayFooter(file));
-
-    overlay.appendChild(overlayContent);
+export function createOverlay(fileId) {
+    
+    axios.get(`/api/files/${fileId}/info`)
+    .then(res => {
+        let file = new File(res.data.id, res.data.filename, res.data.shared, res.data.shared_with);
+        
+        const overlay = document.querySelector(".overlay-background");
+        overlay.removeAttribute("hidden");
+    
+        const overlayContent = document.querySelector(".overlay-content");
+        overlayContent.innerHTML = "";
+        overlayContent.appendChild(createOverlayBody(file));
+        overlayContent.appendChild(createOverlayShare(file));
+        overlayContent.appendChild(createOverlayFooter(file));
+    
+        overlay.appendChild(overlayContent);
+    })
+    .catch(err => {
+        message.showError(err.response.data.message);
+    });
 }
 
