@@ -12,6 +12,7 @@ window.addEventListener('DOMContentLoaded', function() {
         window.location.href = '/static/login/login.html';
     }
 
+    // Agrego el header a la página al Inicio del Body
     document.body.innerHTML = `
     <div class="header-title">
         <img src="/static/images/gosf-icon.png" alt="server">

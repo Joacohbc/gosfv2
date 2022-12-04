@@ -1,20 +1,28 @@
 import { Message } from "/static/modules/message.js";
-import { createOverlay } from "/static/main/overlay.js";
 import { File } from "/static/models/file.js";
+import { createOverlay } from "/static/main/overlay.js";
 
-
+// Creo el objeto message para mostrar los mensajes
+// y le digo que el ID sera "message"
 const message = new Message("message");
 
+// Una Clase FileCustom que tiene un objeto File que es convertido
+// a elementos HTML para mostrar en la tabla y le agrega funcionalidades
+// a los botones
 class FileCustom {
 
+    // Constructor que recibe un objeto JSON y 
+    // lo convierte a un objeto File
     constructor(fileJson) {
         this.file = File.fromJSON(fileJson);
     }
 
+    // Función que abre el archivo en una nueva pestaña
     open() {
         window.open(`${this.file.link}`, '_blank');
     }
 
+    // Función que descarga el archivo
     download() {
         axios.get(`/api/files/${this.file.id}`, {
             responseType: 'blob'
@@ -32,6 +40,7 @@ class FileCustom {
 
     }
 
+    // Función que elimina el archivo
     delete() {
         axios.delete(`/api/files/${this.file.id}`)
         .then(res => {
@@ -44,6 +53,7 @@ class FileCustom {
         });
     }
 
+    // Función que actualiza el archivo (el nombre y si es publico o no)
     update(filename, shared = this.file.shared) {
         axios.put(`/api/files/${this.file.id}`, {
             filename: filename,
@@ -58,17 +68,7 @@ class FileCustom {
         });
     }
 
-    getShared() {
-        navigator.clipboard.writeText(`${window.location.origin}/api/files/share/${this.file.id}`)            
-        .then(() => {
-            message.showInfo("The link has been copied to the clipboard");
-        })
-        .catch(err => {
-            message.showError("Error copying the link");
-            console.log(err);
-        });
-    }
-
+    // Función que convierte el objeto File a elementos HTML
     toTableRow() {
         const part = document.createElement('tr');
         part.setAttribute("class", "file");
@@ -146,6 +146,7 @@ class FileCustom {
     }
 }
 
+// Función que recarga la tabla de Archivos
 function reloadTable() {
     axios.get("/api/files/")
     .then(req => {
@@ -199,9 +200,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
         axios.post('/api/files/', form)
         .then(req => {
-            setTimeout(() => {
-                reloadTable();
-            });
+            reloadTable();
             message.showSuccess(req.data.message);
         })
         .catch(err => {

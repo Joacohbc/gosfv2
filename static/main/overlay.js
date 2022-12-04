@@ -38,8 +38,7 @@ function createOverlayShare(file) {
     axios.get(`/api/files/${file.id}/info`)
     .then(req => {
         
-        // Si no hay archivos que ingrese un mensaje personalizado
-        // en el head de la tabla que indique que no hay archivos
+        // Si no hay usuarios, muestra un mensaje que lo indique
         if(req.data.shared_with == null) {
             overlayShare.innerHTML = "No users have access to this file";
             return;
@@ -132,7 +131,6 @@ function getShareLink(file) {
 // Crea el footer del overlay (el link de compartir y el checkbox para compartir con todos)
 // Ademas del label de los mensajes de error y éxito
 function createOverlayFooter(file) {
-    //* Creo el footer del overlay
     const overlayFooter = document.createElement('div');
     overlayFooter.classList.add("overlay-footer");
 
