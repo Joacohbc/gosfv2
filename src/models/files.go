@@ -84,7 +84,7 @@ func (f FileFuncs) GetAllFromUser(userId uint) ([]File, error) {
 	return files, nil
 }
 
-func (f FileFuncs) GetFilePath(fileId, userId uint) (string, error) {
+func (f FileFuncs) GetFilepath(fileId, userId uint) (string, error) {
 
 	var path struct {
 		Filename string `db:"filename"`
@@ -111,28 +111,14 @@ func (f FileFuncs) GetFilePath(fileId, userId uint) (string, error) {
 func (f FileFuncs) GetByIdFromUser(fileId, userId uint) (File, error) {
 	var file File
 
-	err := f.BD.GetContext(f.Context, &file, `
-	SELECT 
-		f.*,
-		u.user_id "user.user_id",
-		u.username "user.username",
-		u.update_at "user.update_at",
-		u.created_at "user.created_at"
-	FROM files f
-	JOIN users u ON f.user_id  = u.user_id
-	WHERE f.file_id = ? AND f.user_id = ?`, fileId, userId)
+	file, err := f.GetById(fileId)
 	if err != nil {
-		if database.IsNotFound(err) {
-			return File{}, ErrFileNotFound
-		}
-		return File{}, err
+		return file, err
 	}
 
-	users, err := f.GetAllUserFromFile(fileId)
-	if err != nil {
-		return File{}, err
+	if file.UserID != userId {
+		return file, ErrFileNotFound
 	}
-	file.SharedWith = users
 
 	return file, nil
 }
@@ -308,7 +294,7 @@ func (f FileFuncs) GetAllUserFromFile(filedId uint) ([]User, error) {
 func (f FileFuncs) GetById(fileId uint) (File, error) {
 	var file File
 
-	if err := f.BD.GetContext(f.Context, &file, `
+	err := f.BD.GetContext(f.Context, &file, `
 	SELECT 
 		f.*,
 		u.user_id "user.user_id",
@@ -317,12 +303,19 @@ func (f FileFuncs) GetById(fileId uint) (File, error) {
 		u.created_at "user.created_at"
 	FROM files f
 	JOIN users u ON f.user_id  = u.user_id
-	WHERE f.file_id = ?;`, fileId); err != nil {
+	WHERE f.file_id = ?;`, fileId)
+	if err != nil {
 		if database.IsNotFound(err) {
 			return File{}, ErrFileNotFound
 		}
 		return File{}, err
 	}
+
+	users, err := f.GetAllUserFromFile(file.ID)
+	if err != nil {
+		return File{}, err
+	}
+	file.SharedWith = users
 
 	return file, nil
 }

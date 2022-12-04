@@ -21,6 +21,11 @@ type User struct {
 	UpdateAt sql.NullTime `json:"update_at" db:"update_at"`
 }
 
+// Equals: Compara dos usuarios (su ID y su nombre de usuario)
+func (u *User) Equals(u2 User) bool {
+	return u.ID == u2.ID && u.Username == u2.Username
+}
+
 func (u User) Validate() error {
 
 	if len(u.Username) > 255 {
