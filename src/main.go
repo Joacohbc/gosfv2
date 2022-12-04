@@ -58,9 +58,9 @@ func main() {
 	})
 
 	routes.Auth.AddRoutes(e)
-
 	api := e.Group("/api")
 	routes.Files.AddRoutesToGroup(api)
+	routes.User.AddRoutesToGroup(api)
 
 	go func() {
 		quit := make(chan os.Signal, 1)

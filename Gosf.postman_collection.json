@@ -41,7 +41,7 @@
 									"variable": [
 										{
 											"key": "fileId",
-											"value": ""
+											"value": "57"
 										}
 									]
 								}
@@ -77,10 +77,18 @@
 										"user",
 										":idUser"
 									],
+									"query": [
+										{
+											"key": "filename",
+											"value": "213955.png",
+											"disabled": true
+										}
+									],
 									"variable": [
 										{
 											"key": "idFile",
-											"value": "418"
+											"value": "57",
+											"description": "3"
 										},
 										{
 											"key": "idUser",
@@ -130,11 +138,12 @@
 									"variable": [
 										{
 											"key": "idFile",
-											"value": ""
+											"value": "94",
+											"description": "3"
 										},
 										{
 											"key": "idUser",
-											"value": ""
+											"value": "3"
 										}
 									]
 								}
@@ -258,7 +267,7 @@
 							"variable": [
 								{
 									"key": "fileId",
-									"value": "42"
+									"value": "57"
 								}
 							]
 						}
@@ -394,6 +403,89 @@
 								"api",
 								"files",
 								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Rename",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"Joaco\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:{{port}}/api/users/rename",
+							"host": [
+								"localhost"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"users",
+								"rename"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"old_password\": \"1234\",\n    \"new_password\": \"5678\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:{{port}}/api/users/password",
+							"host": [
+								"localhost"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"users",
+								"password"
 							]
 						}
 					},

@@ -25,7 +25,7 @@ const (
 )
 
 // Inscrita el password con AES y retorna la cadena encriptada
-func generatePassword(password *string) error {
+func GeneratePassword(password *string) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(*password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -34,8 +34,12 @@ func generatePassword(password *string) error {
 	return nil
 }
 
-func checkPassword(password, bdHash string) (bool, error) {
-	if err := bcrypt.CompareHashAndPassword([]byte(bdHash), []byte(password)); err != nil {
+func CheckPassword(password, bdHash string) (bool, error) {
+	err := bcrypt.CompareHashAndPassword([]byte(bdHash), []byte(password))
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return false, nil
+		}
 		return false, err
 	}
 	return true, nil
@@ -95,10 +99,13 @@ func generateJWTForUser(c echo.Context) (string, error) {
 
 	dbUser, err := models.Users(c).FindUserByName(user.Username)
 	if err != nil {
-		return "", HandleUserError(err)
+		if err == models.ErrUserNotFound {
+			return "", echo.NewHTTPError(http.StatusNotFound, "Invalid username or password")
+		}
+		return "", echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	ok, err := checkPassword(user.Password, dbUser.Password)
+	ok, err := CheckPassword(user.Password, dbUser.Password)
 	if err != nil {
 		return "", echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

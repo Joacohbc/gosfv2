@@ -125,3 +125,13 @@ func (u UsersFuncs) ExistUserByName(username string) (bool, error) {
 	}
 	return true, nil
 }
+
+func (u UsersFuncs) Rename(id uint, newName string) error {
+	_, err := u.DB.ExecContext(u.Context, "UPDATE users SET username = ? WHERE user_id = ?", newName, id)
+	return err
+}
+
+func (u UsersFuncs) ChangePassword(id uint, newPassword string) error {
+	_, err := u.DB.ExecContext(u.Context, "UPDATE users SET password = ? WHERE user_id = ?", newPassword, id)
+	return err
+}

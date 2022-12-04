@@ -101,7 +101,7 @@ func RegisterHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Username already exists")
 	}
 
-	if err := generatePassword(&user.Password); err != nil {
+	if err := GeneratePassword(&user.Password); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 

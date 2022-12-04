@@ -123,6 +123,35 @@ func (f FileFuncs) GetByIdFromUser(fileId, userId uint) (File, error) {
 	return file, nil
 }
 
+func (f FileFuncs) GetByFilenameFromUser(filename string, userId uint) (File, error) {
+	var file File
+
+	err := f.BD.GetContext(f.Context, &file, `
+	SELECT 
+		f.*,
+		u.user_id "user.user_id",
+		u.username "user.username",
+		u.update_at "user.update_at",
+		u.created_at "user.created_at"
+	FROM files f
+	JOIN users u ON f.user_id  = u.user_id
+	WHERE f.filename = ? AND u.user_id = ?;`, filename, userId)
+	if err != nil {
+		if database.IsNotFound(err) {
+			return File{}, ErrFileNotFound
+		}
+		return File{}, err
+	}
+
+	users, err := f.GetAllUserFromFile(file.ID)
+	if err != nil {
+		return File{}, err
+	}
+	file.SharedWith = users
+
+	return file, nil
+}
+
 //
 // Inserts
 //

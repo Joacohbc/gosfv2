@@ -167,20 +167,31 @@ func (f *fileController) UpdateFile(c echo.Context) error {
 		return err
 	}
 
-	var file models.File
+	var file dtos.FileDTO
 	if err := c.Bind(&file); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid file data")
 	}
 
-	if _, err = models.Files(c).GetByIdFromUser(idFile, c.Get("user_id").(uint)); err != nil {
+	actual, err := models.Files(c).GetByIdFromUser(idFile, c.Get("user_id").(uint))
+	if err != nil {
 		return HandleFileError(err)
+	}
+
+	// Si el nombre del archivo es diferente al actual, lo renombro
+	if actual.Filename != file.Filename {
+
+		// Si el archivo con el nuevo nombre ya existe, lo informo al usuario
+		if _, err := models.Files(c).GetByFilenameFromUser(file.Filename, c.Get("user_id").(uint)); err == nil {
+			return echo.NewHTTPError(http.StatusConflict, "File with that name already exists")
+		}
+
+		// Si no existe, renombro el archivo
+		if err := models.Files(c).Rename(idFile, file.Filename); err != nil {
+			return HandleFileError(err)
+		}
 	}
 
 	if err := models.Files(c).SetShared(idFile, file.Shared); err != nil {
-		return HandleFileError(err)
-	}
-
-	if err := models.Files(c).Rename(idFile, file.Filename); err != nil {
 		return HandleFileError(err)
 	}
 
@@ -253,23 +264,25 @@ func (f *fileController) AddUserToFile(c echo.Context) error {
 		return HandleFileError(err)
 	}
 
+	if file.UserID == userId {
+		return echo.NewHTTPError(http.StatusBadRequest, echo.Map{
+			"message": "The user is the owner of the file",
+		})
+	}
+
 	// Verifico que exista el usuario con el userId
-	user, err := models.Users(c).FindUserById(userId)
-	if err != nil {
+	if _, err := models.Users(c).FindUserById(userId); err != nil {
 		return auth.HandleUserError(err)
 	}
 
-	for _, u := range file.SharedWith {
-		if u.Equals(user) {
-			return echo.NewHTTPError(http.StatusBadRequest, echo.Map{
-				"message": "The File is already shared with that user",
-			})
-		}
+	ok, err := models.Files(c).IsSharedWith(fileId, userId)
+	if err != nil {
+		return HandleFileError(err)
 	}
 
-	if userId == file.UserID {
+	if ok {
 		return echo.NewHTTPError(http.StatusBadRequest, echo.Map{
-			"message": "You can't share a file with yourself",
+			"message": "The File is already shared with that user",
 		})
 	}
 
@@ -296,26 +309,23 @@ func (f *fileController) RemoveUserFromFile(c echo.Context) error {
 		return err
 	}
 
+	// Verifico que exista el archivo con el fileId
 	file, err := models.Files(c).GetByIdFromUser(fileId, c.Get("user_id").(uint))
 	if err != nil {
 		return HandleFileError(err)
 	}
 
 	// Verifico que exista el usuario con el userId
-	user, err := models.Users(c).FindUserById(userId)
-	if err != nil {
+	if _, err := models.Users(c).FindUserById(userId); err != nil {
 		return auth.HandleUserError(err)
 	}
 
-	flagFind := false
-	for _, u := range file.SharedWith {
-		if u.Equals(user) {
-			flagFind = true
-			break
-		}
+	ok, err := models.Files(c).IsSharedWith(fileId, userId)
+	if err != nil {
+		return HandleFileError(err)
 	}
 
-	if !flagFind {
+	if !ok {
 		return echo.NewHTTPError(http.StatusBadRequest, echo.Map{
 			"message": "The File is not shared with that user",
 		})
