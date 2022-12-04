@@ -1,5 +1,6 @@
 @import url("/static/main.css");
 
+/* SEARCH CSS */
 .search {
     display: flex;
     justify-content: center;
@@ -62,6 +63,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    margin: 10px;
 }
 
 #message {
