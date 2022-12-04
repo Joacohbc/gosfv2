@@ -147,14 +147,19 @@ class FileCustom {
 }
 
 // Función que recarga la tabla de Archivos
-function reloadTable() {
+export function reloadTable(cbFiltro = null) {
     axios.get("/api/files/")
     .then(req => {
         document.querySelector('tbody').innerHTML = '';
 
+        let files = req.data || [];
+        if(cbFiltro != null) {
+            files = files.filter(cbFiltro);
+        }
+
         // Si no hay archivos que ingrese un mensaje personalizado
         // en el head de la tabla que indique que no hay archivos
-        if(req.data == null) {
+        if(files.length == 0) {
             document.querySelector('thead').innerHTML = "No files, start uploading files c:";
             return;
         }
@@ -169,11 +174,11 @@ function reloadTable() {
         `;
 
         // Y cargue las filas de la tabla
-        const files = document.createDocumentFragment();
-        req.data.forEach(element => {
-            files.appendChild(new FileCustom(element).toTableRow());
+        const part = document.createDocumentFragment();
+        files.forEach(element => {
+            part.appendChild(new FileCustom(element).toTableRow());
         });
-        document.querySelector('tbody').appendChild(files);
+        document.querySelector('tbody').appendChild(part);
     })
     .catch(err => {
         message.showError(err.response.data.message);
@@ -205,6 +210,20 @@ window.addEventListener('DOMContentLoaded', function() {
         })
         .catch(err => {
             message.showError(err.response.data.message); 
+        });
+    });
+
+    document.querySelector('#search-input').addEventListener('keypress', (e) => {
+        if(e.key != 'Enter') return;
+
+        let search = document.querySelector('#search-input').value;
+        if(search.trim() == "")  {
+            reloadTable();
+            return;
+        }
+
+        reloadTable((file) => {
+            return file.filename.toLowerCase().includes(search.toLowerCase());
         });
     });
 });
