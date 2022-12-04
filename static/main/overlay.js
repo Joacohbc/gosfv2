@@ -134,14 +134,17 @@ function createOverlayFooter(file) {
     const overlayFooter = document.createElement('div');
     overlayFooter.classList.add("overlay-footer");
 
+    const divShareAnyone = document.createElement('div');
+    divShareAnyone.classList.add("share-anyone");
+    
     const lblCheckbox = document.createElement('label');
-    lblCheckbox.for = "share-anyone";
+    lblCheckbox.setAttribute("for", "share-anyone-chk");
     lblCheckbox.innerText = "Share with Anyone";
-    overlayFooter.appendChild(lblCheckbox);
+    divShareAnyone.appendChild(lblCheckbox);
 
     const checkbox = document.createElement('input');
     checkbox.type = "checkbox";
-    checkbox.id = "share-anyone";
+    checkbox.id = "share-anyone-chk";
     checkbox.checked = file.shared;
     checkbox.addEventListener('change', () => {
         axios.put(`/api/files/${file.id}`, {
@@ -155,8 +158,9 @@ function createOverlayFooter(file) {
             message.showError(err.response.data.message);
         });
     });
+    divShareAnyone.appendChild(checkbox);
 
-    overlayFooter.appendChild(checkbox);
+    overlayFooter.appendChild(divShareAnyone);
 
     const inputLink = document.createElement('input');
     inputLink.type = "text";
@@ -175,10 +179,9 @@ function createOverlayFooter(file) {
     });
     overlayFooter.appendChild(inputLink);
     
-    
     const btnClose = document.createElement('button');
     btnClose.id = "btn-close-overlay";
-    btnClose.innerText = "Close";
+    btnClose.innerText = "x";
     btnClose.addEventListener('click', () => {
         document.querySelector(".overlay-background").setAttribute("hidden", "");
     });

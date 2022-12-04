@@ -48,8 +48,10 @@
 }
 
 .overlay-body {
-    text-align: center;
+    display: flex;
+    justify-content: center;
     margin-bottom: 10px;
+    gap: 10px;
 }
 
 .overlay-share {
@@ -62,8 +64,8 @@
 
 .overlay-user-share {
     display: flex;
-    gap: 10px;
     justify-content: center;
+    gap: 10px;
     padding: 5px;
 }
 
@@ -73,10 +75,25 @@
 }
 
 .overlay-footer {
+    display: block;
     text-align: center;
 }
 
-.overlay-footer input[type="text"] {
+#btn-close-overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 10px;
+}
+
+.share-anyone {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 5px;
+}
+
+#share-link {
     border: none;
     outline: none;
     border-radius: 5px;
@@ -84,7 +101,7 @@
     width: 100%;
 }
 
-.overlay-footer input[type="text"]:hover {
+#share-link:hover {
     color: var(--color-link);
     text-decoration: underline;
 }

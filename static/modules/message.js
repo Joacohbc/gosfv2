@@ -14,7 +14,6 @@ export class Message {
     constructor(id = messageId, color = colors) {
         this._id = id;
         this._color = color;
-        console.log(this);
     }
 
     get id() {
