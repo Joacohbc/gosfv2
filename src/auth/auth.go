@@ -2,22 +2,14 @@ package auth
 
 import (
 	"gosfV2/src/models"
-	"gosfV2/src/models/env"
 	"net/http"
 	"strings"
 	"time"
 
 	"gosfV2/src/utils"
 
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo"
 )
-
-type UserClaims struct {
-	UserID   uint
-	Username string
-	jwt.RegisteredClaims
-}
 
 // Maneja los errores de los archivos, si el error ErrUserNotFound
 // o si es un error desconocido (base de datos), devuelve un error 500
@@ -31,7 +23,7 @@ func HandleUserError(err error) error {
 func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
-		if c.Path() == "/register" || c.Path() == "/login" || c.Path() == "/logout" || strings.HasPrefix(c.Path(), "/static") {
+		if c.Path() == "/register" || c.Path() == "/login" || strings.HasPrefix(c.Path(), "/static") {
 			return next(c)
 		}
 
@@ -53,15 +45,6 @@ func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			}
 			token = t
 
-			// Si no tiene el URL, se busca el Token en una Cookie
-		} else if _, err := c.Cookie(cookieName); err == nil {
-			t, err := getTokenFromCookie(c)
-			if err != nil {
-				return err
-			}
-			token = t
-
-			// Si no tiene Token lo informo
 		} else {
 			return echo.NewHTTPError(http.StatusUnauthorized, "Not token provided")
 		}
@@ -71,15 +54,10 @@ func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 		}
 
-		if _, err := models.Users(c).FindUserById(claims.UserID); err != nil {
-			return echo.NewHTTPError(http.StatusUnauthorized, "User with that ID not found")
-		}
-
 		// Set user in the echo context
 		c.Set("user_id", claims.UserID)
 		c.Set("username", claims.Username)
 		c.Set("claims", claims)
-		c.Set(cookieName, token)
 
 		return next(c)
 	}
@@ -118,32 +96,10 @@ func RegisterHandler(c echo.Context) error {
 }
 
 func LoginHandler(c echo.Context) error {
-	if ck, err := c.Cookie(cookieName); err == nil {
-
-		if _, err := ValidJWT(ck.Value); err != nil {
-			c.SetCookie(&http.Cookie{
-				Name:   cookieName,
-				MaxAge: -1, // Poniendo -1 se borra la cookie
-			})
-			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid Cookie: "+err.Error())
-		}
-
-		return c.JSON(http.StatusOK, echo.Map{
-			"token": ck.Value,
-		})
-	}
-
 	tokenString, err := generateJWTForUser(c)
 	if err != nil {
 		return err
 	}
-
-	c.SetCookie(&http.Cookie{
-		Name:    cookieName,
-		Value:   tokenString,
-		Expires: time.Now().Add(time.Hour * time.Duration(env.Config.JWTHours)),
-		MaxAge:  3600 * env.Config.JWTHours, // El MaxAge se pide en segundos (3600s = 1 hora)
-	})
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"token": tokenString,
@@ -151,15 +107,18 @@ func LoginHandler(c echo.Context) error {
 }
 
 func LogoutHandler(c echo.Context) error {
-
-	if _, err := c.Cookie(cookieName); err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "You are not logged in")
+	if err := NewTokenManager().RemoveUserTokens(c.Get("user_id").(uint)); err != nil {
+		return HandlerTokenError(err)
 	}
 
-	c.SetCookie(&http.Cookie{
-		Name:   cookieName,
-		MaxAge: -1, // Poniendo -1 se borra la cookie
-	})
-
 	return c.JSON(http.StatusOK, utils.ToJSON("You have been logged out successfully"))
+}
+
+func init() {
+	go func() {
+		for {
+			time.Sleep(time.Minute * 1)
+
+		}
+	}()
 }

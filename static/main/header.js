@@ -1,17 +1,4 @@
-import { getToken } from '/static/modules/request.js';
-
 window.addEventListener('DOMContentLoaded', function() {
-    
-    // Defino el URL base de las peticiones
-    axios.defaults.baseURL = window.location.origin;
-
-    // Agrego el evento click al botón de Login
-    // Verifico que el Token este en la Cookie
-    if (getToken() === null) {
-        // Si no esta lo devuelvo al Login
-        window.location.href = '/static/login/login.html';
-    }
-
     // Agrego el header a la página al Inicio del Body
     document.body.innerHTML = `
     <div class="header-title">
@@ -30,7 +17,7 @@ window.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         axios.post('/logout')
         .then(res => {
-            window.location.href = '/static/index.html';
+            window.location.href = '/static/login/login.html';
         })
         .catch(err => {
             alert(err.response.data.message);

@@ -83,7 +83,7 @@ func (u userController) ChangePassword(c echo.Context) error {
 
 func (u userController) DeleteUser(c echo.Context) error {
 
-	files, err := models.Files(c).GetAllFromUser(c.Get("user_id").(uint))
+	files, err := models.Files(c).GetFilesFromUser(c.Get("user_id").(uint))
 	if err != nil {
 		return auth.HandleUserError(err)
 	}
@@ -94,6 +94,10 @@ func (u userController) DeleteUser(c echo.Context) error {
 
 	if err := models.Users(c).Delete(c.Get("user_id").(uint)); err != nil {
 		return auth.HandleUserError(err)
+	}
+
+	if err := auth.NewTokenManager().RemoveUserTokens(c.Get("user_id").(uint)); err != nil {
+		return auth.HandlerTokenError(err)
 	}
 
 	return c.JSON(http.StatusAccepted, echo.Map{

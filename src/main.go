@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"gosfV2/src/auth"
 	"gosfV2/src/middleware/logger"
+	"gosfV2/src/models/database"
 	"gosfV2/src/models/env"
 	"gosfV2/src/routes"
 	"net/http"
@@ -57,8 +58,8 @@ func main() {
 		return c.String(http.StatusOK, "pong")
 	})
 
-	routes.Auth.AddRoutes(e)
 	api := e.Group("/api")
+	routes.Auth.AddRoutes(e)
 	routes.Files.AddRoutesToGroup(api)
 	routes.User.AddRoutesToGroup(api)
 
@@ -67,11 +68,15 @@ func main() {
 		signal.Notify(quit, os.Interrupt)
 		<-quit
 
+		if err := database.GetMySQL().Close(); err != nil {
+			e.Logger.Error(err.Error())
+		}
+
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
 		if err := e.Shutdown(ctx); err != nil {
-			e.Logger.Fatal(err)
+			e.Logger.Fatal(err.Error())
 		}
 	}()
 

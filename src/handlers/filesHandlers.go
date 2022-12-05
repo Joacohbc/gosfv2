@@ -76,7 +76,7 @@ func (f *fileController) GetInfo(c echo.Context) error {
 
 // Obtiene todos los archivos del usuario (Su información)
 func (f *fileController) GetAllFiles(c echo.Context) error {
-	files, err := models.Files(c).GetAllFromUser(c.Get("user_id").(uint))
+	files, err := models.Files(c).GetFilesFromUser(c.Get("user_id").(uint))
 	if err != nil {
 		return HandleFileError(err)
 	}

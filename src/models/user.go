@@ -49,20 +49,32 @@ var (
 	ErrUserNotFound = errors.New("user/s not found")
 )
 
-type UsersFuncs struct {
+type UserInterface interface {
+	GetAllUsers() ([]User, error)
+	NewUser(user User) error
+	FindUserByName(username string) (User, error)
+	FindUserById(id uint) (User, error)
+	ExistUserByName(username string) (bool, error)
+	Rename(id uint, newName string) error
+	ChangePassword(id uint, newPassword string) error
+	Delete(id uint) error
+	ManageError(err error) error
+}
+
+type usersBD struct {
 	DB      *sqlx.DB
 	Context context.Context
 }
 
-func Users(c echo.Context) UsersFuncs {
-	return UsersFuncs{DB: database.GetMySQL(), Context: c.Request().Context()}
+func Users(c echo.Context) UserInterface {
+	return usersBD{DB: database.GetMySQL(), Context: c.Request().Context()}
 }
 
-func UsersC(ctx context.Context) UsersFuncs {
-	return UsersFuncs{DB: database.GetMySQL(), Context: ctx}
+func UsersC(ctx context.Context) UserInterface {
+	return usersBD{DB: database.GetMySQL(), Context: ctx}
 }
 
-func (u UsersFuncs) GetAllUsers() ([]User, error) {
+func (u usersBD) GetAllUsers() ([]User, error) {
 	var users []User
 	err := u.DB.SelectContext(u.Context, &users, "SELECT * FROM users")
 	if err != nil {
@@ -75,23 +87,27 @@ func (u UsersFuncs) GetAllUsers() ([]User, error) {
 	return users, nil
 }
 
+func (u usersBD) ManageError(err error) error {
+	if database.IsNotFound(err) {
+		return ErrUserNotFound
+	}
+	return err
+}
+
 // Crea un nuevo usuario
-func (u UsersFuncs) NewUser(user User) error {
+func (u usersBD) NewUser(user User) error {
 	_, err := u.DB.ExecContext(u.Context, "INSERT INTO users (username, password) VALUES (?, ?)", user.Username, user.Password)
 	return err
 }
 
 // Devuelve el usuario con el nombre de usuario
 // Si no encuentra ninguno, devuelve ErrUserNotFound
-func (u UsersFuncs) FindUserByName(username string) (User, error) {
+func (u usersBD) FindUserByName(username string) (User, error) {
 
 	var user User
 	err := u.DB.GetContext(u.Context, &user, "SELECT * FROM users WHERE username = ?", username)
 	if err != nil {
-		if database.IsNotFound(err) {
-			return User{}, ErrUserNotFound
-		}
-		return User{}, err
+		return User{}, u.ManageError(err)
 	}
 
 	return user, nil
@@ -99,15 +115,12 @@ func (u UsersFuncs) FindUserByName(username string) (User, error) {
 
 // Devuelve el usuario con el nombre de usuario
 // Si no encuentra ninguno, devuelve ErrUserNotFound
-func (u UsersFuncs) FindUserById(id uint) (User, error) {
+func (u usersBD) FindUserById(id uint) (User, error) {
 
 	var user User
 	err := u.DB.GetContext(u.Context, &user, "SELECT * FROM users WHERE user_id = ?", id)
 	if err != nil {
-		if database.IsNotFound(err) {
-			return User{}, ErrUserNotFound
-		}
-		return User{}, err
+		return User{}, u.ManageError(err)
 	}
 
 	return user, nil
@@ -115,7 +128,7 @@ func (u UsersFuncs) FindUserById(id uint) (User, error) {
 
 // Devuelve el usuario con el nombre de usuario
 // Si no encuentra ninguno, no devuelve error (solo retorna false)
-func (u UsersFuncs) ExistUserByName(username string) (bool, error) {
+func (u usersBD) ExistUserByName(username string) (bool, error) {
 	_, err := u.FindUserByName(username)
 	if err != nil {
 		if err == ErrUserNotFound {
@@ -126,17 +139,17 @@ func (u UsersFuncs) ExistUserByName(username string) (bool, error) {
 	return true, nil
 }
 
-func (u UsersFuncs) Rename(id uint, newName string) error {
+func (u usersBD) Rename(id uint, newName string) error {
 	_, err := u.DB.ExecContext(u.Context, "UPDATE users SET username = ? WHERE user_id = ?", newName, id)
 	return err
 }
 
-func (u UsersFuncs) ChangePassword(id uint, newPassword string) error {
+func (u usersBD) ChangePassword(id uint, newPassword string) error {
 	_, err := u.DB.ExecContext(u.Context, "UPDATE users SET password = ? WHERE user_id = ?", newPassword, id)
 	return err
 }
 
-func (u UsersFuncs) Delete(id uint) error {
+func (u usersBD) Delete(id uint) error {
 	_, err := u.DB.ExecContext(u.Context, "DELETE FROM users WHERE user_id = ?", id)
 	return err
 }

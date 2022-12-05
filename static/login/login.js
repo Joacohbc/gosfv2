@@ -1,11 +1,5 @@
-import { getToken } from '/static/modules/request.js';
 import { Message }  from '/static/modules/message.js';
 const message = new Message("message");
-
-if(getToken() != null) {
-    // Si esta logueado, lo redirijo a la pagina principal
-    window.location.href = '/static/main/files.html';
-}
 
 window.addEventListener('DOMContentLoaded', function() {
 
@@ -30,6 +24,7 @@ window.addEventListener('DOMContentLoaded', function() {
                 password: password.value
         })
         .then(req => {
+            localStorage.setItem('token', req.data.token);
             window.location.href = '/static/main/files.html';
         })
         .catch(err => {

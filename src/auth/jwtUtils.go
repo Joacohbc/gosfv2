@@ -17,12 +17,15 @@ const (
 	// Bearer es el tipo de Header de autenticación que se utiliza en JWT
 	authScheme string = "Bearer"
 
-	// token es el nombre de la Cookie donde se buscara el JWT
-	cookieName string = "token"
-
-	// api-token es el nombre de la Cookie donde se buscara el JWT
+	// api-token es el nombre del QueryParam donde se buscara el JWT
 	queryName string = "api-token"
 )
+
+type UserClaims struct {
+	UserID   uint
+	Username string
+	jwt.RegisteredClaims
+}
 
 // Inscrita el password con AES y retorna la cadena encriptada
 func GeneratePassword(password *string) error {
@@ -74,19 +77,6 @@ func getTokenAsQueryParam(c echo.Context) (string, error) {
 	return token, nil
 }
 
-func getTokenFromCookie(c echo.Context) (string, error) {
-	ck, err := c.Cookie(cookieName)
-	if err != nil {
-		return "", echo.NewHTTPError(http.StatusUnauthorized, "invalid authorization cookie, must be a "+cookieName+" cookie")
-	}
-
-	if ck.Value == "" {
-		return "", echo.NewHTTPError(http.StatusUnauthorized, "missing or malformed jwt")
-	}
-
-	return ck.Value, nil
-}
-
 // Genera un JWT para el usuario que se está logueado.
 // El error que se genera es un error de tipo echo.HTTPError
 func generateJWTForUser(c echo.Context) (string, error) {
@@ -118,7 +108,7 @@ func generateJWTForUser(c echo.Context) (string, error) {
 		UserID:   dbUser.ID,
 		Username: dbUser.Username,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * time.Duration(env.Config.JWTHours))),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TokenDuration)),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 			Issuer:    "gosfV2",
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -128,6 +118,10 @@ func generateJWTForUser(c echo.Context) (string, error) {
 	tokenString, err := token.SignedString([]byte(env.Config.JWTKey))
 	if err != nil {
 		return "", echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if err := NewTokenManager().AddToken(dbUser.ID, tokenString); err != nil {
+		return "", HandlerTokenError(err)
 	}
 
 	return tokenString, nil
@@ -152,6 +146,15 @@ func ValidJWT(tokenString string) (*UserClaims, error) {
 
 	if time.Now().After(claims.ExpiresAt.Time) {
 		return nil, jwt.ErrTokenExpired
+	}
+
+	exist, err := NewTokenManager().ExistsToken(claims.UserID, tokenString)
+	if err != nil {
+		return nil, err
+	}
+
+	if !exist {
+		return nil, errors.New("the token is not valid for the current session")
 	}
 
 	return claims, nil

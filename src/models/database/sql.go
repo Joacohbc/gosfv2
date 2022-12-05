@@ -21,6 +21,10 @@ func GetMySQL() *sqlx.DB {
 	return mySqlDB
 }
 
+func GetRedis() *redis.Client {
+	return redisDb
+}
+
 // Retorna true si es sql.ErrNoRows)
 func IsNotFound(err error) bool {
 	return errors.Is(err, sql.ErrNoRows)
