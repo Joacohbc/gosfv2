@@ -71,6 +71,10 @@ func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 		}
 
+		if _, err := models.Users(c).FindUserById(claims.UserID); err != nil {
+			return echo.NewHTTPError(http.StatusUnauthorized, "User with that ID not found")
+		}
+
 		// Set user in the echo context
 		c.Set("user_id", claims.UserID)
 		c.Set("username", claims.Username)

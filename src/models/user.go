@@ -55,11 +55,11 @@ type UsersFuncs struct {
 }
 
 func Users(c echo.Context) UsersFuncs {
-	return UsersFuncs{DB: database.GetBd(), Context: c.Request().Context()}
+	return UsersFuncs{DB: database.GetMySQL(), Context: c.Request().Context()}
 }
 
 func UsersC(ctx context.Context) UsersFuncs {
-	return UsersFuncs{DB: database.GetBd(), Context: ctx}
+	return UsersFuncs{DB: database.GetMySQL(), Context: ctx}
 }
 
 func (u UsersFuncs) GetAllUsers() ([]User, error) {
@@ -133,5 +133,10 @@ func (u UsersFuncs) Rename(id uint, newName string) error {
 
 func (u UsersFuncs) ChangePassword(id uint, newPassword string) error {
 	_, err := u.DB.ExecContext(u.Context, "UPDATE users SET password = ? WHERE user_id = ?", newPassword, id)
+	return err
+}
+
+func (u UsersFuncs) Delete(id uint) error {
+	_, err := u.DB.ExecContext(u.Context, "DELETE FROM users WHERE user_id = ?", id)
 	return err
 }

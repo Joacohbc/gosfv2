@@ -80,3 +80,32 @@ func (u userController) ChangePassword(c echo.Context) error {
 		"message": "Password changed successfully",
 	})
 }
+
+func (u userController) DeleteUser(c echo.Context) error {
+
+	files, err := models.Files(c).GetAllFromUser(c.Get("user_id").(uint))
+	if err != nil {
+		return auth.HandleUserError(err)
+	}
+
+	if len(files) > 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, "You can't delete your account because you have files")
+	}
+
+	if err := models.Users(c).Delete(c.Get("user_id").(uint)); err != nil {
+		return auth.HandleUserError(err)
+	}
+
+	return c.JSON(http.StatusAccepted, echo.Map{
+		"message": "User deleted successfully",
+	})
+}
+
+func (u userController) GetUser(c echo.Context) error {
+	user, err := models.Users(c).FindUserById(c.Get("user_id").(uint))
+	if err != nil {
+		return auth.HandleUserError(err)
+	}
+
+	return c.JSON(http.StatusOK, dtos.ToUserDTO(user))
+}

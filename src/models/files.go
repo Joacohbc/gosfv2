@@ -51,7 +51,7 @@ type FileFuncs struct {
 }
 
 func Files(c echo.Context) FileFuncs {
-	return FileFuncs{BD: database.GetBd(), Context: c.Request().Context()}
+	return FileFuncs{BD: database.GetMySQL(), Context: c.Request().Context()}
 }
 
 func (f FileFuncs) MakeUserDir(user string) error {
