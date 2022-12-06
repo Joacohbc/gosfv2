@@ -18,7 +18,7 @@ window.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btn-register').addEventListener('click', function(e) {
         e.preventDefault();
 
-        let url = window.location.origin + '/register';
+        let url = window.location.origin + '/auth/register';
 
         axios.post(url,{
                 username: username.value,

@@ -1,19 +1,12 @@
-// Defino el URL base de las peticiones
-axios.defaults.baseURL = window.location.origin;
-axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('token');
-
-export function getToken() {
-    let token = null;
-    document.cookie.split(';').forEach((cookie) => {
-        if(cookie.includes('token')) {
-            token = cookie.split('=')[1];
-            return;
-        }
-    });
-    return token;
-}
 
 if (localStorage.getItem('token') != null) {
+    // Defino el URL base de las peticiones
+    axios.defaults.baseURL = window.location.origin;
+    axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('token');
+    // axios.defaults.params = {
+    //     token: localStorage.getItem('token')
+    // };
+    
     axios.get(window.location.origin + '/api/auth')
     .catch(err => {
         if(err.response.status === 401) {

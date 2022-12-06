@@ -17,9 +17,8 @@ window.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btn-login').addEventListener('click', function(e) {
         e.preventDefault();
 
-        let url = window.location.origin + '/login';
+        let url = window.location.origin + '/auth/login?cookie=true';
         
-
         axios.post(url,{
                 username: username.value,
                 password: password.value
