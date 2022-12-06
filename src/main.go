@@ -50,7 +50,6 @@ func main() {
 
 	e.Use(logger.RequestLoggerConfig())
 	e.Use(middleware.Recover())
-	e.Use(auth.JWTAuthMiddleware)
 	e.Logger = logger.Logger(log.DEBUG)
 
 	// Test Endpoint
@@ -58,11 +57,12 @@ func main() {
 		return c.String(http.StatusOK, "pong")
 	})
 
-	api := e.Group("/api")
-	routes.Auth.AddNoAuthRoutes(e)
+	tokens := e.Group("/auth")
+	routes.Auth.AddAuthRoutes(tokens)
+
+	api := e.Group("/api", auth.JWTAuthMiddleware)
 	routes.Files.AddRoutesToGroup(api)
 	routes.User.AddRoutesToGroup(api)
-	routes.Auth.AddTokenRoutes(api)
 
 	go func() {
 		quit := make(chan os.Signal, 1)

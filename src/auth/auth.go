@@ -21,40 +21,41 @@ func HandleUserError(err error) error {
 	return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 }
 
-func LoginValid(c echo.Context) (models.User, error) {
-	user := new(models.User)
+// Valida los datos de un usuario, si el usuario no existe o la contraseña es incorrecta
+func UserCredencialMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		user := new(models.User)
 
-	if err := c.Bind(user); err != nil {
-		return models.User{}, echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	dbUser, err := models.Users(c).FindUserByName(user.Username)
-	if err != nil {
-		if err == models.ErrUserNotFound {
-			return models.User{}, echo.NewHTTPError(http.StatusNotFound, "Invalid username or password")
+		if err := c.Bind(user); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-		return models.User{}, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
 
-	ok, err := CheckPassword(user.Password, dbUser.Password)
-	if err != nil {
-		return models.User{}, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
+		dbUser, err := models.Users(c).FindUserByName(user.Username)
+		if err != nil {
+			if err == models.ErrUserNotFound {
+				return echo.NewHTTPError(http.StatusNotFound, "Invalid username or password")
+			}
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 
-	if !ok {
-		return models.User{}, echo.NewHTTPError(http.StatusUnauthorized, "Invalid username or password")
-	}
+		ok, err := CheckPassword(user.Password, dbUser.Password)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 
-	return dbUser, nil
+		if !ok {
+			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid username or password")
+		}
+
+		c.Set("user", dbUser)
+		return next(c)
+	}
 }
 
+// Verifica que el usuario tenga un token válido
+// Ya sea en el Header, en el QueryParam o en el Cookie
 func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-
-		if c.Path() == "/register" || c.Path() == "/login" || c.Path() == "/tokens" || strings.HasPrefix(c.Path(), "/static") {
-			return next(c)
-		}
-
 		var token string
 
 		// Si tiene un Header Authorization, se toma el token de ahí
@@ -73,11 +74,14 @@ func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			}
 			token = t
 
+		} else if ck, err := GetTokenCookie(c); err == nil {
+			token = ck
+
 		} else {
 			return echo.NewHTTPError(http.StatusUnauthorized, "Not token provided")
 		}
 
-		claims, err := ValidJWT(token)
+		claims, err := validJWT(token)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 		}
@@ -90,11 +94,12 @@ func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func RegisterHandler(c echo.Context) error {
+// Registra un nuevo usuario
+func RegisterUser(c echo.Context) error {
 	user := new(models.User)
 
 	if err := c.Bind(user); err != nil {
-		return c.String(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	if strings.TrimSpace(user.Username) == "" || strings.TrimSpace(user.Password) == "" {
@@ -122,25 +127,27 @@ func RegisterHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.ToJSON("User created successfully"))
 }
 
-func LoginHandler(c echo.Context) error {
-
-	user, err := LoginValid(c)
-	if err != nil {
-		return err
-	}
+// Genera un token JWT para el usuario si el usuario y la contraseña son correctos
+func Login(c echo.Context) error {
+	user := c.Get("user").(models.User)
 
 	tokenString, err := generateJWTForUser(user.ID, user.Username, c.RealIP())
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+
+	// Si se paso el Cookie en el QueryParam se guarda en el Cookie
+	SetTokenCookie(c, tokenString)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"token": tokenString,
 	})
 }
 
-func RefreshHandler(c echo.Context) error {
-	claims, err := ValidJWT(c.Get("token").(string))
+// Refresca el token del usuario y lo guarda en la base de datos
+// y en el cookie del usuario (si se paso el cookie en el QueryParam)
+func RefreshToken(c echo.Context) error {
+	claims, err := validJWT(c.Get("token").(string))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 	}
@@ -154,16 +161,17 @@ func RefreshHandler(c echo.Context) error {
 		return err
 	}
 
+	SetTokenCookie(c, tokenString)
+
 	return c.JSON(http.StatusOK, echo.Map{
 		"token": tokenString,
 	})
 }
 
-func DeleteTokens(c echo.Context) error {
-	user, err := LoginValid(c)
-	if err != nil {
-		return err
-	}
+// Elimina todos los tokens del usuario
+// y en el cookie del usuario (si se paso el cookie en el QueryParam)
+func DeleteAllTokens(c echo.Context) error {
+	user := c.Get("user").(models.User)
 
 	if err := NewTokenManager().RemoveUserTokens(user.ID); err != nil {
 		return HandlerTokenError(err)
@@ -172,19 +180,25 @@ func DeleteTokens(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.ToJSON("All tokens have been deleted successfully"))
 }
 
-func VerifyAuth(c echo.Context) error {
-	return c.JSON(http.StatusOK, utils.ToJSON("You are authenticated"))
-}
-
-func LogoutHandler(c echo.Context) error {
+// Elimina el token de la base de datos y del Cookie (si se paso el cookie en el QueryParam)
+func Logout(c echo.Context) error {
 	if err := NewTokenManager().RemoveToken(c.Get("user_id").(uint), c.Get("token").(string)); err != nil {
 		return HandlerTokenError(err)
 	}
 
+	DeleteTokenCookie(c, c.Get("token").(string))
+
 	return c.JSON(http.StatusOK, utils.ToJSON("You have been logged out successfully"))
 }
 
+// Si se puede acceder a la ruta, se retorna un mensaje de que se esta autenticado
+func VerifyAuth(c echo.Context) error {
+	return c.JSON(http.StatusOK, utils.ToJSON("You are authenticated"))
+}
+
 func init() {
+	// Cada un minutos se verifica si los tokens son validos
+	// Si no son validos se eliminan
 	go func() {
 		for {
 			time.Sleep(time.Minute * 1)
@@ -200,7 +214,7 @@ func init() {
 				}
 
 				for _, token := range tokens {
-					if _, err := ValidJWT(token); err != nil {
+					if _, err := validJWT(token); err != nil {
 						if err := NewTokenManager().RemoveToken(user.ID, token); err != nil {
 							panic(err)
 						}

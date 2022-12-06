@@ -11,14 +11,12 @@ var Auth authRoutes
 type authRoutes struct{}
 
 // Agrego los Endpoints de Auth
-func (a *authRoutes) AddNoAuthRoutes(e *echo.Echo) {
-	e.POST("/login", auth.LoginHandler)
-	e.POST("/register", auth.RegisterHandler)
-	e.DELETE("/tokens", auth.DeleteTokens)
-}
+func (a *authRoutes) AddAuthRoutes(group *echo.Group) {
+	group.POST("/register", auth.RegisterUser)
+	group.POST("/login", auth.Login, auth.UserCredencialMiddleware)
+	group.DELETE("/restore", auth.DeleteAllTokens, auth.UserCredencialMiddleware)
 
-func (a *authRoutes) AddTokenRoutes(group *echo.Group) {
-	group.GET("/auth", auth.VerifyAuth)
-	group.GET("/refresh", auth.RefreshHandler)
-	group.POST("/logout", auth.LogoutHandler)
+	group.GET("/refresh", auth.RefreshToken, auth.JWTAuthMiddleware)
+	group.GET("/verify", auth.VerifyAuth, auth.JWTAuthMiddleware)
+	group.DELETE("/logout", auth.Logout, auth.JWTAuthMiddleware)
 }

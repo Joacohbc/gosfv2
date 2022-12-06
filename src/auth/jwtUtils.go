@@ -20,6 +20,8 @@ const (
 
 	// api-token es el nombre del QueryParam donde se buscara el JWT
 	queryName string = "api-token"
+
+	cookieName string = "token"
 )
 
 type UserClaims struct {
@@ -40,6 +42,7 @@ func GeneratePassword(password *string) error {
 	return nil
 }
 
+// Compara el password con el hash de la base de datos
 func CheckPassword(password, bdHash string) (bool, error) {
 	err := bcrypt.CompareHashAndPassword([]byte(bdHash), []byte(password))
 	if err != nil {
@@ -51,6 +54,8 @@ func CheckPassword(password, bdHash string) (bool, error) {
 	return true, nil
 }
 
+// Obtiene el Token del usuario del Header
+// El error que se genera es un error de tipo echo.HTTPError
 func getTokenFromHeader(c echo.Context) (string, error) {
 
 	// Obtengo las 2 partes del Header, el tipo[0] y el contenido[1]
@@ -72,6 +77,8 @@ func getTokenFromHeader(c echo.Context) (string, error) {
 	return auth[1], nil
 }
 
+// Obtiene el Token del usuario del QueryParam
+// El error que se genera es un error de tipo echo.HTTPError
 func getTokenAsQueryParam(c echo.Context) (string, error) {
 	token := c.QueryParam(queryName)
 	if strings.TrimSpace(token) == "" {
@@ -80,6 +87,7 @@ func getTokenAsQueryParam(c echo.Context) (string, error) {
 	return token, nil
 }
 
+// Obtiene la Localización del IP que se le pase
 func getLocation(ip string) string {
 	res, err := http.Get(fmt.Sprintf("http://ip-api.com/json/%s?fields=country,regionName,city,status", ip))
 	if err != nil {
@@ -109,8 +117,7 @@ func getLocation(ip string) string {
 	return fmt.Sprintf("%s, %s, %s", location.Country, location.RegionName, location.City)
 }
 
-// Genera un JWT para el usuario que se está logueado.
-// El error que se genera es un error de tipo echo.HTTPError
+// Genera un JWT para el usuario que se está logueado
 func generateJWTForUser(userId uint, username string, ip string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, UserClaims{
@@ -128,17 +135,18 @@ func generateJWTForUser(userId uint, username string, ip string) (string, error)
 
 	tokenString, err := token.SignedString([]byte(env.Config.JWTKey))
 	if err != nil {
-		return "", echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return "", err
 	}
 
 	if err := NewTokenManager().AddToken(userId, tokenString); err != nil {
-		return "", HandlerTokenError(err)
+		return "", err
 	}
 
 	return tokenString, nil
 }
 
-func ValidJWT(tokenString string) (*UserClaims, error) {
+// Valida el JWT que se le pase
+func validJWT(tokenString string) (*UserClaims, error) {
 	jwtToken, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")

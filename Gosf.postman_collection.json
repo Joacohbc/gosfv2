@@ -572,14 +572,20 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:{{port}}/api/auth",
+							"raw": "localhost:{{port}}/auth/verify?cookie=true",
 							"host": [
 								"localhost"
 							],
 							"port": "{{port}}",
 							"path": [
-								"api",
-								"auth"
+								"auth",
+								"verify"
+							],
+							"query": [
+								{
+									"key": "cookie",
+									"value": "true"
+								}
 							]
 						}
 					},
@@ -610,13 +616,14 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:{{port}}/tokens",
+							"raw": "localhost:{{port}}/auth/restore",
 							"host": [
 								"localhost"
 							],
 							"port": "{{port}}",
 							"path": [
-								"tokens"
+								"auth",
+								"restore"
 							]
 						}
 					},
@@ -638,14 +645,20 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:{{port}}/api/refresh",
+							"raw": "localhost:{{port}}/auth/refresh?cookie=true",
 							"host": [
 								"localhost"
 							],
 							"port": "{{port}}",
 							"path": [
-								"api",
+								"auth",
 								"refresh"
+							],
+							"query": [
+								{
+									"key": "cookie",
+									"value": "true"
+								}
 							]
 						}
 					},
@@ -660,7 +673,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"username\":\"Joaco\",\n    \"password\":\"1234\"\n}",
+					"raw": "{\n    \"username\":\"Tania\",\n    \"password\":\"1234\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -668,12 +681,13 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:{{port}}/register",
+					"raw": "localhost:{{port}}/auth/register",
 					"host": [
 						"localhost"
 					],
 					"port": "{{port}}",
 					"path": [
+						"auth",
 						"register"
 					]
 				}
@@ -695,13 +709,20 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:{{port}}/login",
+					"raw": "localhost:{{port}}/auth/login?cookie=true",
 					"host": [
 						"localhost"
 					],
 					"port": "{{port}}",
 					"path": [
+						"auth",
 						"login"
+					],
+					"query": [
+						{
+							"key": "cookie",
+							"value": "true"
+						}
 					]
 				}
 			},
@@ -720,17 +741,23 @@
 						}
 					]
 				},
-				"method": "POST",
+				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "localhost:{{port}}/api/logout",
+					"raw": "localhost:{{port}}/auth/logout?cookie=true",
 					"host": [
 						"localhost"
 					],
 					"port": "{{port}}",
 					"path": [
-						"api",
+						"auth",
 						"logout"
+					],
+					"query": [
+						{
+							"key": "cookie",
+							"value": "true"
+						}
 					]
 				}
 			},
