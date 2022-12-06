@@ -195,17 +195,16 @@ function createOverlayFooter(file) {
 }
 
 // Crea el overlay y lo agrega al DOM
-export function createOverlay(fileId) {
+export async function createOverlay(fileId) {
     
-    axios.get(`/api/files/${fileId}/info`)
+    const overlay = document.querySelector(".overlay-background");
+
+    const overlayContent = document.querySelector(".overlay-content");
+    overlayContent.innerHTML = "";
+
+    await axios.get(`/api/files/${fileId}/info`)
     .then(res => {
         let file = new File(res.data.id, res.data.filename, res.data.shared, res.data.shared_with);
-        
-        const overlay = document.querySelector(".overlay-background");
-        overlay.removeAttribute("hidden");
-    
-        const overlayContent = document.querySelector(".overlay-content");
-        overlayContent.innerHTML = "";
         overlayContent.appendChild(createOverlayBody(file));
         overlayContent.appendChild(createOverlayShare(file));
         overlayContent.appendChild(createOverlayFooter(file));
@@ -215,5 +214,9 @@ export function createOverlay(fileId) {
     .catch(err => {
         message.showError(err.response.data.message);
     });
+
+    return () => {
+        overlay.removeAttribute("hidden");
+    };
 }
 

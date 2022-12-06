@@ -4,8 +4,11 @@
 /* Register Container */
 .register {
     position: relative;
-    margin: auto;
+    display: grid;
+    justify-content: center;
+    align-items: center;
     padding: 10%;
+    margin: 0 auto;
     width: 65%;
     background-color: var(--color-background-light);
     border-radius: 10px;

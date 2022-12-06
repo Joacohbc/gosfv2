@@ -18,6 +18,7 @@ window.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
 
         let url = window.location.origin + '/login';
+        
 
         axios.post(url,{
                 username: username.value,

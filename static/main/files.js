@@ -135,7 +135,7 @@ class FileCustom {
         shareBtn.innerHTML = 'Share';
         shareBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            createOverlay(this.file.id);
+            createOverlay(this.file.id).then(show => show());
         });
         actions.appendChild(shareBtn);
 

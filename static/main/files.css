@@ -20,13 +20,13 @@
 .table-container {
     display: flex;
     justify-content: center;
+    text-align: center;
     border-radius: 10px;
     color: var(--color-text);
-    text-align: center;
-    overflow-wrap: break-word;
-    text-overflow: ellipsis;
     width: 70%;
     margin: auto;
+    overflow-wrap: break-word;
+    text-overflow: ellipsis;
 }
 
 .file td {
