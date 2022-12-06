@@ -226,4 +226,9 @@ window.addEventListener('DOMContentLoaded', function() {
             return file.filename.toLowerCase().includes(search.toLowerCase());
         });
     });
+
+    document.querySelector('#go-share').addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.href = document.querySelector('#search-input').value + "?api-token="+this.localStorage.getItem('token');
+    });
 });

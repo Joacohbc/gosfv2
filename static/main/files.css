@@ -81,3 +81,16 @@
 #btn-upload:hover {
     background-color: var(--color-hover);
 }
+
+#go-share {
+    color: var(--color-text);
+    border-radius: 5px;
+    padding: 10px;
+    background-color: transparent;
+    border: none;
+    outline: none;
+}
+
+#go-share:hover {
+    background-color: var(--color-hover);
+}

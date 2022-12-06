@@ -59,9 +59,10 @@ func main() {
 	})
 
 	api := e.Group("/api")
-	routes.Auth.AddRoutes(e)
+	routes.Auth.AddNoAuthRoutes(e)
 	routes.Files.AddRoutesToGroup(api)
 	routes.User.AddRoutesToGroup(api)
+	routes.Auth.AddTokenRoutes(api)
 
 	go func() {
 		quit := make(chan os.Signal, 1)
@@ -80,5 +81,7 @@ func main() {
 		}
 	}()
 
-	e.Start(":" + port)
+	if err := e.Start(":" + port); err != nil {
+		e.Logger.Fatal(err.Error())
+	}
 }

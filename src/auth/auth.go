@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"gosfV2/src/models"
 	"net/http"
 	"strings"
@@ -20,10 +21,37 @@ func HandleUserError(err error) error {
 	return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 }
 
+func LoginValid(c echo.Context) (models.User, error) {
+	user := new(models.User)
+
+	if err := c.Bind(user); err != nil {
+		return models.User{}, echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	dbUser, err := models.Users(c).FindUserByName(user.Username)
+	if err != nil {
+		if err == models.ErrUserNotFound {
+			return models.User{}, echo.NewHTTPError(http.StatusNotFound, "Invalid username or password")
+		}
+		return models.User{}, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	ok, err := CheckPassword(user.Password, dbUser.Password)
+	if err != nil {
+		return models.User{}, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if !ok {
+		return models.User{}, echo.NewHTTPError(http.StatusUnauthorized, "Invalid username or password")
+	}
+
+	return dbUser, nil
+}
+
 func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
-		if c.Path() == "/register" || c.Path() == "/login" || strings.HasPrefix(c.Path(), "/static") {
+		if c.Path() == "/register" || c.Path() == "/login" || c.Path() == "/tokens" || strings.HasPrefix(c.Path(), "/static") {
 			return next(c)
 		}
 
@@ -38,7 +66,7 @@ func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			token = t
 
 			// Si no tiene un Header Authorization, se busca el Token en el URL
-		} else if c.Param(queryName) != "" {
+		} else if c.QueryParam(queryName) != "" {
 			t, err := getTokenAsQueryParam(c)
 			if err != nil {
 				return err
@@ -56,9 +84,8 @@ func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		// Set user in the echo context
 		c.Set("user_id", claims.UserID)
-		c.Set("username", claims.Username)
 		c.Set("claims", claims)
-
+		c.Set("token", token)
 		return next(c)
 	}
 }
@@ -96,7 +123,13 @@ func RegisterHandler(c echo.Context) error {
 }
 
 func LoginHandler(c echo.Context) error {
-	tokenString, err := generateJWTForUser(c)
+
+	user, err := LoginValid(c)
+	if err != nil {
+		return err
+	}
+
+	tokenString, err := generateJWTForUser(user.ID, user.Username, c.RealIP())
 	if err != nil {
 		return err
 	}
@@ -106,8 +139,45 @@ func LoginHandler(c echo.Context) error {
 	})
 }
 
+func RefreshHandler(c echo.Context) error {
+	claims, err := ValidJWT(c.Get("token").(string))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
+
+	if err := NewTokenManager().RemoveToken(c.Get("user_id").(uint), c.Get("token").(string)); err != nil {
+		return HandlerTokenError(err)
+	}
+
+	tokenString, err := generateJWTForUser(claims.UserID, claims.Username, c.RealIP())
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"token": tokenString,
+	})
+}
+
+func DeleteTokens(c echo.Context) error {
+	user, err := LoginValid(c)
+	if err != nil {
+		return err
+	}
+
+	if err := NewTokenManager().RemoveUserTokens(user.ID); err != nil {
+		return HandlerTokenError(err)
+	}
+
+	return c.JSON(http.StatusOK, utils.ToJSON("All tokens have been deleted successfully"))
+}
+
+func VerifyAuth(c echo.Context) error {
+	return c.JSON(http.StatusOK, utils.ToJSON("You are authenticated"))
+}
+
 func LogoutHandler(c echo.Context) error {
-	if err := NewTokenManager().RemoveUserTokens(c.Get("user_id").(uint)); err != nil {
+	if err := NewTokenManager().RemoveToken(c.Get("user_id").(uint), c.Get("token").(string)); err != nil {
 		return HandlerTokenError(err)
 	}
 
@@ -118,7 +188,25 @@ func init() {
 	go func() {
 		for {
 			time.Sleep(time.Minute * 1)
+			users, err := models.UsersC(context.Background()).GetAllUsers()
+			if err != nil && err != models.ErrUserNotFound {
+				panic(err)
+			}
 
+			for _, user := range users {
+				tokens, err := NewTokenManager().GetTokens(user.ID)
+				if err != nil && err != ErrTokenNotFound {
+					panic(err)
+				}
+
+				for _, token := range tokens {
+					if _, err := ValidJWT(token); err != nil {
+						if err := NewTokenManager().RemoveToken(user.ID, token); err != nil {
+							panic(err)
+						}
+					}
+				}
+			}
 		}
 	}()
 }

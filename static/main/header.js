@@ -15,7 +15,7 @@ window.addEventListener('DOMContentLoaded', function() {
     // Agrego funcionamiento a los botones
     document.querySelector("#btn-logout").addEventListener('click', (e) => {
         e.preventDefault();
-        axios.post('/logout')
+        axios.post('/api/logout')
         .then(res => {
             window.location.href = '/static/login/login.html';
         })

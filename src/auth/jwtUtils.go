@@ -1,8 +1,9 @@
 package auth
 
 import (
+	"encoding/json"
 	"errors"
-	"gosfV2/src/models"
+	"fmt"
 	"gosfV2/src/models/env"
 	"net/http"
 	"strings"
@@ -24,6 +25,8 @@ const (
 type UserClaims struct {
 	UserID   uint
 	Username string
+	IP       string
+	Location string
 	jwt.RegisteredClaims
 }
 
@@ -70,43 +73,51 @@ func getTokenFromHeader(c echo.Context) (string, error) {
 }
 
 func getTokenAsQueryParam(c echo.Context) (string, error) {
-	token := c.Param(queryName)
+	token := c.QueryParam(queryName)
 	if strings.TrimSpace(token) == "" {
 		return "", echo.NewHTTPError(http.StatusUnauthorized, "missing or malformed jwt")
 	}
 	return token, nil
 }
 
+func getLocation(ip string) string {
+	res, err := http.Get(fmt.Sprintf("http://ip-api.com/json/%s?fields=country,regionName,city,status", ip))
+	if err != nil {
+		return ""
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return ""
+	}
+
+	var location struct {
+		Country    string `json:"country"`
+		RegionName string `json:"regionName"`
+		City       string `json:"city"`
+		Status     string `json:"status"`
+	}
+
+	if err := json.NewDecoder(res.Body).Decode(&location); err != nil {
+		return ""
+	}
+
+	if location.Status != "success" {
+		return ""
+	}
+
+	return fmt.Sprintf("%s, %s, %s", location.Country, location.RegionName, location.City)
+}
+
 // Genera un JWT para el usuario que se está logueado.
 // El error que se genera es un error de tipo echo.HTTPError
-func generateJWTForUser(c echo.Context) (string, error) {
-
-	user := new(models.User)
-
-	if err := c.Bind(user); err != nil {
-		return "", echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	dbUser, err := models.Users(c).FindUserByName(user.Username)
-	if err != nil {
-		if err == models.ErrUserNotFound {
-			return "", echo.NewHTTPError(http.StatusNotFound, "Invalid username or password")
-		}
-		return "", echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	ok, err := CheckPassword(user.Password, dbUser.Password)
-	if err != nil {
-		return "", echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	if !ok {
-		return "", echo.NewHTTPError(http.StatusUnauthorized, "Invalid username or password")
-	}
+func generateJWTForUser(userId uint, username string, ip string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, UserClaims{
-		UserID:   dbUser.ID,
-		Username: dbUser.Username,
+		UserID:   userId,
+		Username: username,
+		IP:       ip,
+		Location: getLocation(ip),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TokenDuration)),
 			NotBefore: jwt.NewNumericDate(time.Now()),
@@ -120,7 +131,7 @@ func generateJWTForUser(c echo.Context) (string, error) {
 		return "", echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	if err := NewTokenManager().AddToken(dbUser.ID, tokenString); err != nil {
+	if err := NewTokenManager().AddToken(userId, tokenString); err != nil {
 		return "", HandlerTokenError(err)
 	}
 
