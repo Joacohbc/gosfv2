@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"gosfV2/src/models/env"
 	"os"
+	"strconv"
 
 	redis "github.com/go-redis/redis/v9"
 	_ "github.com/go-sql-driver/mysql"
@@ -32,7 +33,7 @@ func IsNotFound(err error) bool {
 }
 
 func init() {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local", env.Config.DBUser, env.Config.DBPassword, env.Config.DBHost, env.Config.BDPort, env.Config.DBName, env.Config.BDCharset)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local", env.Config.DBUserSQL, env.Config.DBPasswordSQL, env.Config.DBHostSQL, env.Config.BDPortSQL, env.Config.DBNameSQL, env.Config.BDCharsetSQL)
 
 	var err error
 	mySqlDB, err = sqlx.Connect("mysql", dsn)
@@ -76,8 +77,8 @@ func init() {
 	) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`)
 
 	redisDb = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
+		Addr:     env.Config.RedisHost + ":" + strconv.Itoa(env.Config.RedisPort),
+		Password: env.Config.RedisPassword,
+		DB:       env.Config.RedisDB,
 	})
 }

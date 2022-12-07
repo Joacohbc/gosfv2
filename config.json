@@ -1,13 +1,18 @@
 {
     "jwt_key": "<The JWT Key to create the tokens>",
-    "jwt_hours": 10,
+    "jwt_minutes": 60,
     "log_dir_path": "./logs",
-    "db_host": "localhost",
-    "db_user":"user",
-	"db_password":"password",
-    "db_name":"db-name",
-    "db_port": 3306,
-    "db_charset": "utf8",
+    "db_host_sql": "localhost",
+    "db_user_sql":"user",
+	"db_password_sql":"password",
+    "db_name_sql":"db",
+    "db_port_sql": 3306,
+    "db_charset_sql": "utf8",
+    "redis_host": "localhost",
+	"redis_port": 6379,
+	"redis_password": "",
+	"redis_db": 0,
     "files_directory": "./files",
-    "static_files": "./static"
+    "static_files": "./static",
+    "max_token_per_user": 5
 }

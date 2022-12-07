@@ -16,7 +16,7 @@ import (
 var (
 	ErrTokenNotFound               = fmt.Errorf("token not found")
 	ErrMaxTokens                   = fmt.Errorf("max tokens reached")
-	TokenDuration    time.Duration = time.Hour * time.Duration(env.Config.JWTHours)
+	TokenDuration    time.Duration = time.Minute * time.Duration(env.Config.JWTMinutes)
 )
 
 type TokenManager interface {

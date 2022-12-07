@@ -2,7 +2,6 @@ import { Message }  from '/static/modules/message.js';
 const message = new Message("message");
 
 window.addEventListener('DOMContentLoaded', function() {
-
     const username = document.getElementById('username');
     username.addEventListener('keyup', function(e) {
         username.style = "color: white;";
@@ -25,9 +24,15 @@ window.addEventListener('DOMContentLoaded', function() {
         })
         .then(req => {
             localStorage.setItem('token', req.data.token);
+            localStorage.setItem('duration', req.data.duration);
+
+            let expires = new Date(Date.now() + req.data.duration * 1000 * 60);
+            localStorage.setItem('expires', expires);
+            
             window.location.href = '/static/main/files.html';
         })
         .catch(err => {
+            console.log(err);
             message. showError(err.response.data.message);
         });
     });

@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"gosfV2/src/models"
+	"gosfV2/src/models/env"
 	"net/http"
 	"strings"
 	"time"
@@ -84,6 +85,8 @@ func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		claims, err := validJWT(token)
 		if err != nil {
+			c.Logger().Info(token)
+			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 		}
 
@@ -134,38 +137,38 @@ func Login(c echo.Context) error {
 
 	tokenString, err := generateJWTForUser(user.ID, user.Username, c.RealIP())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return HandlerTokenError(err)
 	}
 
 	// Si se paso el Cookie en el QueryParam se guarda en el Cookie
 	SetTokenCookie(c, tokenString)
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"token": tokenString,
+		"token":    tokenString,
+		"duration": env.Config.JWTMinutes,
 	})
 }
 
 // Refresca el token del usuario y lo guarda en la base de datos
 // y en el cookie del usuario (si se paso el cookie en el QueryParam)
 func RefreshToken(c echo.Context) error {
-	claims, err := validJWT(c.Get("token").(string))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
-	}
-
 	if err := NewTokenManager().RemoveToken(c.Get("user_id").(uint), c.Get("token").(string)); err != nil {
+		c.Logger().Error(err)
 		return HandlerTokenError(err)
 	}
 
+	claims := c.Get("claims").(*UserClaims)
 	tokenString, err := generateJWTForUser(claims.UserID, claims.Username, c.RealIP())
 	if err != nil {
-		return err
+		c.Logger().Error(err)
+		return HandlerTokenError(err)
 	}
 
 	SetTokenCookie(c, tokenString)
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"token": tokenString,
+		"token":    tokenString,
+		"duration": env.Config.JWTMinutes,
 	})
 }
 

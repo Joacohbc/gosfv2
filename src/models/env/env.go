@@ -8,14 +8,18 @@ import (
 
 type config struct {
 	JWTKey          string `json:"jwt_key"`
-	JWTHours        int    `json:"jwt_hours"`
+	JWTMinutes      int    `json:"jwt_minutes"`
 	LogDirPath      string `json:"log_dir_path"`
-	DBHost          string `json:"db_host"`
-	DBUser          string `json:"db_user"`
-	DBPassword      string `json:"db_password"`
-	DBName          string `json:"db_name"`
-	BDPort          int    `json:"db_port"`
-	BDCharset       string `json:"db_charset"`
+	DBHostSQL       string `json:"db_host_sql"`
+	DBUserSQL       string `json:"db_user_sql"`
+	DBPasswordSQL   string `json:"db_password_sql"`
+	DBNameSQL       string `json:"db_name_sql"`
+	BDPortSQL       int    `json:"db_port_sql"`
+	BDCharsetSQL    string `json:"db_charset_sql"`
+	RedisHost       string `json:"redis_host"`
+	RedisPort       int    `json:"redis_port"`
+	RedisPassword   string `json:"redis_password"`
+	RedisDB         int    `json:"redis_db"`
 	FilesDirectory  string `json:"files_directory"`
 	StaticFiles     string `json:"static_files"`
 	MaxTokenPerUser int    `json:"max_token_per_user"`
