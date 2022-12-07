@@ -7,7 +7,7 @@ if (localStorage.getItem('token') != null) {
     //     token: localStorage.getItem('token')
     // };
     
-    axios.get(window.location.origin + '/api/auth')
+    axios.get(window.location.origin + '/auth/verify')
     .catch(err => {
         if(err.response.status === 401) {
             localStorage.removeItem('token');

@@ -15,6 +15,10 @@ class FileCustom {
     // lo convierte a un objeto File
     constructor(fileJson) {
         this.file = File.fromJSON(fileJson);
+
+        const row = document.createElement('tr');
+        row.setAttribute("class", "file");
+        this.row = row;
     }
 
     // Función que abre el archivo en una nueva pestaña
@@ -44,11 +48,14 @@ class FileCustom {
     delete() {
         axios.delete(`/api/files/${this.file.id}`)
         .then(res => {
-            reloadTable();
+            this.row.remove();
+    
+            if(document.querySelector("tbody").childElementCount == 0) {
+                document.querySelector("thead").innerHTML = "No files, start uploading files c:";
+            }
             message.showSuccess(res.data.message);
         })
         .catch(err => {
-            console.log(err);
             message.showError(err.response.data.message);
         });
     }
@@ -70,13 +77,10 @@ class FileCustom {
 
     // Función que convierte el objeto File a elementos HTML
     toTableRow() {
-        const part = document.createElement('tr');
-        part.setAttribute("class", "file");
-
         const id = document.createElement('td');
         id.classList.add('file-id');
         id.innerText = this.file.id;
-        part.appendChild(id);
+        this.row.appendChild(id);
 
         const filename = document.createElement('td');
         filename.classList.add('file-filename');
@@ -85,7 +89,7 @@ class FileCustom {
             e.preventDefault();
             this.open();
         });
-        part.appendChild(filename);
+        this.row.appendChild(filename);
         
         const actions = document.createElement('td');
         actions.classList.add('file-actions');
@@ -140,9 +144,9 @@ class FileCustom {
         actions.appendChild(shareBtn);
 
 
-        part.appendChild(actions);
+        this.row.appendChild(actions);
 
-        return part;
+        return this.row;
     }
 }
 
@@ -163,7 +167,7 @@ export function reloadTable(cbFiltro = null) {
             document.querySelector('thead').innerHTML = "No files, start uploading files c:";
             return;
         }
-
+        
         // Si hay archivos que agregue las columnas a la tabla
         document.querySelector('thead').innerHTML = `
         <tr>
@@ -172,6 +176,8 @@ export function reloadTable(cbFiltro = null) {
             <th>Actions</th>
         </tr>
         `;
+            
+        // debugger;
 
         // Y cargue las filas de la tabla
         const part = document.createDocumentFragment();
@@ -225,10 +231,5 @@ window.addEventListener('DOMContentLoaded', function() {
         reloadTable((file) => {
             return file.filename.toLowerCase().includes(search.toLowerCase());
         });
-    });
-
-    document.querySelector('#go-share').addEventListener('click', (e) => {
-        e.preventDefault();
-        window.location.href = document.querySelector('#search-input').value + "?api-token="+this.localStorage.getItem('token');
     });
 });

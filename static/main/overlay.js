@@ -21,7 +21,13 @@ function getUserDiv(user, file) {
         axios.delete(`/api/files/share/${file.id}/user/${user.id}`)
         .then(res => {
             message.showSuccess(res.data.message);
-            reloadUsers(file);
+            userShare.remove();
+            
+            if(document.querySelector(".overlay-share").childElementCount == 0) {
+                document.querySelector(".overlay-share").innerHTML = "No users have access to this file";
+            }
+
+            message.showSuccess(res.data.message);
         })
         .catch(err => {
             message.showError(err.response.data.message);

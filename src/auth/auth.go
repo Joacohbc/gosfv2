@@ -74,6 +74,7 @@ func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			}
 			token = t
 
+			// Si no tiene un Header Authorization ni en el URL, se busca el Token en el Cookie
 		} else if ck, err := GetTokenCookie(c); err == nil {
 			token = ck
 
