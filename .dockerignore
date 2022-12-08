@@ -1,0 +1,13 @@
+.vscode/
+.vscode/
+bin/
+logs/
+files/
+node_modules/
+*.sh
+.jshintrc
+Gosf.postman_collection.json
+Ideas.txt
+.gitignore
+package-lock.json
+package.json

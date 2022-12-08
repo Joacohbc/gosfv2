@@ -2,6 +2,7 @@ package env
 
 import (
 	"encoding/json"
+	"flag"
 	"log"
 	"os"
 )
@@ -9,6 +10,7 @@ import (
 type config struct {
 	JWTKey          string `json:"jwt_key"`
 	JWTMinutes      int    `json:"jwt_minutes"`
+	Port            int    `json:"port"`
 	LogDirPath      string `json:"log_dir_path"`
 	DBHostSQL       string `json:"db_host_sql"`
 	DBUserSQL       string `json:"db_user_sql"`
@@ -28,7 +30,11 @@ type config struct {
 var Config config
 
 func init() {
-	b, err := os.ReadFile("config.json")
+
+	configFile := flag.String("config", "config.json", "Path to config file")
+	flag.Parse()
+
+	b, err := os.ReadFile(*configFile)
 	if err != nil {
 		log.Fatal("Error reading config.json:", err)
 	}

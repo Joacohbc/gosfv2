@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
-	"flag"
 	"fmt"
 	"gosfV2/src/auth"
 	"gosfV2/src/middleware/logger"
@@ -13,29 +11,12 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
 )
-
-var (
-	port string
-)
-
-func init() {
-	flag.StringVar(&port, "port", "3000", "Port to listen on")
-	flag.Parse()
-}
-
-type User struct {
-	ID        int          `db:"id"`
-	Username  string       `db:"username"`
-	Password  string       `db:"password"`
-	UpdateAt  sql.NullTime `db:"updated_at"`
-	DeletedAt sql.NullTime `db:"deleted_at"`
-	CreateAt  sql.NullTime `db:"created_at"`
-}
 
 func main() {
 
@@ -43,7 +24,6 @@ func main() {
 		fmt.Println(r)
 		os.Exit(1)
 	}
-
 	e := echo.New()
 
 	e.Static("/static", env.Config.StaticFiles)
@@ -81,7 +61,7 @@ func main() {
 		}
 	}()
 
-	if err := e.Start(":" + port); err != nil {
+	if err := e.Start(":" + strconv.Itoa(env.Config.Port)); err != nil {
 		e.Logger.Fatal(err.Error())
 	}
 }

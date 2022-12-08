@@ -1,0 +1,38 @@
+version: '1.0v'
+services:
+
+  redis-gosf:
+    image: redis:7.0.5
+    container_name: redis-gosf
+    ports:
+      - "6379:6379"
+    volumes:
+      - /data/redis:/data
+    restart: always
+  
+  mysql-gosf:
+    image: mysql:8.0-debian
+    container_name: mysql-gosf
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - /data/mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: "gosf"
+      MYSQL_USER: "gosf"
+      MYSQL_PASSWORD: "gosf"
+      MYSQL_ROOT_PASSWORD: 1234
+    restart: always
+
+  app-gosf:
+    build: 
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - "80:80"
+    depends_on:
+      - redis-gosf
+      - mysql-gosf
+    volumes:
+      - .:/opt/app/api
