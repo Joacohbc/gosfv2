@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"gosfV2/src/models/database"
 	"gosfV2/src/models/env"
 	"io"
@@ -47,7 +48,7 @@ var (
 
 type FileInterface interface {
 	// Obtiene la ruta de un archivo de un usuario
-	GetPath(file, user string) string
+	GetPath(fileId uint, ext string) string
 
 	// Copia el archivo del Reader al sistema de archivos
 	// y guarda la la ruta de archivo en la base de datos
@@ -64,9 +65,6 @@ type FileInterface interface {
 
 	// Obtiene todos los archivos de un usuario
 	GetFilesFromUser(userId uint) ([]File, error)
-
-	// Obtiene la ruta de un archivo de un usuario
-	GetFilepath(fileId, userId uint) (string, error)
 
 	// Obtiene un archivo de un usuario
 	GetByIdFromUser(fileId, userId uint) (File, error)
@@ -103,12 +101,8 @@ func Files(c echo.Context) FileInterface {
 	return fileBD{BD: database.GetMySQL(), Context: c.Request().Context()}
 }
 
-func (f fileBD) MakeUserDir(user string) error {
-	return os.MkdirAll(filepath.Join(env.Config.FilesDirectory, user), 0744)
-}
-
-func (f fileBD) GetPath(file, user string) string {
-	return filepath.Join(env.Config.FilesDirectory, user, file)
+func (f fileBD) GetPath(fileId uint, ext string) string {
+	return filepath.Join(env.Config.FilesDirectory, fmt.Sprint(fileId)+ext)
 }
 
 func (f fileBD) ManageError(err error) error {
@@ -181,27 +175,6 @@ func (f fileBD) GetById(fileId uint) (File, error) {
 	return file, nil
 }
 
-func (f fileBD) GetFilepath(fileId, userId uint) (string, error) {
-
-	var path struct {
-		Filename string `db:"filename"`
-		Username string `db:"username"`
-	}
-
-	err := f.BD.GetContext(f.Context, &path, `
-	SELECT 
-		f.filename,
-		u.username
-	FROM files f
-	JOIN users u ON f.user_id  = u.user_id
-	WHERE f.file_id = ? AND f.user_id = ?`, fileId, userId)
-	if err != nil {
-		return "", f.ManageError(err)
-	}
-
-	return f.GetPath(path.Filename, path.Username), nil
-}
-
 func (f fileBD) GetByIdFromUser(fileId, userId uint) (File, error) {
 	var file File
 
@@ -259,26 +232,19 @@ func (f fileBD) Create(filename string, userId uint, src io.Reader) error {
 	}
 
 	// Creo el archivo
-	if _, err := tx.ExecContext(f.Context, `INSERT INTO files (filename,user_id) VALUES (?,?);`, filename, userId); err != nil {
+	if _, err := tx.ExecContext(f.Context, `INSERT INTO files (filename, user_id) VALUES (?,?);`, filename, userId); err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	user, err := UsersC(f.Context).FindUserById(userId)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// Creo el Directorio de archivos del usuario
-	if err := f.MakeUserDir(user.Username); err != nil {
+	var fileId uint
+	if err := tx.GetContext(f.Context, &fileId, `SELECT LAST_INSERT_ID();`); err != nil {
 		tx.Rollback()
 		return err
 	}
 
 	// Creo el archivo (en Local)
-	path := f.GetPath(filename, user.Username)
-	fileOpen, err := os.Create(path)
+	fileOpen, err := os.Create(f.GetPath(fileId, filepath.Ext(filename)))
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -320,18 +286,12 @@ func (f fileBD) Delete(fileId uint) error {
 		return err
 	}
 
-	user, err := UsersC(f.Context).FindUserById(file.UserID)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
 	if _, err := tx.Exec("DELETE FROM files WHERE file_id = ?", fileId); err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if err := os.Remove(f.GetPath(file.Filename, user.Username)); err != nil {
+	if err := os.Remove(f.GetPath(fileId, filepath.Ext(file.Filename))); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -368,17 +328,7 @@ func (f fileBD) Rename(fileId uint, newName string) error {
 		return errors.New("filename can't be empty")
 	}
 
-	file, err := f.GetById(fileId)
-	if err != nil {
-		return err
-	}
-
-	user, err := UsersC(f.Context).FindUserById(file.UserID)
-	if err != nil {
-		return err
-	}
-
-	if err := os.Rename(f.GetPath(file.Filename, user.Username), f.GetPath(newName, user.Username)); err != nil {
+	if _, err := f.GetById(fileId); err != nil {
 		return err
 	}
 
@@ -446,4 +396,11 @@ func (f fileBD) GetFilesShared(userId uint) ([]File, error) {
 	}
 
 	return files, nil
+}
+
+func init() {
+	if err := os.MkdirAll(env.Config.FilesDirectory, 0744); err != nil {
+		fmt.Println("Error creating files directory: ", err.Error())
+		os.Exit(1)
+	}
 }

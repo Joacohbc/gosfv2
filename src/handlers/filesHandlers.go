@@ -7,6 +7,7 @@ import (
 	"gosfV2/src/models"
 	"gosfV2/src/utils"
 	"net/http"
+	"path/filepath"
 	"strconv"
 
 	"github.com/labstack/echo"
@@ -47,12 +48,12 @@ func (f *fileController) GetFile(c echo.Context) error {
 		return err
 	}
 
-	path, err := models.Files(c).GetFilepath(idFile, c.Get("user_id").(uint))
+	file, err := models.Files(c).GetByIdFromUser(idFile, c.Get("user_id").(uint))
 	if err != nil {
 		return HandleFileError(err)
 	}
 
-	return c.File(path)
+	return c.File(models.Files(c).GetPath(file.ID, filepath.Ext(file.Filename)))
 }
 
 // Obtiene el Id del URL para retornar la Información del archivo
@@ -101,15 +102,15 @@ func (f *fileController) GetSharedFile(c echo.Context) error {
 	}
 
 	idCurrentUser := c.Get("user_id").(uint)
-
+	path := models.Files(c).GetPath(file.ID, filepath.Ext(file.Filename))
 	// Si el usuario es el dueño del archivo, lo envío directamente
 	if file.UserID == idCurrentUser {
-		return c.File(models.Files(c).GetPath(file.Filename, file.User.Username))
+		return c.File(path)
 	}
 
 	// Si esta compartido lo envió directamente
 	if file.Shared {
-		return c.File(models.Files(c).GetPath(file.Filename, file.User.Username))
+		return c.File(path)
 	}
 
 	sharedWithMe, err := models.Files(c).IsSharedWith(file.ID, idCurrentUser)
@@ -123,7 +124,7 @@ func (f *fileController) GetSharedFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, models.ErrFileNotFound.Error())
 	}
 
-	return c.File(models.Files(c).GetPath(file.Filename, file.User.Username))
+	return c.File(path)
 }
 
 // Obtiene todos los archivos del usuario (Su información)
@@ -189,20 +190,15 @@ func (f *fileController) UpdateFile(c echo.Context) error {
 
 	// Si el nombre del archivo es diferente al actual, lo renombro
 	if actual.Filename != file.Filename {
-
-		// Si el archivo con el nuevo nombre ya existe, lo informo al usuario
-		if _, err := models.Files(c).GetByFilenameFromUser(file.Filename, c.Get("user_id").(uint)); err == nil {
-			return echo.NewHTTPError(http.StatusConflict, "File with that name already exists")
-		}
-
-		// Si no existe, renombro el archivo
 		if err := models.Files(c).Rename(idFile, file.Filename); err != nil {
 			return HandleFileError(err)
 		}
 	}
 
-	if err := models.Files(c).SetShared(idFile, file.Shared); err != nil {
-		return HandleFileError(err)
+	if actual.Shared != file.Shared {
+		if err := models.Files(c).SetShared(idFile, file.Shared); err != nil {
+			return HandleFileError(err)
+		}
 	}
 
 	return c.JSON(http.StatusOK, utils.ToJSON(fmt.Sprintf("File %d updated successfully", idFile)))
