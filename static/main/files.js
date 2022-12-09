@@ -181,6 +181,7 @@ class FileCustom {
 // Función que recarga la tabla de Archivos
 export function reloadTable(cbFiltro = null) {
     const htmlFiles = [];
+    document.querySelector('tbody').innerHTML = "";
     axios.get("/api/files/")
     .then(req => {
         
