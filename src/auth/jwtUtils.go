@@ -21,12 +21,12 @@ const (
 	// api-token es el nombre del QueryParam donde se buscara el JWT
 	queryName string = "api-token"
 
+	// token es el nombre de la cookie donde se buscara el JWT
 	cookieName string = "token"
 )
 
 type UserClaims struct {
 	UserID   uint
-	Username string
 	IP       string
 	Location string
 	jwt.RegisteredClaims
@@ -117,12 +117,38 @@ func getLocation(ip string) string {
 	return fmt.Sprintf("%s, %s, %s", location.Country, location.RegionName, location.City)
 }
 
-// Genera un JWT para el usuario que se está logueado
-func generateJWTForUser(userId uint, username string, ip string) (string, error) {
+// Obtiene el Token del usuario del QueryParam, Header o Cookie
+// El error que se genera es un error de tipo echo.HTTPError
+func GetToken(c echo.Context) (string, error) {
+	// Si tiene un Header Authorization, se toma el token de ahí
+	if c.Request().Header.Get(echo.HeaderAuthorization) != "" {
+		t, err := getTokenFromHeader(c)
+		if err != nil {
+			return "", err
+		}
+		return t, nil
 
+		// Si no tiene un Header Authorization, se busca el Token en el URL
+	} else if c.QueryParam(queryName) != "" {
+		t, err := getTokenAsQueryParam(c)
+		if err != nil {
+			return "", err
+		}
+		return t, nil
+
+		// Si no tiene un Header Authorization ni en el URL, se busca el Token en el Cookie
+	} else if ck, err := GetTokenCookie(c); err == nil {
+		return ck, nil
+
+	} else {
+		return "", echo.NewHTTPError(http.StatusUnauthorized, "Not token provided")
+	}
+}
+
+// Genera un JWT para el usuario que se está logueado
+func generateJWTForUser(userId uint, ip string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, UserClaims{
 		UserID:   userId,
-		Username: username,
 		IP:       ip,
 		Location: getLocation(ip),
 		RegisteredClaims: jwt.RegisteredClaims{

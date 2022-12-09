@@ -33,7 +33,7 @@ window.addEventListener('DOMContentLoaded', function() {
         })
         .catch(err => {
             console.log(err);
-            message. showError(err.response.data.message);
+            message.showError(err.response.data.message);
         });
     });
 });

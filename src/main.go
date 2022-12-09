@@ -25,12 +25,15 @@ func main() {
 		os.Exit(1)
 	}
 	e := echo.New()
+	e.Logger = logger.Logger(log.DEBUG)
+
+	// e.Logger = logger.Logger(log.INFO)
+	// e.HideBanner = true
 
 	e.Static("/static", env.Config.StaticFiles)
 
 	e.Use(logger.RequestLoggerConfig())
 	e.Use(middleware.Recover())
-	e.Logger = logger.Logger(log.DEBUG)
 
 	// Test Endpoint
 	e.GET("/ping", func(c echo.Context) error {
@@ -49,6 +52,7 @@ func main() {
 		signal.Notify(quit, os.Interrupt)
 		<-quit
 
+		fmt.Println("Shutting down server... (this may take a few seconds)")
 		if err := database.GetMySQL().Close(); err != nil {
 			e.Logger.Error(err.Error())
 		}

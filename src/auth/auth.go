@@ -31,6 +31,14 @@ func UserCredencialMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
+		if user.Username == "" {
+			return echo.NewHTTPError(http.StatusBadRequest, "Username must not be empty")
+		}
+
+		if user.Password == "" {
+			return echo.NewHTTPError(http.StatusBadRequest, "Password must not be empty")
+		}
+
 		dbUser, err := models.Users(c).FindUserByName(user.Username)
 		if err != nil {
 			if err == models.ErrUserNotFound {
@@ -59,34 +67,14 @@ func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var token string
 
-		// Si tiene un Header Authorization, se toma el token de ahí
-		if c.Request().Header.Get(echo.HeaderAuthorization) != "" {
-			t, err := getTokenFromHeader(c)
-			if err != nil {
-				return err
-			}
-			token = t
-
-			// Si no tiene un Header Authorization, se busca el Token en el URL
-		} else if c.QueryParam(queryName) != "" {
-			t, err := getTokenAsQueryParam(c)
-			if err != nil {
-				return err
-			}
-			token = t
-
-			// Si no tiene un Header Authorization ni en el URL, se busca el Token en el Cookie
-		} else if ck, err := GetTokenCookie(c); err == nil {
-			token = ck
-
-		} else {
-			return echo.NewHTTPError(http.StatusUnauthorized, "Not token provided")
+		// Verifica si la petición viene con el token
+		token, err := GetToken(c)
+		if err != nil {
+			return err
 		}
 
 		claims, err := validJWT(token)
 		if err != nil {
-			c.Logger().Info(token)
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 		}
 
@@ -135,7 +123,7 @@ func RegisterUser(c echo.Context) error {
 func Login(c echo.Context) error {
 	user := c.Get("user").(models.User)
 
-	tokenString, err := generateJWTForUser(user.ID, user.Username, c.RealIP())
+	tokenString, err := generateJWTForUser(user.ID, c.RealIP())
 	if err != nil {
 		return HandlerTokenError(err)
 	}
@@ -158,7 +146,7 @@ func RefreshToken(c echo.Context) error {
 	}
 
 	claims := c.Get("claims").(*UserClaims)
-	tokenString, err := generateJWTForUser(claims.UserID, claims.Username, c.RealIP())
+	tokenString, err := generateJWTForUser(claims.UserID, c.RealIP())
 	if err != nil {
 		c.Logger().Error(err)
 		return HandlerTokenError(err)

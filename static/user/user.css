@@ -1,0 +1,55 @@
+@import url("/static/main.css");
+
+.container {
+    display: flex;
+    justify-content: center;
+}
+
+#user-username {
+    font-size: 2em;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+    color: var(--color-text);
+}
+
+#user-icon {
+    content: url("/static/images/perfil-del-usuario.png");
+    width:  15em;
+    height: 15em;
+    margin: 0 auto;
+    border-radius: 50%;
+    justify-self: center;
+    margin-bottom: 10px;
+}
+
+#user-info {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 5%;
+    width: 50%;
+    background-color: var(--color-background-light);
+    border-radius: 10px;
+}
+
+input, button {
+    padding: .5em;
+    border-radius: 10px;
+}
+
+button {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    border: 1px solid var(--color-text);
+}
+
+button:hover {
+    background-color: var(--color-hover);
+    font-size: 1.1em;
+}
+
+#message{
+    text-align: center;
+}

@@ -20,7 +20,8 @@ window.addEventListener('DOMContentLoaded', function() {
             window.location.href = '/static/login/login.html';
         })
         .catch(err => {
-            alert(err.response.data.message);
+            localStorage.removeItem('token');
+            window.location.href = '/static/login/login.html';
         });
     });
 
@@ -31,6 +32,6 @@ window.addEventListener('DOMContentLoaded', function() {
 
     document.querySelector("#btn-user-info").addEventListener('click', (e) => {
         e.preventDefault();
-        alert("Working in progress!");
+        window.location.href = '/static/user/users.html';
     });
 });

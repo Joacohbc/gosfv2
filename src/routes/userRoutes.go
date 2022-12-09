@@ -16,5 +16,5 @@ func (a *userRoutes) AddRoutesToGroup(group *echo.Group) {
 	users.PUT("/rename", handlers.Users.RenameUser)
 	users.PUT("/password", handlers.Users.ChangePassword)
 	users.DELETE("/", handlers.Users.DeleteUser)
-	users.GET("/", handlers.Users.GetUser)
+	users.GET("/me", handlers.Users.GetUser)
 }

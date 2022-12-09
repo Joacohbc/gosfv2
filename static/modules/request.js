@@ -17,6 +17,7 @@ function refreshToken() {
             localStorage.setItem('expires', expires);
 
             axios.defaults.headers.common.Authorization = 'Bearer ' + res.data.token;
+            console.log('Token refreshed');
             refreshToken();
         })
         .catch(err => {

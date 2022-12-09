@@ -20,6 +20,10 @@ func (u userController) RenameUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid user data")
 	}
 
+	if user.Username == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Username must not be empty")
+	}
+
 	exist, err := models.Users(c).ExistUserByName(user.Username)
 	if err != nil {
 		return auth.HandleUserError(err)

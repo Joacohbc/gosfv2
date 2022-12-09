@@ -28,7 +28,7 @@ window.addEventListener('DOMContentLoaded', function() {
             message.showSuccess(req.data.message);
         })
         .catch(err => {
-            message. showError(err.response.data.message);
+            message.showError(err.response.data.message);
         });
     });
 });

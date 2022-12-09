@@ -14,8 +14,8 @@ import (
 )
 
 var (
-	ErrTokenNotFound               = fmt.Errorf("token not found")
-	ErrMaxTokens                   = fmt.Errorf("max tokens reached")
+	ErrTokenNotFound               = fmt.Errorf("token/s not found in the database for the user")
+	ErrMaxTokens                   = fmt.Errorf("max tokens reached for the user")
 	TokenDuration    time.Duration = time.Minute * time.Duration(env.Config.JWTMinutes)
 )
 
