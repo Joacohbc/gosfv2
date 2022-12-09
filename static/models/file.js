@@ -21,10 +21,4 @@ export class File {
     get shared() {
         return this._shared;
     }
-
-    get link() {
-        return `/api/files/${this._id}`;
-    }
-
-
 }

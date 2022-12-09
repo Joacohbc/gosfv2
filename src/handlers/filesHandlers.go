@@ -126,6 +126,16 @@ func (f *fileController) GetSharedFile(c echo.Context) error {
 	return c.File(models.Files(c).GetPath(file.Filename, file.User.Username))
 }
 
+// Obtiene todos los archivos del usuario (Su información)
+func (f *fileController) GetAllShareFiles(c echo.Context) error {
+	files, err := models.Files(c).GetFilesShared(c.Get("user_id").(uint))
+	if err != nil {
+		return HandleFileError(err)
+	}
+
+	return c.JSON(http.StatusOK, dtos.ToFileListDTO(files))
+}
+
 // Obtiene los archivos subidos desde el Body de la Request (Formulario)
 // y los guarda en la base de datos para el usuario logueado
 //

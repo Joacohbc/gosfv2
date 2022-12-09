@@ -89,6 +89,8 @@ type FileInterface interface {
 	// Elimina un usuario de un archivo
 	RemoveUserFromFile(userId, fileId uint) error
 
+	GetFilesShared(userId uint) ([]File, error)
+
 	ManageError(err error) error
 }
 
@@ -425,4 +427,23 @@ func (f fileBD) RemoveUserFromFile(userId, fileId uint) error {
 	}
 
 	return nil
+}
+
+func (f fileBD) GetFilesShared(userId uint) ([]File, error) {
+	var files []File
+
+	err := f.BD.SelectContext(f.Context, &files, `
+	SELECT
+		f.*
+	FROM files f
+	JOIN file_users fu ON f.file_id = fu.file_id
+	WHERE fu.user_id = ?`, userId)
+	if err != nil {
+		if database.IsNotFound(err) {
+			return []File{}, nil
+		}
+		return nil, err
+	}
+
+	return files, nil
 }

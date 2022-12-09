@@ -23,7 +23,11 @@ class FileCustom {
 
     // Función que abre el archivo en una nueva pestaña
     open() {
-        window.open(`${this.file.link}`, '_blank');
+        window.open(`/api/files/${this.file.id}`, '_blank');
+    }
+
+    share() {
+        window.open(`/api/files/share/${this.file.id}`, '_blank');
     }
 
     // Función que descarga el archivo
@@ -148,18 +152,63 @@ class FileCustom {
 
         return this.row;
     }
+
+    // Función que convierte el objeto File a elementos HTML
+    toTableRowShare() {
+        const id = document.createElement('td');
+        id.classList.add('file-id');
+        id.innerText = this.file.id;
+        this.row.appendChild(id);
+
+        const filename = document.createElement('td');
+        filename.classList.add('file-filename');
+        filename.innerHTML = this.file.filename;
+        filename.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.share();
+        });
+        this.row.appendChild(filename);
+        
+        const actions = document.createElement('td');
+        actions.classList.add('file-actions');
+        actions.innerHTML = "Shared file";
+        this.row.appendChild(actions);
+
+        return this.row;
+    }
 }
 
 // Función que recarga la tabla de Archivos
 export function reloadTable(cbFiltro = null) {
+    const htmlFiles = [];
     axios.get("/api/files/")
     .then(req => {
-        document.querySelector('tbody').innerHTML = '';
-
+        
         let files = req.data || [];
         if(cbFiltro != null) {
             files = files.filter(cbFiltro);
         }
+
+        files.forEach(element => {
+            htmlFiles.push(new FileCustom(element).toTableRow());
+        });
+
+        return axios.get("/api/files/share");
+    })
+    .then(req => {
+        let files = req.data || [];
+        console.log(files);
+        if(cbFiltro != null) {
+            files = files.filter(cbFiltro);
+        }
+        
+        files.forEach(file => {
+            htmlFiles.push(new FileCustom(file).toTableRowShare());
+        });
+
+        return Promise.resolve(htmlFiles);
+    })
+    .then(files => {
 
         // Si no hay archivos que ingrese un mensaje personalizado
         // en el head de la tabla que indique que no hay archivos
@@ -176,13 +225,11 @@ export function reloadTable(cbFiltro = null) {
             <th>Actions</th>
         </tr>
         `;
-            
-        // debugger;
 
         // Y cargue las filas de la tabla
         const part = document.createDocumentFragment();
         files.forEach(element => {
-            part.appendChild(new FileCustom(element).toTableRow());
+            part.appendChild(element);
         });
         document.querySelector('tbody').appendChild(part);
     })

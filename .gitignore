@@ -5,3 +5,4 @@ logs/
 files/
 node_modules/*
 Ideas.txt
+src/config.json
