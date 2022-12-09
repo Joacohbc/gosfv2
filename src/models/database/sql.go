@@ -43,8 +43,8 @@ func init() {
 		temp, err := sqlx.Connect("mysql", dsn)
 		if err != nil {
 			fmt.Printf("Error to connect to MySQL (%s): %s\n", dsn, err.Error())
-			fmt.Printf("Retrying the MySQL connection in 10 seconds (time %d)..\n", i)
-			time.Sleep(10 * time.Second)
+			fmt.Printf("Retrying the MySQL connection in 20 seconds (time %d)..\n", i)
+			time.Sleep(20 * time.Second)
 			continue
 		}
 
@@ -70,8 +70,8 @@ func init() {
 
 		if err := temp.Ping(context.Background()).Err(); err != nil {
 			fmt.Printf("Error to connect to Redis (%s - %s - %d): %s\n", redisDb.Options().Addr, redisDb.Options().Password, redisDb.Options().DB, err.Error())
-			fmt.Printf("Retrying the MySQL connection in 10 seconds (time %d)..\n", i)
-			time.Sleep(10 * time.Second)
+			fmt.Printf("Retrying the MySQL connection in 20 seconds (time %d)..\n", i)
+			time.Sleep(20 * time.Second)
 			continue
 		}
 

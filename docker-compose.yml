@@ -4,8 +4,8 @@ services:
   redis-gosf:
     image: redis:7.0.5
     container_name: redis-gosf
-    ports:
-      - "6379:6379"
+    # ports:
+    #   - "6379:6379"
     # volumes:
     #   - /data/gosf/redis:/data
     restart: always
@@ -14,8 +14,8 @@ services:
     image: mysql:8.0-debian
     container_name: mysql-gosf
     command: --default-authentication-plugin=mysql_native_password
-    ports:
-      - "3306:3306"
+    # ports:
+      # - "3306:3306"
     # volumes:
     #   - /data/gosf/mysql:/var/lib/mysql
     environment:
