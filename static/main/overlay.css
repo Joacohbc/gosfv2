@@ -65,8 +65,17 @@
 .overlay-user-share {
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: 10px;
     padding: 5px;
+}
+
+.overlay-user-share-icon {
+    position: absolute; 
+    left: 3em;
+    width: 2em;
+    height: 2em;
+    border-radius: 50%;
 }
 
 .overlay-user-share:hover {

@@ -4,7 +4,9 @@ import (
 	"gosfV2/src/auth"
 	"gosfV2/src/dtos"
 	"gosfV2/src/models"
+	"gosfV2/src/utils"
 	"net/http"
+	"os"
 
 	"github.com/labstack/echo"
 )
@@ -116,4 +118,79 @@ func (u userController) GetUser(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, dtos.ToUserDTO(user))
+}
+
+func (u userController) GetIcon(c echo.Context) error {
+
+	path := models.Users(c).GetIcon(c.Get("user_id").(uint))
+
+	if _, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			return c.File(models.DefaultIcon)
+		}
+		return echo.NewHTTPError(http.StatusNotFound, "Icon not found")
+	}
+
+	return c.File(path)
+}
+
+func (u userController) GetIconFromUser(c echo.Context) error {
+
+	id, err := Files.GetIdFromURL(c, "userId")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid user id")
+	}
+
+	path := models.Users(c).GetIcon(id)
+	if _, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			return c.File(models.DefaultIcon)
+		}
+		return echo.NewHTTPError(http.StatusNotFound, "Icon not found")
+	}
+
+	return c.File(path)
+}
+
+func (u userController) UploadIcon(c echo.Context) error {
+
+	file, err := c.FormFile("icon")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid file: "+err.Error())
+	}
+
+	blob, err := file.Open()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if err := models.Users(c).UploadIcon(c.Get("user_id").(uint), blob); err != nil {
+
+		if err == models.ErrIconFormatNotSupported || err == models.ErrIconTooLarge {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, utils.ToJSON("Icon uploaded successfully"))
+}
+
+func (u userController) DeleteIcon(c echo.Context) error {
+
+	id := c.Get("user_id").(uint)
+	path := models.Users(c).GetIcon(id)
+	if _, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			return echo.NewHTTPError(http.StatusNotFound, "The user doesn't have an icon")
+		}
+	}
+
+	err := models.Users(c).DeleteIcon(id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, utils.ToJSON("Icon removed successfully"))
+
 }

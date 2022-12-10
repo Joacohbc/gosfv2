@@ -10,6 +10,11 @@ function getUserDiv(user, file) {
     const userShare = document.createElement('div');
     userShare.classList.add("overlay-user-share");
 
+    const icon = document.createElement("img");
+    icon.src = window.location.origin + `/api/users/icon/${user.id}`+ "?" + new Date().getTime();
+    icon.classList.add("overlay-user-share-icon");
+    userShare.appendChild(icon);
+
     const username = document.createElement("div");
     username.innerHTML = user.username;
     userShare.appendChild(username);

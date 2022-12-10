@@ -14,12 +14,19 @@
 }
 
 #user-icon {
-    content: url("/static/images/perfil-del-usuario.png");
-    width:  15em;
-    height: 15em;
+    width:  45%;
+    height: 45%;
     margin: 0 auto;
     border-radius: 50%;
     justify-self: center;
+    margin-bottom: 10px;
+}
+
+.icon-options {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    gap: 10px;
     margin-bottom: 10px;
 }
 
@@ -29,23 +36,40 @@
     flex-direction: column;
     gap: 10px;
     padding: 5%;
-    width: 50%;
+    width: 60%;
     background-color: var(--color-background-light);
     border-radius: 10px;
 }
 
-input, button {
+input {
     padding: .5em;
     border-radius: 10px;
 }
 
-button {
+
+.btn-icon {
+    padding: .5em;
+    border-radius: 10px;
+    background-color: var(--color-background);
+    color: var(--color-text);
+    border: 1px  var(--color-text);
+    border-style: dashed;
+}
+
+.btn-icon:hover {
+    background-color: var(--color-hover);
+}
+
+
+.btn-form {
+    padding: .5em;
+    border-radius: 10px;
     background-color: var(--color-background);
     color: var(--color-text);
     border: 1px solid var(--color-text);
 }
 
-button:hover {
+.btn-form:hover {
     background-color: var(--color-hover);
     font-size: 1.1em;
 }

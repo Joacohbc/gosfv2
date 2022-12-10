@@ -26,13 +26,22 @@
         <div id="user-info">
 
             <div id="user-username"></div>
-            <div id="user-icon"></div>
+            <img id="user-icon">
+            
+            <div class="icon-options">  
+                <label for="icon-upload" class="btn-icon">Upload icon</label>
+                <input id="icon-upload" type="file" style="display: none;" required>
+                <button id="btn-delete-icon" class="btn-icon">Remove icon</button>
+            </div>
+
             <input type="text" id="username" placeholder="Username">
-            <button id="btn-update">Update</button>
-            <input type="text" id="old-password" placeholder="Old Password">
-            <input type="text" id="new-password" placeholder="New Password">            
-            <input type="text" id="confirm-password" placeholder="Confirm Password">
-            <button id="btn-change-password"> Changes Password</button>
+            <button id="btn-update" class="btn-form">Update</button>
+
+            <input type="password" id="old-password" placeholder="Old Password">
+            <input type="password" id="new-password" placeholder="New Password">            
+            <input type="password" id="confirm-password" placeholder="Confirm Password">
+            <button id="btn-change-password" class="btn-form"> Changes Password</button>
+            
             <div id="message"></div>
         </div>
 

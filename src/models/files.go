@@ -397,10 +397,3 @@ func (f fileBD) GetFilesShared(userId uint) ([]File, error) {
 
 	return files, nil
 }
-
-func init() {
-	if err := os.MkdirAll(env.Config.FilesDirectory, 0744); err != nil {
-		fmt.Println("Error creating files directory: ", err.Error())
-		os.Exit(1)
-	}
-}

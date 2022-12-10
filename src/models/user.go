@@ -1,10 +1,16 @@
 package models
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"gosfV2/src/models/database"
+	"image/jpeg"
+	"io"
+	"os"
+	"path/filepath"
 	"regexp"
 
 	"time"
@@ -46,7 +52,9 @@ func (u User) Validate() error {
 }
 
 var (
-	ErrUserNotFound = errors.New("user/s not found")
+	ErrUserNotFound           = errors.New("user/s not found")
+	ErrIconTooLarge           = errors.New("icon too large (max 512 x 512)")
+	ErrIconFormatNotSupported = errors.New("invalid image format, only jpeg is supported")
 )
 
 type UserInterface interface {
@@ -58,6 +66,9 @@ type UserInterface interface {
 	Rename(id uint, newName string) error
 	ChangePassword(id uint, newPassword string) error
 	Delete(id uint) error
+	UploadIcon(id uint, src io.Reader) error
+	DeleteIcon(id uint) error
+	GetIcon(id uint) string
 	ManageError(err error) error
 }
 
@@ -152,4 +163,53 @@ func (u usersBD) ChangePassword(id uint, newPassword string) error {
 func (u usersBD) Delete(id uint) error {
 	_, err := u.DB.ExecContext(u.Context, "DELETE FROM users WHERE user_id = ?", id)
 	return err
+}
+
+func (u usersBD) UploadIcon(id uint, src io.Reader) error {
+
+	// Leo el archivo (para poder usar el contenido del Reader varias veces)
+	blob, err := io.ReadAll(src)
+	if err != nil {
+		return err
+	}
+
+	// Verifico que sea un png y que no sea muy grande
+	img, err := jpeg.DecodeConfig(bytes.NewReader(blob))
+	if err != nil {
+		return ErrIconFormatNotSupported
+	}
+
+	if img.Width > 512 || img.Height > 512 {
+		return ErrIconTooLarge
+	}
+
+	// Guardo el archivo
+	file, err := os.Create(u.GetIcon(id))
+	if err != nil {
+		return err
+	}
+
+	// Cierro el archivo
+	if _, err = io.Copy(file, bytes.NewReader(blob)); err != nil {
+		return err
+	}
+
+	if err = file.Close(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u usersBD) GetIcon(id uint) string {
+	return filepath.Join(UserIconDir, fmt.Sprint(id)+"icon.jpeg")
+}
+
+func (u usersBD) DeleteIcon(id uint) error {
+	err := os.Remove(u.GetIcon(id))
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
