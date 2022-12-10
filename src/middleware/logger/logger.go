@@ -16,8 +16,7 @@ import (
 var LogWriter io.Writer
 
 func init() {
-	err := os.MkdirAll(env.Config.LogDirPath, 0744)
-	if err != nil {
+	if err := os.MkdirAll(env.Config.LogDirPath, 0744); err != nil {
 		log.Fatal("Error creating log directory: ", err)
 	}
 

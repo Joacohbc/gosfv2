@@ -19,6 +19,8 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
+const Version = "v1.0.0"
+
 func main() {
 
 	if err := recover(); err != nil {
@@ -87,8 +89,8 @@ ____  ___  ____  _____       ____
 | |  _| | | \___ \| |_  \ \ / / __) |
 | |_| | |_| |___) |  _|  \ V / / __/ 
 \____|\___/|____/|_|     \_/ |_____|
-Powered By Echo with Go Language - v1.0.0
-	`)
+Powered By Echo v4 with Go Language - ` + Version)
+	fmt.Println()
 	fmt.Println("Server's Configuration: ")
 	fmt.Println("- Server is running on port " + strconv.Itoa(env.Config.Port))
 	fmt.Println("- Frontend files are served from " + staticAbs)

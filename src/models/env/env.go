@@ -47,18 +47,15 @@ func init() {
 		log.Fatal("Error reading config.json:", err)
 	}
 
-	err = json.Unmarshal(b, &Config)
-	if err != nil {
+	if err := json.Unmarshal(b, &Config); err != nil {
 		log.Fatal("Error unmarshaling config.json:", err)
 	}
 
-	err = json.Unmarshal(b, &Config.SQL)
-	if err != nil {
+	if err := json.Unmarshal(b, &Config.SQL); err != nil {
 		log.Fatal("Error unmarshaling config.json:", err)
 	}
 
-	err = json.Unmarshal(b, &Config.Redis)
-	if err != nil {
+	if err := json.Unmarshal(b, &Config.Redis); err != nil {
 		log.Fatal("Error unmarshaling config.json:", err)
 	}
 
@@ -66,14 +63,5 @@ func init() {
 		if os.IsNotExist(err) {
 			log.Fatal("Static files directory does not exist: " + Config.StaticFiles)
 		}
-
-	}
-
-	if _, err := os.Stat(Config.FilesDirectory); os.IsNotExist(err) {
-		log.Fatal("Files directory does not exist: " + Config.FilesDirectory)
-	}
-
-	if _, err := os.Stat(Config.LogDirPath); os.IsNotExist(err) {
-		log.Fatal("Log directory does not exist: " + Config.LogDirPath)
 	}
 }
