@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strconv"
 
 	"github.com/labstack/echo"
@@ -20,15 +21,11 @@ import (
 
 func main() {
 
-	if r := recover(); r != nil {
-		fmt.Println(r)
-		os.Exit(1)
+	if err := recover(); err != nil {
+		log.Fatal(err)
 	}
-	e := echo.New()
-	e.Logger = logger.Logger(log.DEBUG)
 
-	// e.Logger = logger.Logger(log.INFO)
-	// e.HideBanner = true
+	e := echo.New()
 
 	e.Static("/static", env.Config.StaticFiles)
 
@@ -65,6 +62,52 @@ func main() {
 		}
 	}()
 
+	e.HideBanner = true
+	e.HidePort = true
+	e.Logger = logger.Logger(log.ERROR)
+
+	staticAbs, err := filepath.Abs(env.Config.StaticFiles)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	filesAbs, err := filepath.Abs(env.Config.FilesDirectory)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	logAbs, err := filepath.Abs(env.Config.LogDirPath)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	fmt.Println(`
+____  ___  ____  _____       ____  
+/ ___|/ _ \/ ___||  ___|_   _|___ \ 
+| |  _| | | \___ \| |_  \ \ / / __) |
+| |_| | |_| |___) |  _|  \ V / / __/ 
+\____|\___/|____/|_|     \_/ |_____|
+Powered By Echo with Go Language - v1.0.0
+	`)
+	fmt.Println("Server's Configuration: ")
+	fmt.Println("- Server is running on port " + strconv.Itoa(env.Config.Port))
+	fmt.Println("- Frontend files are served from " + staticAbs)
+	fmt.Println("- Files are stored in " + filesAbs)
+	fmt.Println("- Logs are stored in " + logAbs)
+	fmt.Println()
+	fmt.Println("MySQL's Connection: ")
+	fmt.Println("- Host: " + env.Config.SQL.Host)
+	fmt.Println("- Port: " + strconv.Itoa(env.Config.SQL.Port))
+	fmt.Println("- User: " + env.Config.SQL.User)
+	fmt.Println("- Database: " + env.Config.SQL.Name)
+	fmt.Println()
+	fmt.Println("Redis's Connection: ")
+	fmt.Println("- Host: " + env.Config.Redis.Host)
+	fmt.Println("- Port: " + strconv.Itoa(env.Config.Redis.Port))
+	fmt.Println("- Database: " + strconv.Itoa(env.Config.Redis.DB))
+	fmt.Println()
+	fmt.Println("Starting server...")
+	fmt.Println("Press CTRL+C to stop the server")
 	if err := e.Start(":" + strconv.Itoa(env.Config.Port)); err != nil {
 		e.Logger.Fatal(err.Error())
 	}

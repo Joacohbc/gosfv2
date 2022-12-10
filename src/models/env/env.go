@@ -8,23 +8,31 @@ import (
 )
 
 type config struct {
+	SQL             sql
+	Redis           redis
 	JWTKey          string `json:"jwt_key"`
 	JWTMinutes      int    `json:"jwt_minutes"`
 	Port            int    `json:"port"`
 	LogDirPath      string `json:"log_dir_path"`
-	DBHostSQL       string `json:"db_host_sql"`
-	DBUserSQL       string `json:"db_user_sql"`
-	DBPasswordSQL   string `json:"db_password_sql"`
-	DBNameSQL       string `json:"db_name_sql"`
-	BDPortSQL       int    `json:"db_port_sql"`
-	BDCharsetSQL    string `json:"db_charset_sql"`
-	RedisHost       string `json:"redis_host"`
-	RedisPort       int    `json:"redis_port"`
-	RedisPassword   string `json:"redis_password"`
-	RedisDB         int    `json:"redis_db"`
 	FilesDirectory  string `json:"files_directory"`
 	StaticFiles     string `json:"static_files"`
 	MaxTokenPerUser int    `json:"max_token_per_user"`
+}
+
+type sql struct {
+	Host     string `json:"db_host_sql"`
+	User     string `json:"db_user_sql"`
+	Password string `json:"db_password_sql"`
+	Name     string `json:"db_name_sql"`
+	Port     int    `json:"db_port_sql"`
+	Charset  string `json:"db_charset_sql"`
+}
+
+type redis struct {
+	Host     string `json:"redis_host"`
+	Port     int    `json:"redis_port"`
+	Password string `json:"redis_password"`
+	DB       int    `json:"redis_db"`
 }
 
 var Config config
@@ -42,5 +50,30 @@ func init() {
 	err = json.Unmarshal(b, &Config)
 	if err != nil {
 		log.Fatal("Error unmarshaling config.json:", err)
+	}
+
+	err = json.Unmarshal(b, &Config.SQL)
+	if err != nil {
+		log.Fatal("Error unmarshaling config.json:", err)
+	}
+
+	err = json.Unmarshal(b, &Config.Redis)
+	if err != nil {
+		log.Fatal("Error unmarshaling config.json:", err)
+	}
+
+	if _, err := os.Stat(Config.StaticFiles); err != nil {
+		if os.IsNotExist(err) {
+			log.Fatal("Static files directory does not exist: " + Config.StaticFiles)
+		}
+
+	}
+
+	if _, err := os.Stat(Config.FilesDirectory); os.IsNotExist(err) {
+		log.Fatal("Files directory does not exist: " + Config.FilesDirectory)
+	}
+
+	if _, err := os.Stat(Config.LogDirPath); os.IsNotExist(err) {
+		log.Fatal("Log directory does not exist: " + Config.LogDirPath)
 	}
 }

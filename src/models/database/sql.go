@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"gosfV2/src/models/env"
-	"os"
+	"log"
 	"strconv"
 	"time"
 
@@ -31,19 +31,18 @@ func GetRedis() *redis.Client {
 // Retorna true si es sql.ErrNoRows)
 func IsNotFound(err error) bool {
 	return errors.Is(err, sql.ErrNoRows)
-
 }
 
 func init() {
 
 	for i := 1; i <= 10; i++ {
-		dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local", env.Config.DBUserSQL, env.Config.DBPasswordSQL, env.Config.DBHostSQL, env.Config.BDPortSQL, env.Config.DBNameSQL, env.Config.BDCharsetSQL)
+		dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local", env.Config.SQL.User, env.Config.SQL.Password, env.Config.SQL.Host, env.Config.SQL.Port, env.Config.SQL.Name, env.Config.SQL.Charset)
 
 		var err error
 		temp, err := sqlx.Connect("mysql", dsn)
 		if err != nil {
-			fmt.Printf("Error to connect to MySQL (%s): %s\n", dsn, err.Error())
-			fmt.Printf("Retrying the MySQL connection in 20 seconds (time %d)..\n", i)
+			log.Printf("Error to connect to MySQL (%s): %s\n", dsn, err.Error())
+			log.Printf("Retrying the MySQL connection in 20 seconds (time %d)..\n", i)
 			time.Sleep(20 * time.Second)
 			continue
 		}
@@ -57,20 +56,19 @@ func init() {
 	}
 
 	if mySqlDB == nil {
-		fmt.Println("Error to connect to MySQL")
-		os.Exit(1)
+		log.Fatal("Error to connect to MySQL")
 	}
 
 	for i := 1; i <= 10; i++ {
 		temp := redis.NewClient(&redis.Options{
-			Addr:     env.Config.RedisHost + ":" + strconv.Itoa(env.Config.RedisPort),
-			Password: env.Config.RedisPassword,
-			DB:       env.Config.RedisDB,
+			Addr:     env.Config.Redis.Host + ":" + strconv.Itoa(env.Config.Redis.Port),
+			Password: env.Config.Redis.Password,
+			DB:       env.Config.Redis.DB,
 		})
 
 		if err := temp.Ping(context.Background()).Err(); err != nil {
-			fmt.Printf("Error to connect to Redis (%s - %s - %d): %s\n", redisDb.Options().Addr, redisDb.Options().Password, redisDb.Options().DB, err.Error())
-			fmt.Printf("Retrying the MySQL connection in 20 seconds (time %d)..\n", i)
+			log.Printf("Error to connect to Redis (%s - %s - %d): %s\n", redisDb.Options().Addr, redisDb.Options().Password, redisDb.Options().DB, err.Error())
+			log.Printf("Retrying the MySQL connection in 20 seconds (time %d)..\n", i)
 			time.Sleep(20 * time.Second)
 			continue
 		}
@@ -80,8 +78,7 @@ func init() {
 	}
 
 	if redisDb == nil {
-		fmt.Println("Error to connect to Redis")
-		os.Exit(1)
+		log.Fatal("Error to connect to Redis")
 	}
 
 	mySqlDB.MustExec(`

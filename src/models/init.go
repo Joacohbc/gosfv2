@@ -5,6 +5,7 @@ import (
 	"gosfV2/src/models/env"
 	"image"
 	"image/jpeg"
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -16,13 +17,11 @@ var (
 
 func init() {
 	if err := os.MkdirAll(env.Config.FilesDirectory, 0744); err != nil {
-		fmt.Println("Error creating files directory: ", err.Error())
-		os.Exit(1)
+		log.Fatal("Error creating files directory: ", err.Error())
 	}
 
 	if err := os.MkdirAll(UserIconDir, 0744); err != nil {
-		fmt.Println("Error creating icon files directory: ", err.Error())
-		os.Exit(1)
+		log.Fatal("Error creating icon files directory: ", err.Error())
 	}
 
 	file, err := os.Create(DefaultIcon)
@@ -35,12 +34,10 @@ func init() {
 	img.Set(0, 0, image.White)
 
 	if err := jpeg.Encode(file, img, nil); err != nil {
-		fmt.Println("Error creating default icon: ", err.Error())
-		os.Exit(1)
+		log.Fatal("Error creating default icon: ", err.Error())
 	}
 
 	if err := file.Close(); err != nil {
-		fmt.Println("Error creating default icon: ", err.Error())
-		os.Exit(1)
+		log.Fatal("Error creating default icon: ", err.Error())
 	}
 }
