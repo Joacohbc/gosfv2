@@ -141,7 +141,7 @@ Para iniciar basta con ejecutar el binario (con las 2 base de datos corriendo)
 
 ```bash
 # Clono el repositorio
-git clone https://github.com/Joacohbc/gosfv2;
+git clone https://github.com/Joacohbc/gosfv2; cd ./gosfv2;
 
 # Obtener todas las dependencias indicadas en el g.mod
 go get ./src;
@@ -162,7 +162,7 @@ Por defecto el servicio corre en el puerto 3000, para cambiar esto basta con mod
 
 ```bash
 # Clono el repositorio
-git clone https://github.com/Joacohbc/gosfv2;
+git clone https://github.com/Joacohbc/gosfv2; cd ./gosfv2;
 
 # Compilo los binarios y inicio los contenedores
 docker-compose build --no-cache; 
