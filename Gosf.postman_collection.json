@@ -149,6 +149,43 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Get Share All",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:{{port}}/api/files/share",
+									"host": [
+										"localhost"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"files",
+										"share"
+									],
+									"query": [
+										{
+											"key": "filename",
+											"value": "213955.png",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
@@ -191,9 +228,6 @@
 				},
 				{
 					"name": "Get File",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -207,17 +241,8 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "localhost:{{port}}/api/files/:fileId",
+							"raw": "localhost:{{port}}/api/files/:fileId/info",
 							"host": [
 								"localhost"
 							],
@@ -225,12 +250,13 @@
 							"path": [
 								"api",
 								"files",
-								":fileId"
+								":fileId",
+								"info"
 							],
 							"variable": [
 								{
 									"key": "fileId",
-									"value": "57"
+									"value": "2"
 								}
 							]
 						}
@@ -382,14 +408,7 @@
 								{
 									"key": "files",
 									"type": "file",
-									"src": [
-										"/home/joaco/Wallpaper/678759.jpg",
-										"/home/joaco/Wallpaper/680749.jpg",
-										"/home/joaco/Wallpaper/691314.png",
-										"/home/joaco/Wallpaper/692699.jpg",
-										"/home/joaco/Wallpaper/694838.png",
-										"/home/joaco/Wallpaper/700001.png"
-									]
+									"src": []
 								}
 							]
 						},
@@ -430,7 +449,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"Joaco\"\n}",
+							"raw": "{\n    \"username\": \"NewName\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -438,15 +457,22 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:{{port}}/api/users/rename",
+							"raw": "localhost:{{port}}/api/files/",
 							"host": [
 								"localhost"
 							],
 							"port": "{{port}}",
 							"path": [
 								"api",
-								"users",
-								"rename"
+								"files",
+								""
+							],
+							"query": [
+								{
+									"key": "filename",
+									"value": "213955.png",
+									"disabled": true
+								}
 							]
 						}
 					},
@@ -537,7 +563,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:{{port}}/api/users/",
+							"raw": "localhost:{{port}}/api/users/me",
 							"host": [
 								"localhost"
 							],
@@ -545,7 +571,129 @@
 							"path": [
 								"api",
 								"users",
-								""
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Icon",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "icon",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:{{port}}/api/users/icon",
+							"host": [
+								"localhost"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"users",
+								"icon"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Icon",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "localhost:{{port}}/api/users/icon",
+							"host": [
+								"localhost"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"users",
+								"icon"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Icon",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:{{port}}/api/users/icon/me",
+							"host": [
+								"localhost"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"users",
+								"icon",
+								"me"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
 							]
 						}
 					},
@@ -709,7 +857,7 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:{{port}}/auth/login?cookie=true",
+					"raw": "localhost:{{port}}/auth/login",
 					"host": [
 						"localhost"
 					],
@@ -721,7 +869,8 @@
 					"query": [
 						{
 							"key": "cookie",
-							"value": "true"
+							"value": "true",
+							"disabled": true
 						}
 					]
 				}

@@ -44,7 +44,7 @@ go build -o ./gosfv2 ./src
 
 ### Docker
 
-- Necesita tener instalado [Docker](https://docs.docker.com/get-docker/).
+Necesita tener instalado [Docker](https://docs.docker.com/get-docker/).
 
 ### MySQL
 
@@ -131,9 +131,9 @@ docker run -d -p 6379:6379 --name redis-docker redis:redis:6.2.7-bullseye
 docker run -d -p 6379:6379 --name redis-docker redis:6.0-bullseye
 ```
 
-## Docker Compose (Unicamente para la opción de despliegue numero 2)
+### Docker Compose
 
-- Necesita tener instalado [Docker Compose](https://docs.docker.com/compose/install/)
+Necesita tener instalado [Docker Compose](https://docs.docker.com/compose/install/). Unicamente para la opción de despliegue numero 2.
 
 ## Iniciar (Opción 1)
 
@@ -144,14 +144,14 @@ Para iniciar basta con ejecutar el binario (con las 2 base de datos corriendo)
 git clone https://github.com/Joacohbc/gosfv2;
 
 # Obtener todas las dependencias indicadas en el g.mod
-go get ./src
+go get ./src;
 
 # Compilar el código fuente
-go build -o ./gosfv2 ./src
+go build -o ./gosfv2 ./src;
 
 # Ejecuto el binario anteriormente compilado (./gosfv2) y 
 # le indicio que utilice el archivo de configuración ./config.json
-./gosfv2 -config ./config.json
+./gosfv2 -config ./config.json;
 ```
 
 ## Iniciar (Opción 2)
