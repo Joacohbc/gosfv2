@@ -4,10 +4,13 @@ bin/
 logs/
 files/
 node_modules/
-*.sh
+makee.sh
 .jshintrc
 Gosf.postman_collection.json
 Ideas.txt
 .gitignore
 package-lock.json
 package.json
+Dockerfile
+README.md
+config*.json

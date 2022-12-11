@@ -1,4 +1,4 @@
-*.sh
+make.sh
 .vscode/*
 src/config.json
 logs/

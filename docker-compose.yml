@@ -1,4 +1,7 @@
+# Docker-compose.yml con MySQL 5.7 y Redis 6.0
+
 version: '1.0v'
+
 services:
 
   redis-gosf:
@@ -27,14 +30,18 @@ services:
 
   app-gosf:
     build: 
-      dockerfile: Dockerfile
       context: .
+      dockerfile: Dockerfile
     ports:
-      - "80:80"
+      # - "80:80"
       - "3000:3000"
+      # - "8080:8080" 
+    env_file:
+      - ./config-docker-compose.env
     depends_on:
       - redis-gosf
       - mysql-gosf
     # volumes:
     #   - /data/gosf/files:/app/files
+    #   - /data/gosf/static:/app/static
     restart: always
