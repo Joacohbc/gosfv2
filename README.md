@@ -156,15 +156,15 @@ go build -o ./gosfv2 ./src;
 
 ## Iniciar (Opción 2)
 
-Para iniciar basta con "ejecutar" el [docker-compose.yml](./docker-compose.yml). Dentro de la [carpeta docker](./docker/), hay más docker-compose.yml para las versiones de MySQL y Redis anteriores.
+Para iniciar basta con "ejecutar" el [docker-compose.yml](./docker-compose.yml).
 
-Por defecto el servicio corre en el puerto 3000, para cambiar esto basta con modificar el la variable de ambiente `PORT` en el [config-docker-compose.env](./config-docker-compose.env) y el puerto que se expone en el [docker-compose.yml](./docker-compose.yml)
+Por defecto el servicio corre en el puerto 3000 (hace port forwarding del puerto 80 donde ser escucha el servidor), para cambiar esto basta con modificar el puerto que se expone en el [config.env](./config.env). Ademas se puede cambiar otros parámetros de configuración del servicio (como la Volume path, y versiones de Tags, etc) en el mismo archivo.
 
 ```bash
 # Clono el repositorio
 git clone https://github.com/Joacohbc/gosfv2; cd ./gosfv2;
 
-# Compilo los binarios y inicio los contenedores
+# Creo los contenedores y inicio los contenedores
 docker-compose build --no-cache; 
-docker-compose up;
+docker-compose --env-file config.env up
 ```
