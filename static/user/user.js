@@ -94,4 +94,18 @@ window.addEventListener("DOMContentLoaded", () => {
             message.showError(err.response.data.message);
         });
     });
+
+    document.getElementById("btn-delete-account").addEventListener("click", (e) => {
+        e.preventDefault();
+
+        if(confirm("Are you sure you want to delete your account?") == false) return;
+
+        axios.delete("/api/users/")
+        .then((res) => {
+            window.location.href = "/static/login/login.html";
+            message.showSuccess(res.data.message);
+        }).catch((err) => {
+            message.showError(err.response.data.message);
+        });
+    });
 });
