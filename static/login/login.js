@@ -36,4 +36,27 @@ window.addEventListener('DOMContentLoaded', function() {
             message.showError(err.response.data.message);
         });
     });
+
+    // Agrego el evento click al botón de Login
+    document.getElementById('btn-restore').addEventListener('click', function(e) {
+        e.preventDefault();
+
+        let url = window.location.origin + '/auth/restore';
+        
+        axios.post(url, {
+            username: username.value,
+            password: password.value
+        })
+        .then(req => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('duration');
+            localStorage.removeItem('expires');
+            
+            message.showSuccess(req.data.message);
+        })
+        .catch(err => {
+            console.log(err);
+            message.showError(err.response.data.message);
+        });
+    });
 });

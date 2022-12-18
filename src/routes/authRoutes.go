@@ -14,7 +14,7 @@ type authRoutes struct{}
 func (a *authRoutes) AddAuthRoutes(group *echo.Group) {
 	group.POST("/register", auth.RegisterUser)
 	group.POST("/login", auth.Login, auth.UserCredencialMiddleware)
-	group.DELETE("/restore", auth.DeleteAllTokens, auth.UserCredencialMiddleware)
+	group.POST("/restore", auth.DeleteAllTokens, auth.UserCredencialMiddleware)
 
 	group.GET("/refresh", auth.RefreshToken, auth.JWTAuthMiddleware)
 	group.GET("/verify", auth.VerifyAuth, auth.JWTAuthMiddleware)
