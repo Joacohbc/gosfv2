@@ -41,6 +41,7 @@ services:
     restart: always
 
   app-gosf:
+    container_name: app-gosf
     build: 
       context: .
       dockerfile: Dockerfile

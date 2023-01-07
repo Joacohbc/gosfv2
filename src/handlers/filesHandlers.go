@@ -7,7 +7,6 @@ import (
 	"gosfV2/src/models"
 	"gosfV2/src/utils"
 	"net/http"
-	"path/filepath"
 	"strconv"
 
 	"github.com/labstack/echo"
@@ -28,7 +27,7 @@ func HandleFileError(err error) error {
 }
 
 // Obtiene el ID como PathParam y lo convierte en uint
-func (f *fileController) GetIdFromURL(c echo.Context, param string) (uint, error) {
+func (fc *fileController) GetIdFromURL(c echo.Context, param string) (uint, error) {
 	id, err := strconv.Atoi(c.Param(param))
 	if err != nil {
 		return 0, echo.NewHTTPError(http.StatusBadRequest, "Invalid Id from URL")
@@ -37,37 +36,57 @@ func (f *fileController) GetIdFromURL(c echo.Context, param string) (uint, error
 	return uint(id), nil
 }
 
+// Obtiene el ID del usuario logueado
+func (fc *fileController) getUserId(c echo.Context) uint {
+	return c.Get("user_id").(uint)
+}
+
 // Obtiene el Id del URL para retornar el archivo
 // SI el usuario logueado es el dueño del archivo
 //
 // PathParams:
 // - Id de Archivo | Uint
-func (f *fileController) GetFile(c echo.Context) error {
-	idFile, err := f.GetIdFromURL(c, "id")
+func (fc *fileController) GetFile(c echo.Context) error {
+	idFile, err := fc.GetIdFromURL(c, "id")
 	if err != nil {
 		return err
 	}
 
-	file, err := models.Files(c).GetByIdFromUser(idFile, c.Get("user_id").(uint))
+	file, err := models.Files(c).GetByIdFromUser(idFile, fc.getUserId(c))
 	if err != nil {
 		return HandleFileError(err)
 	}
 
-	return c.File(models.Files(c).GetPath(file.ID, filepath.Ext(file.Filename)))
+	return c.Inline(file.GetPath(), file.Filename)
 }
+
+// Download file
+// func (fc *fileController) DownloadFile(c echo.Context) error {
+// 	idFile, err := fc.GetIdFromURL(c, "id")
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	file, err := models.Files(c).GetByIdFromUser(idFile, fc.getUserId(c))
+// 	if err != nil {
+// 		return HandleFileError(err)
+// 	}
+
+// 	return c.Attachment(models.Files(c).GetPath(file.ID, filepath.Ext(file.Filename)), file.Filename)
+// }
 
 // Obtiene el Id del URL para retornar la Información del archivo
 // SI el usuario logueado es el dueño del archivo
 //
 // PathParams:
 // - Id de Archivo | Uint
-func (f *fileController) GetInfo(c echo.Context) error {
-	idNum, err := f.GetIdFromURL(c, "id")
+func (fc *fileController) GetInfo(c echo.Context) error {
+	idNum, err := fc.GetIdFromURL(c, "id")
 	if err != nil {
 		return err
 	}
 
-	file, err := models.Files(c).GetByIdFromUser(idNum, c.Get("user_id").(uint))
+	file, err := models.Files(c).GetByIdFromUser(idNum, fc.getUserId(c))
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -76,8 +95,8 @@ func (f *fileController) GetInfo(c echo.Context) error {
 }
 
 // Obtiene todos los archivos del usuario (Su información)
-func (f *fileController) GetAllFiles(c echo.Context) error {
-	files, err := models.Files(c).GetFilesFromUser(c.Get("user_id").(uint))
+func (fc *fileController) GetAllFiles(c echo.Context) error {
+	files, err := models.Files(c).GetFilesFromUser(fc.getUserId(c))
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -90,8 +109,8 @@ func (f *fileController) GetAllFiles(c echo.Context) error {
 //
 // PathParams:
 // - Id de Archivo | Uint
-func (f *fileController) GetSharedFile(c echo.Context) error {
-	idFile, err := f.GetIdFromURL(c, "id")
+func (fc *fileController) GetSharedFile(c echo.Context) error {
+	idFile, err := fc.GetIdFromURL(c, "id")
 	if err != nil {
 		return err
 	}
@@ -101,16 +120,16 @@ func (f *fileController) GetSharedFile(c echo.Context) error {
 		return HandleFileError(err)
 	}
 
-	idCurrentUser := c.Get("user_id").(uint)
-	path := models.Files(c).GetPath(file.ID, filepath.Ext(file.Filename))
+	idCurrentUser := fc.getUserId(c)
+
 	// Si el usuario es el dueño del archivo, lo envío directamente
 	if file.UserID == idCurrentUser {
-		return c.File(path)
+		return c.File(file.GetPath())
 	}
 
 	// Si esta compartido lo envió directamente
 	if file.Shared {
-		return c.File(path)
+		return c.File(file.GetPath())
 	}
 
 	sharedWithMe, err := models.Files(c).IsSharedWith(file.ID, idCurrentUser)
@@ -124,12 +143,12 @@ func (f *fileController) GetSharedFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, models.ErrFileNotFound.Error())
 	}
 
-	return c.File(path)
+	return c.File(file.GetPath())
 }
 
 // Obtiene todos los archivos del usuario (Su información)
-func (f *fileController) GetAllShareFiles(c echo.Context) error {
-	files, err := models.Files(c).GetFilesShared(c.Get("user_id").(uint))
+func (fc *fileController) GetAllShareFiles(c echo.Context) error {
+	files, err := models.Files(c).GetFilesShared(fc.getUserId(c))
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -142,19 +161,19 @@ func (f *fileController) GetAllShareFiles(c echo.Context) error {
 //
 // PathParams:
 // - Id de Archivo | Uint
-func (f *fileController) UploadFile(c echo.Context) error {
+func (fc *fileController) UploadFile(c echo.Context) error {
 	mf, err := c.MultipartForm()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	for _, f := range mf.File["files"] {
-		src, err := f.Open()
+	for _, file := range mf.File["files"] {
+		src, err := file.Open()
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
-		if err := models.Files(c).Create(f.Filename, c.Get("user_id").(uint), src); err != nil {
+		if err := models.Files(c).Create(file.Filename, fc.getUserId(c), src); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
@@ -171,9 +190,9 @@ func (f *fileController) UploadFile(c echo.Context) error {
 //
 // PathParams:
 // - Id de Archivo | Uint
-func (f *fileController) UpdateFile(c echo.Context) error {
+func (fc *fileController) UpdateFile(c echo.Context) error {
 
-	idFile, err := f.GetIdFromURL(c, "id")
+	idFile, err := fc.GetIdFromURL(c, "id")
 	if err != nil {
 		return err
 	}
@@ -183,7 +202,7 @@ func (f *fileController) UpdateFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid file data")
 	}
 
-	actual, err := models.Files(c).GetByIdFromUser(idFile, c.Get("user_id").(uint))
+	actual, err := models.Files(c).GetByIdFromUser(idFile, fc.getUserId(c))
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -212,13 +231,13 @@ func (f *fileController) UpdateFile(c echo.Context) error {
 //
 // QueryParams:
 // - Force | String
-func (f *fileController) DeleteFile(c echo.Context) error {
-	idNum, err := f.GetIdFromURL(c, "id")
+func (fc *fileController) DeleteFile(c echo.Context) error {
+	idNum, err := fc.GetIdFromURL(c, "id")
 	if err != nil {
 		return err
 	}
 
-	file, err := models.Files(c).GetByIdFromUser(idNum, c.Get("user_id").(uint))
+	file, err := models.Files(c).GetByIdFromUser(idNum, fc.getUserId(c))
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -253,19 +272,19 @@ func (f *fileController) DeleteFile(c echo.Context) error {
 // PathParams:
 // - Id de Archivo | Uint
 // - Id de Usuario | Uint
-func (f *fileController) AddUserToFile(c echo.Context) error {
+func (fc *fileController) AddUserToFile(c echo.Context) error {
 
-	fileId, err := f.GetIdFromURL(c, "idFile")
+	fileId, err := fc.GetIdFromURL(c, "idFile")
 	if err != nil {
 		return err
 	}
 
-	userId, err := f.GetIdFromURL(c, "idUser")
+	userId, err := fc.GetIdFromURL(c, "idUser")
 	if err != nil {
 		return err
 	}
 
-	file, err := models.Files(c).GetByIdFromUser(fileId, c.Get("user_id").(uint))
+	file, err := models.Files(c).GetByIdFromUser(fileId, fc.getUserId(c))
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -304,19 +323,19 @@ func (f *fileController) AddUserToFile(c echo.Context) error {
 // PathParams:
 // - Id de Archivo | Uint
 // - Id de Usuario | Uint
-func (f *fileController) RemoveUserFromFile(c echo.Context) error {
-	fileId, err := f.GetIdFromURL(c, "idFile")
+func (fc *fileController) RemoveUserFromFile(c echo.Context) error {
+	fileId, err := fc.GetIdFromURL(c, "idFile")
 	if err != nil {
 		return err
 	}
 
-	userId, err := f.GetIdFromURL(c, "idUser")
+	userId, err := fc.GetIdFromURL(c, "idUser")
 	if err != nil {
 		return err
 	}
 
 	// Verifico que exista el archivo con el fileId
-	file, err := models.Files(c).GetByIdFromUser(fileId, c.Get("user_id").(uint))
+	file, err := models.Files(c).GetByIdFromUser(fileId, fc.getUserId(c))
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -339,7 +358,7 @@ func (f *fileController) RemoveUserFromFile(c echo.Context) error {
 
 	// Si el el usuario no es el dueño del archivo, por seguridad
 	// le digo que el archivo no existe
-	if file.UserID != c.Get("user_id").(uint) {
+	if file.UserID != fc.getUserId(c) {
 		return echo.NewHTTPError(http.StatusNotFound, models.ErrFileNotFound.Error())
 	}
 

@@ -33,12 +33,16 @@ type File struct {
 }
 
 func (f *File) Validate() error {
-	match, err := regexp.MatchString(`[a-zA-Z0-9_-]+(\.)[a-z]+`, "Image.png")
+	match, err := regexp.MatchString(`[a-zA-Z0-9_-]+(\.)[a-z]+`, f.Filename)
 	if !match || err != nil {
 		return errors.New(`invalid filename format, only letters, numbers, "-" and "_" are allowed`)
 	}
 
 	return nil
+}
+
+func (f *File) GetPath() string {
+	return filepath.Join(env.Config.FilesDirectory, fmt.Sprint(f.ID)+f.Filename)
 }
 
 var (
@@ -47,8 +51,6 @@ var (
 )
 
 type FileInterface interface {
-	// Obtiene la ruta de un archivo de un usuario
-	GetPath(fileId uint, ext string) string
 
 	// Copia el archivo del Reader al sistema de archivos
 	// y guarda la la ruta de archivo en la base de datos
@@ -99,10 +101,6 @@ type fileBD struct {
 
 func Files(c echo.Context) FileInterface {
 	return fileBD{BD: database.GetMySQL(), Context: c.Request().Context()}
-}
-
-func (f fileBD) GetPath(fileId uint, ext string) string {
-	return filepath.Join(env.Config.FilesDirectory, fmt.Sprint(fileId)+ext)
 }
 
 func (f fileBD) ManageError(err error) error {
@@ -244,7 +242,8 @@ func (f fileBD) Create(filename string, userId uint, src io.Reader) error {
 	}
 
 	// Creo el archivo (en Local)
-	fileOpen, err := os.Create(f.GetPath(fileId, filepath.Ext(filename)))
+	path := (&File{ID: fileId, Filename: filename}).GetPath()
+	fileOpen, err := os.Create(path)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -291,7 +290,7 @@ func (f fileBD) Delete(fileId uint) error {
 		return err
 	}
 
-	if err := os.Remove(f.GetPath(fileId, filepath.Ext(file.Filename))); err != nil {
+	if err := os.Remove(file.GetPath()); err != nil {
 		tx.Rollback()
 		return err
 	}

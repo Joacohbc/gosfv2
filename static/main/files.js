@@ -32,20 +32,11 @@ class FileCustom {
 
     // Función que descarga el archivo
     download() {
-        axios.get(`/api/files/${this.file.id}`, {
-            responseType: 'blob'
-        })
-        .then(blob => {
-            let url = window.URL.createObjectURL(blob.data);
-            let a = document.createElement('a');
-            a.href = url;
-            a.download = this.file.filename;
-            a.click();
-        })
-        .catch(err => {
-            message.showError(err.response.data.message);
-        });
-
+        let a = document.createElement('a');
+        a.href = `/api/files/${this.file.id}`;
+        a.download = this.file.filename;
+        a.click();
+        document.removeChild(a);
     }
 
     // Función que elimina el archivo
