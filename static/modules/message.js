@@ -58,7 +58,7 @@ export class Message {
         this.showMessage(message, this._color.info, this._id);
     }
     
-    showMessage(message, color) {
+    showMessage(message, color, time = 5000) {
         const element = document.getElementById(this._id);
         element.style.color = color;
         element.style.fontWeight = "bold";
@@ -70,6 +70,44 @@ export class Message {
             if(message == element.innerHTML){
                 element.innerHTML = '';
             }
-        }, 5000);
+        }, time);
+    }
+}
+
+export class LoadingMessage {
+
+    constructor(id = messageId, color = colors) {
+        this._id = id;
+        this._color = color;
+        this._loading = true;
+    }
+
+    async start(message) {
+        const element = document.getElementById(this._id);
+        element.style.color = this._color.warning;
+        element.style.fontWeight = "bold";
+        element.innerHTML = message[0].toUpperCase() + message.substring(1);
+
+        const loading = document.createElement("div");
+        loading.setAttribute("class", "loading");
+        element.appendChild(loading);
+
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        while(this._loading) {
+            loading.innerHTML = "...";
+            await sleep(300);
+            loading.innerHTML = "..";
+            await sleep(300);
+            loading.innerHTML = ".";
+            await sleep(300);
+        }
+
+        element.innerHTML = '';
+        loading.innerHTML = '';
+    } 
+
+    stop() {
+        this._loading = false;
     }
 }

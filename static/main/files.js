@@ -1,10 +1,11 @@
-import { Message } from "/static/modules/message.js";
+import { Message, LoadingMessage } from "/static/modules/message.js";
 import { File } from "/static/models/file.js";
 import { createOverlay } from "/static/main/overlay.js";
 
 // Creo el objeto message para mostrar los mensajes
 // y le digo que el ID sera "message"
 const message = new Message("message");
+const load = new LoadingMessage("file-loading");
 
 // Una Clase FileCustom que tiene un objeto File que es convertido
 // a elementos HTML para mostrar en la tabla y le agrega funcionalidades
@@ -248,6 +249,8 @@ window.addEventListener('DOMContentLoaded', function() {
             form.append('files', files[i]);
         }
 
+        load.start("Uploading files");
+
         axios.post('/api/files/', form)
         .then(req => {
             reloadTable();
@@ -255,6 +258,9 @@ window.addEventListener('DOMContentLoaded', function() {
         })
         .catch(err => {
             message.showError(err.response.data.message); 
+        })
+        .finally(() => {
+            load.stop();
         });
     });
 
