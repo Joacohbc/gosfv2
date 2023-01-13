@@ -16,6 +16,15 @@ GOSF es un servidor de archivos que permite compartir archivos de entre usuario 
     - La ruta en la que se guardan los logs
     - Se pueden modificar la características de las conexiones a la base de datos de Redis y MySQL (host, puerto, usuario, contraseña, etc)
 
+## Tecnologías
+
+- Go
+- [Echo Framework](https://echo.labstack.com/guide/)
+- Redis
+- MySQL
+- Docker y Docker Compose
+- HTML/CSS/JS y JSON
+
 ## Instalación
 
 La instalación de GOSF es muy sencilla, y tiene 2 opciones para su despliegue
@@ -165,6 +174,6 @@ Por defecto el servicio corre en el puerto 3000 (hace port forwarding del puerto
 git clone https://github.com/Joacohbc/gosfv2; cd ./gosfv2;
 
 # Creo los contenedores y inicio los contenedores
-docker-compose build --no-cache; 
-docker-compose --env-file config.env up
+docker compose build --no-cache; 
+docker compose --env-file config.env up
 ```
