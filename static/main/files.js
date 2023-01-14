@@ -248,7 +248,7 @@ window.addEventListener('DOMContentLoaded', function() {
     
     // Cargo la tabla de archivos
     reloadTable();
-
+    
     document.getElementById("input-upload").addEventListener('change', (e) => {
         e.preventDefault();
 
@@ -263,6 +263,7 @@ window.addEventListener('DOMContentLoaded', function() {
         }
 
         document.getElementById('file-loading').removeAttribute('hidden');
+        document.getElementById('btn-upload').setAttribute('hidden', '');
 
         axios.post('/api/files/', form)
         .then(req => {
@@ -274,6 +275,7 @@ window.addEventListener('DOMContentLoaded', function() {
         })
         .finally(() => {
             document.getElementById('file-loading').setAttribute('hidden', '');
+            document.getElementById('btn-upload').removeAttribute('hidden');
         });
     });
 
