@@ -121,7 +121,8 @@ func (f fileBD) GetFilesFromUser(userId uint) ([]File, error) {
 	SELECT 
 		f.* 
 	FROM files f 
-	WHERE user_id = ?`, userId)
+	WHERE user_id = ?
+	ORDER BY f.filename`, userId)
 	if err != nil {
 		return nil, f.ManageError(err)
 	}
@@ -386,7 +387,8 @@ func (f fileBD) GetFilesShared(userId uint) ([]File, error) {
 		f.*
 	FROM files f
 	JOIN file_users fu ON f.file_id = fu.file_id
-	WHERE fu.user_id = ?`, userId)
+	WHERE fu.user_id = ?
+	ORDER BY f.filename`, userId)
 	if err != nil {
 		if database.IsNotFound(err) {
 			return []File{}, nil

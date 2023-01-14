@@ -1,11 +1,10 @@
-import { Message, LoadingMessage } from "/static/modules/message.js";
+import { Message } from "/static/modules/message.js";
 import { File } from "/static/models/file.js";
 import { createOverlay } from "/static/main/overlay.js";
 
 // Creo el objeto message para mostrar los mensajes
 // y le digo que el ID sera "message"
 const message = new Message("message");
-const load = new LoadingMessage("file-loading");
 
 // Una Clase FileCustom que tiene un objeto File que es convertido
 // a elementos HTML para mostrar en la tabla y le agrega funcionalidades
@@ -172,25 +171,38 @@ class FileCustom {
 
 // Función que recarga la tabla de Archivos
 export function reloadTable(cbFiltro = null) {
+    
+    // Donde se cargan los archivos
     const htmlFiles = [];
+    
+    // Se limpia la tabla
     document.querySelector('tbody').innerHTML = "";
+    
     axios.get("/api/files/")
     .then(req => {
+
+        // Se obtienen los archivos
+        let files = req.data || []; // Si req.data es Null se toma un array vacio
         
-        let files = req.data || [];
+        // Si se paso el filtro se filtran los archivos
         if(cbFiltro != null) {
             files = files.filter(cbFiltro);
         }
 
+        // Se agregan los archivos a la tabla
         files.forEach(element => {
             htmlFiles.push(new FileCustom(element).toTableRow());
         });
 
+        // Se retorna una promesa para cargar los archivos compartidos
         return axios.get("/api/files/share");
     })
     .then(req => {
-        let files = req.data || [];
-        console.log(files);
+
+        // Se obtienen los archivos
+        let files = req.data || []; // Si req.data es Null se toma un array vacio
+        
+        // Si se paso el filtro se filtran los archivos
         if(cbFiltro != null) {
             files = files.filter(cbFiltro);
         }
@@ -199,6 +211,7 @@ export function reloadTable(cbFiltro = null) {
             htmlFiles.push(new FileCustom(file).toTableRowShare());
         });
 
+        // Se retorna una promesa con los archivos
         return Promise.resolve(htmlFiles);
     })
     .then(files => {
@@ -249,7 +262,7 @@ window.addEventListener('DOMContentLoaded', function() {
             form.append('files', files[i]);
         }
 
-        load.start("Uploading files");
+        document.getElementById('file-loading').removeAttribute('hidden');
 
         axios.post('/api/files/', form)
         .then(req => {
@@ -260,7 +273,7 @@ window.addEventListener('DOMContentLoaded', function() {
             message.showError(err.response.data.message); 
         })
         .finally(() => {
-            load.stop();
+            document.getElementById('file-loading').setAttribute('hidden', '');
         });
     });
 
