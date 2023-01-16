@@ -244,11 +244,15 @@ export function reloadTable(cbFiltro = null) {
     });
 }
 
+
 window.addEventListener('DOMContentLoaded', function() {
     
+    // Un contador de archivos que se estan subiendo (mientra no sea 0 estarán el mensaje de cargando)
+    let numFiles = 0;
+
     // Cargo la tabla de archivos
     reloadTable();
-    
+
     document.getElementById("input-upload").addEventListener('change', (e) => {
         e.preventDefault();
 
@@ -262,21 +266,24 @@ window.addEventListener('DOMContentLoaded', function() {
             form.append('files', files[i]);
         }
 
-        document.getElementById('file-loading').removeAttribute('hidden');
-        document.getElementById('btn-upload').setAttribute('hidden', '');
+        setTimeout(() => {
+            // Obtengo un indice del archivo (para poder vaciarlo)
+            numFiles++;
 
-        axios.post('/api/files/', form)
-        .then(req => {
-            reloadTable();
-            message.showSuccess(req.data.message);
-        })
-        .catch(err => {
-            message.showError(err.response.data.message); 
-        })
-        .finally(() => {
-            document.getElementById('file-loading').setAttribute('hidden', '');
-            document.getElementById('btn-upload').removeAttribute('hidden');
-        });
+            axios.post('/api/files/', form)
+            .then(req => {
+                reloadTable();
+                message.showSuccess(req.data.message);
+            })
+            .catch(err => {
+                message.showError(err.response.data.message); 
+            })
+            .finally(() => {
+                // Elimino el indice del array una vez que se haya subido el archivo
+                numFiles--;
+            });
+        }, 0);
+
     });
 
     document.querySelector('#search-input').addEventListener('keypress', (e) => {
@@ -292,4 +299,17 @@ window.addEventListener('DOMContentLoaded', function() {
             return file.filename.toLowerCase().includes(search.toLowerCase());
         });
     });
+
+    (async function() {
+        while(true) {
+            await new Promise(r => setTimeout(r, 1000));
+            
+            // Si el array esta vacio que oculte el loading
+            if(numFiles == 0) { 
+                document.getElementById('file-loading').setAttribute('hidden', '');
+            }else {
+                document.getElementById('file-loading').removeAttribute('hidden');
+            }
+        }
+    }())
 });

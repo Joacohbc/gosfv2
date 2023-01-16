@@ -71,6 +71,6 @@ export class Message {
             if(message == element.innerHTML){
                 element.innerHTML = '';
             }
-        }, 5000);
+        }, 1500);
     }
 }

@@ -26,13 +26,16 @@
 <body>
     <div class="overlay-background" hidden>
         <div class="overlay-content">
-
+            
         </div>
     </div>
-
+    
     <div class="search">
         <input type="text" name="Buscar Archivo" placeholder="Enter Search" id="search-input">
     </div>
+    
+    <div id="file-loading" class="loader" hidden> Uploading files </div> 
+    <div id="message"></div>
 
     <div class="table-container">
         <table>
@@ -47,11 +50,9 @@
     </div>
     
     <div class="table-buttons">
-        <div id="file-loading" class="loader" hidden> Uploading files </div>
         <label for="input-upload" id="btn-upload" class="header-btn">Upload file/s</label>
         <input id="input-upload" type="file" style="display: none;" multiple>
     </div>
     
-    <div id="message"></div>
 </body>
 </html>

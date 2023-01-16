@@ -66,10 +66,23 @@
     margin: 10px;
 }
 
-#message, #file-loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+#message {
+    position: fixed;
+    bottom: 0;
+    padding: 10px;
+    color: var(--color-text);
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2;
+}
+
+#file-loading {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    padding: 10px;
+    margin: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2;
 }
 
 .loader {
