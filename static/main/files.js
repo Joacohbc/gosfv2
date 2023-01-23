@@ -1,6 +1,6 @@
 import { Message } from "/static/modules/message.js";
 import { File } from "/static/models/file.js";
-import { createOverlay } from "/static/main/overlay.js";
+import { createOverlay } from "/static/main/shareOverlay.js";
 
 // Creo el objeto message para mostrar los mensajes
 // y le digo que el ID sera "message"
@@ -182,7 +182,7 @@ export function reloadTable(cbFiltro = null) {
     .then(req => {
 
         // Se obtienen los archivos
-        let files = req.data || []; // Si req.data es Null se toma un array vacio
+        let files = req.data || []; // Si req.data es Null se toma un array vació
         
         // Si se paso el filtro se filtran los archivos
         if(cbFiltro != null) {
@@ -200,7 +200,7 @@ export function reloadTable(cbFiltro = null) {
     .then(req => {
 
         // Se obtienen los archivos
-        let files = req.data || []; // Si req.data es Null se toma un array vacio
+        let files = req.data || []; // Si req.data es Null se toma un array vació
         
         // Si se paso el filtro se filtran los archivos
         if(cbFiltro != null) {
@@ -247,7 +247,7 @@ export function reloadTable(cbFiltro = null) {
 
 window.addEventListener('DOMContentLoaded', function() {
     
-    // Un contador de archivos que se estan subiendo (mientra no sea 0 estarán el mensaje de cargando)
+    // Un contador de archivos que se están subiendo (mientra no sea 0 estarán el mensaje de cargando)
     let numFiles = 0;
 
     // Cargo la tabla de archivos
@@ -304,7 +304,7 @@ window.addEventListener('DOMContentLoaded', function() {
         while(true) {
             await new Promise(r => setTimeout(r, 1000));
             
-            // Si el array esta vacio que oculte el loading
+            // Si el array esta vació que oculte el loading
             if(numFiles == 0) { 
                 document.getElementById('file-loading').setAttribute('hidden', '');
             }else {

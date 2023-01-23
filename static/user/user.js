@@ -12,7 +12,20 @@ window.addEventListener("DOMContentLoaded", () => {
 
     axios.get("/api/users/me")
     .then((res) => {
-        document.getElementById("user-username").innerHTML = res.data.username;
+        const username = `${res.data.username} #${res.data.id}`;
+        document.getElementById("user-username").innerHTML =username;
+        
+        document.getElementById('copy-id').addEventListener("click", () => {
+            // Copy content to clipboard
+            navigator.clipboard.writeText(username)
+            .then(() => {
+                message.showSuccess("ID Copied to clipboard");
+            })
+            .catch(err => {
+                message.showError("Error copying ID to clipboard");
+            });
+        });
+
         document.getElementById("username").value = res.data.username;
         updateIcon();
     }).catch((err) => {

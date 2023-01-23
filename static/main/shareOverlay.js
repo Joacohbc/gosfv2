@@ -107,6 +107,7 @@ function createOverlayBody(file) {
 
     const inputUserId = document.createElement('input');
     inputUserId.id = "user-id";
+    inputUserId.placeholder = "Input User ID";
     overlayBody.appendChild(inputUserId);
 
     const btnAddUser = document.createElement('button');
@@ -118,8 +119,9 @@ function createOverlayBody(file) {
             message.showError("Please enter a User ID");
             return;
         }
-    
-        axios.post(`/api/files/share/${file.id}/user/${userId}`)
+
+        const id = userId.substring(userId.lastIndexOf('#') + 1);
+        axios.post(`/api/files/share/${file.id}/user/${id}`)
         .then(res => {
             message.showSuccess(res.data.message);
             reloadUsers(file);
@@ -226,6 +228,7 @@ export async function createOverlay(fileId) {
         message.showError(err.response.data.message);
     });
 
+    // Retorno una función para mostrar el overlay
     return () => {
         overlay.removeAttribute("hidden");
     };
