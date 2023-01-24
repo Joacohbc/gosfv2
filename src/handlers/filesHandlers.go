@@ -7,6 +7,7 @@ import (
 	"gosfV2/src/models"
 	"gosfV2/src/utils"
 	"net/http"
+	"path/filepath"
 	"strconv"
 
 	"github.com/labstack/echo"
@@ -209,6 +210,11 @@ func (fc *fileController) UpdateFile(c echo.Context) error {
 
 	// Si el nombre del archivo es diferente al actual, lo renombro
 	if actual.Filename != file.Filename {
+
+		if filepath.Ext(file.Filename) != filepath.Ext(actual.Filename) {
+			return echo.NewHTTPError(http.StatusBadRequest, "The extension of the file cannot be changed")
+		}
+
 		if err := models.Files(c).Rename(idFile, file.Filename); err != nil {
 			return HandleFileError(err)
 		}

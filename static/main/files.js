@@ -119,12 +119,21 @@ class FileCustom {
         updateBtn.addEventListener('click', (e) => {
             e.preventDefault();
 
-            let filename = prompt("Enter the new filename", this.file.filename);
+            const oldFilename = this.file.filename.substring(0, this.file.filename.lastIndexOf('.'));
+            const extension = this.file.filename.substring(this.file.filename.lastIndexOf('.'));
+
+            let filename = prompt("Enter the new filename", oldFilename);
             if(filename === null || filename == "") {
                 message.showInfo("You have canceled the update");
                 return;
             }
-            this.update(filename);
+
+            if (filename == oldFilename) {
+                message.showInfo("The filename is the same");
+                return;
+            }
+
+            this.update(filename+extension);
         });
         actions.appendChild(updateBtn);
         

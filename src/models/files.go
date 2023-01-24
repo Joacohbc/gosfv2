@@ -42,7 +42,7 @@ func (f *File) Validate() error {
 }
 
 func (f *File) GetPath() string {
-	return filepath.Join(env.Config.FilesDirectory, fmt.Sprint(f.ID)+f.Filename)
+	return filepath.Join(env.Config.FilesDirectory, fmt.Sprint(f.ID)+filepath.Ext(f.Filename))
 }
 
 var (
