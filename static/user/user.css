@@ -71,7 +71,6 @@ input {
     background-color: var(--color-hover);
 }
 
-
 .btn-form {
     padding: .5em;
     border-radius: 10px;
@@ -85,6 +84,15 @@ input {
     font-size: 1.1em;
 }
 
-#message{
-    text-align: center;
+#message {
+    position: fixed;
+    bottom: 0;
+    padding: 10px;
+    color: var(--color-text);
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 2;
+}
+
+#message:empty {
+    display: none;
 }

@@ -1,7 +1,19 @@
 import { Message } from "/static/modules/message.js";
+import { User } from "/static/models/user.js";
 
 const message = new Message("message");
 
+const getFullUsername = (username, id) => `${username} #${id}`;
+
+// Obtengo la información del usuario actual
+async function getUserInfo() {
+    try {
+        const res = await axios.get("/api/users/me");
+        return User.fromJSON(res.data);
+    } catch (err) {
+        throw new Error(message.showError(err.response.data.message));
+    }
+}
 
 function updateIcon() {
     // Agrego el timestamp para que se actualice la imagen (no la saque del Cache)
@@ -10,37 +22,41 @@ function updateIcon() {
 
 window.addEventListener("DOMContentLoaded", () => {
 
-    axios.get("/api/users/me")
-    .then((res) => {
-        const username = `${res.data.username} #${res.data.id}`;
-        document.getElementById("user-username").innerHTML =username;
-        
-        document.getElementById('copy-id').addEventListener("click", () => {
-            // Copy content to clipboard
-            navigator.clipboard.writeText(username)
-            .then(() => {
-                message.showSuccess("ID Copied to clipboard");
-            })
-            .catch(err => {
-                message.showError("Error copying ID to clipboard");
-            });
+    if(localStorage.getItem("username") == null || localStorage.getItem("userId") == null) {
+        getUserInfo().then((user) => {
+            localStorage.setItem("userId", user.id);
+            localStorage.setItem("username", user.username);
         });
+    }
 
-        document.getElementById("username").value = res.data.username;
-        updateIcon();
-    }).catch((err) => {
-        message.showError(err.response.data.message);
+    updateIcon();
+    let lsUsername = localStorage.getItem("username");
+    let lsUserId = localStorage.getItem("userId");
+
+    document.getElementById("user-username").innerHTML = getFullUsername(lsUsername, lsUserId);
+    document.getElementById("username").value = lsUsername;
+
+    document.getElementById('copy-id').addEventListener("click", () => {
+        // Copy content to clipboard
+        navigator.clipboard.writeText(document.getElementById("user-username").innerHTML)
+        .then(() => {
+            message.showSuccess("ID Copied to clipboard");
+        })
+        .catch(err => {
+            message.showError("Error copying ID to clipboard");
+        });
     });
 
-    document.getElementById("btn-update").addEventListener("click", (e) => {
+    document.getElementById("btn-rename").addEventListener("click", (e) => {
         e.preventDefault();
 
-        const newUsername =  document.getElementById("username").value;
+        const newUsername = document.getElementById("username").value;
         axios.put("/api/users/rename", {
             username: newUsername,
         })
         .then((res) => {
-            document.getElementById("user-username").innerHTML = newUsername;
+            document.getElementById("user-username").innerHTML = getFullUsername(newUsername, lsUserId);
+            localStorage.setItem("username", newUsername);
             message.showSuccess(res.data.message);
         }).catch((err) => {
             console.log(err);
@@ -48,10 +64,11 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    // Cambio de contraseña
     document.getElementById("btn-change-password").addEventListener("click", (e) => {
         e.preventDefault();
 
-        const oldPassword = document.getElementById("old-password").value;
+        const oldPassword = document.getElementById("current-password").value;
         const newPassword = document.getElementById("new-password").value;
         const confirmPassword = document.getElementById("confirm-password").value;
 
@@ -66,12 +83,16 @@ window.addEventListener("DOMContentLoaded", () => {
         })
         .then((res) => {
             message.showSuccess(res.data.message);
+            document.getElementById("current-password").value = "";
+            document.getElementById("new-password").value = "";
+            document.getElementById("confirm-password").value = "";
         }).catch((err) => {
             console.log(err);
             message.showError(err.response.data.message);
         });
     });
 
+    // Subida de icono
     document.getElementById("icon-upload").addEventListener('change', (e) => {
         e.preventDefault();
 
@@ -95,7 +116,7 @@ window.addEventListener("DOMContentLoaded", () => {
         e.target.files = [];
     });
 
-
+    // Eliminación de icono
     document.getElementById("btn-delete-icon").addEventListener("click", (e) => {
         e.preventDefault();
 
@@ -108,6 +129,7 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    // Eliminación de cuenta
     document.getElementById("btn-delete-account").addEventListener("click", (e) => {
         e.preventDefault();
 
