@@ -39,7 +39,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("username").value = lsUsername;
 
     // Copiar el ID del usuario al portapapeles
-    document.getElementById('copy-id').addEventListener("click", () => {
+    document.getElementById('copy-id').addEventListener("click", (e) => {
         e.preventDefault();
         
         // Copy content to clipboard
