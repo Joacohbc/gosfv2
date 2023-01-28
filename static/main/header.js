@@ -1,3 +1,5 @@
+import { logout } from "/static/modules/Logout.js";
+
 window.addEventListener('DOMContentLoaded', function() {
     // Agrego el header a la página al Inicio del Body
     document.body.innerHTML = `
@@ -15,14 +17,7 @@ window.addEventListener('DOMContentLoaded', function() {
     // Agrego funcionamiento a los botones
     document.querySelector("#btn-logout").addEventListener('click', (e) => {
         e.preventDefault();
-        axios.delete('/auth/logout')
-        .then(res => {
-            window.location.href = '/static/login/login.html';
-        })
-        .catch(err => {
-            localStorage.removeItem('token');
-            window.location.href = '/static/login/login.html';
-        });
+        logout();
     });
 
     document.querySelector("#btn-files").addEventListener('click', (e) => {

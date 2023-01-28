@@ -20,10 +20,11 @@ function updateIcon() {
     document.getElementById("user-icon").src = window.location.origin + "/api/users/icon/me?" + new Date().getTime();
 }
 
-window.addEventListener("DOMContentLoaded", () => {
+
+window.addEventListener("DOMContentLoaded", async () => {
 
     if(localStorage.getItem("username") == null || localStorage.getItem("userId") == null) {
-        getUserInfo().then((user) => {
+        await getUserInfo().then((user) => {
             localStorage.setItem("userId", user.id);
             localStorage.setItem("username", user.username);
         });
@@ -33,20 +34,21 @@ window.addEventListener("DOMContentLoaded", () => {
     let lsUsername = localStorage.getItem("username");
     let lsUserId = localStorage.getItem("userId");
 
+    // Setteo los campos de la interfaz con la información del usuario
     document.getElementById("user-username").innerHTML = getFullUsername(lsUsername, lsUserId);
     document.getElementById("username").value = lsUsername;
 
+    // Copiar el ID del usuario al portapapeles
     document.getElementById('copy-id').addEventListener("click", () => {
+        e.preventDefault();
+        
         // Copy content to clipboard
         navigator.clipboard.writeText(document.getElementById("user-username").innerHTML)
-        .then(() => {
-            message.showSuccess("ID Copied to clipboard");
-        })
-        .catch(err => {
-            message.showError("Error copying ID to clipboard");
-        });
+        .then(() => message.showSuccess("ID Copied to clipboard"))
+        .catch(err => message.showError("Error copying ID to clipboard: " + err));
     });
 
+    // Cambio de nombre de usuario
     document.getElementById("btn-rename").addEventListener("click", (e) => {
         e.preventDefault();
 
