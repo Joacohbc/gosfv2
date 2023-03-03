@@ -16,11 +16,11 @@ func (a *authRoutes) AddAuthRoutes(group *echo.Group) {
 	group.POST("/register", auth.RegisterUser)
 
 	// Endpoints de Auth con Middleware de Credenciales
-	group.POST("/login", auth.Login, auth.UserCredencialMiddleware)
-	group.POST("/restore", auth.DeleteAllTokens, auth.UserCredencialMiddleware)
+	group.POST("/login", auth.Login, auth.Middlewares.UserCredencialMiddleware)
+	group.POST("/restore", auth.DeleteAllTokens, auth.Middlewares.UserCredencialMiddleware)
 
 	// Endpoints de Auth con Middleware de JWT
-	group.GET("/refresh", auth.RefreshToken, auth.JWTAuthMiddleware)
-	group.GET("/verify", auth.VerifyAuth, auth.JWTAuthMiddleware)
-	group.DELETE("/logout", auth.Logout, auth.JWTAuthMiddleware)
+	group.GET("/refresh", auth.RefreshToken, auth.Middlewares.JWTAuthMiddleware)
+	group.GET("/verify", auth.VerifyAuth, auth.Middlewares.JWTAuthMiddleware)
+	group.DELETE("/logout", auth.Logout, auth.Middlewares.JWTAuthMiddleware)
 }

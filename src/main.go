@@ -41,7 +41,7 @@ func main() {
 	tokens := e.Group("/auth")
 	routes.Auth.AddAuthRoutes(tokens)
 
-	api := e.Group("/api", auth.JWTAuthMiddleware)
+	api := e.Group("/api", auth.Middlewares.JWTAuthMiddleware)
 	routes.Files.AddRoutesToGroup(api)
 	routes.User.AddRoutesToGroup(api)
 
