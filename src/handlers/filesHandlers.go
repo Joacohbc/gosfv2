@@ -278,9 +278,7 @@ func (fc *fileController) AddUserToFile(c echo.Context) error {
 	}
 
 	if file.UserID == userId {
-		return echo.NewHTTPError(http.StatusBadRequest, echo.Map{
-			"message": "The user is the owner of the file",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, utils.ToJSON("The user is the owner of the file"))
 	}
 
 	// Verifico que exista el usuario con el userId
@@ -294,9 +292,7 @@ func (fc *fileController) AddUserToFile(c echo.Context) error {
 	}
 
 	if ok {
-		return echo.NewHTTPError(http.StatusBadRequest, echo.Map{
-			"message": "The File is already shared with that user",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, utils.ToJSON("The File is already shared with that user"))
 	}
 
 	if err := models.Files(c).AddUserToFile(userId, fileId); err != nil {
@@ -339,9 +335,7 @@ func (fc *fileController) RemoveUserFromFile(c echo.Context) error {
 	}
 
 	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, echo.Map{
-			"message": "The File is not shared with that user",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, utils.ToJSON("The File is not shared with that user"))
 	}
 
 	// Si el el usuario no es el dueño del archivo, por seguridad

@@ -43,9 +43,7 @@ func (u userController) RenameUser(c echo.Context) error {
 		return auth.HandleUserError(err)
 	}
 
-	return c.JSON(http.StatusAccepted, echo.Map{
-		"message": "User renamed successfully",
-	})
+	return c.JSON(http.StatusAccepted, utils.ToJSON("User renamed successfully"))
 }
 
 // Cambia la contraseña del usuario actual
@@ -91,9 +89,7 @@ func (u userController) ChangePassword(c echo.Context) error {
 		return auth.HandleUserError(err)
 	}
 
-	return c.JSON(http.StatusAccepted, echo.Map{
-		"message": "Password changed successfully",
-	})
+	return c.JSON(http.StatusAccepted, utils.ToJSON("Password changed successfully"))
 }
 
 // Elimina el usuario actual
@@ -116,9 +112,7 @@ func (u userController) DeleteUser(c echo.Context) error {
 		return auth.HandlerTokenError(err)
 	}
 
-	return c.JSON(http.StatusAccepted, echo.Map{
-		"message": "User deleted successfully",
-	})
+	return c.JSON(http.StatusAccepted, utils.ToJSON("User deleted successfully"))
 }
 
 // Obtiene el usuario actual
