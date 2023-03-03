@@ -119,3 +119,27 @@ docker compose build --no-cache
 ```bash
 docker compose --env-file config.env up
 ```
+
+## Frontend Implementado
+
+### Login Page
+
+![Login Page](/readme/Login%20Page.png)
+
+### Register Page
+
+![Register Page](/readme/Register%20Page.png)
+
+### Home Page
+
+![Home Page](/readme/Main%20Page.png)
+
+![Home Page sin archivos](/readme/Main%20Page%20No%20Files.png)
+
+![Shared Overlay](/readme/Share%20Overlay.png)
+
+![Shared View](/readme/Shared%20FIles%20View.png)
+
+### User Profile
+
+![User Profile Page](/readme/User%20Page%20Options.png)
