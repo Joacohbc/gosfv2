@@ -15,6 +15,10 @@ var Users userController
 
 type userController struct{}
 
+// Cambia el nombre de usuario actual
+//
+// Body:
+// - Username | String
 func (u userController) RenameUser(c echo.Context) error {
 
 	var user dtos.UserDTO
@@ -44,6 +48,11 @@ func (u userController) RenameUser(c echo.Context) error {
 	})
 }
 
+// Cambia la contraseña del usuario actual
+//
+// Body:
+// - OldPassword | String
+// - NewPassword | String
 func (u userController) ChangePassword(c echo.Context) error {
 
 	type PasswordDTO struct {
@@ -87,6 +96,7 @@ func (u userController) ChangePassword(c echo.Context) error {
 	})
 }
 
+// Elimina el usuario actual
 func (u userController) DeleteUser(c echo.Context) error {
 
 	files, err := models.Files(c).GetFilesFromUser(c.Get("user_id").(uint))
@@ -111,6 +121,7 @@ func (u userController) DeleteUser(c echo.Context) error {
 	})
 }
 
+// Obtiene el usuario actual
 func (u userController) GetUser(c echo.Context) error {
 	user, err := models.Users(c).FindUserById(c.Get("user_id").(uint))
 	if err != nil {
@@ -120,6 +131,7 @@ func (u userController) GetUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, dtos.ToUserDTO(user))
 }
 
+// Obtiene el icono del usuario actual
 func (u userController) GetIcon(c echo.Context) error {
 
 	path := models.Users(c).GetIcon(c.Get("user_id").(uint))
@@ -134,6 +146,10 @@ func (u userController) GetIcon(c echo.Context) error {
 	return c.File(path)
 }
 
+// Obtiene el icono del usuario con el id especificado
+//
+// Params:
+// - userId | String
 func (u userController) GetIconFromUser(c echo.Context) error {
 
 	id, err := Files.GetIdFromURL(c, "userId")
@@ -152,6 +168,10 @@ func (u userController) GetIconFromUser(c echo.Context) error {
 	return c.File(path)
 }
 
+// Sube un icono para el usuario actual
+//
+// Body:
+// - icon | File
 func (u userController) UploadIcon(c echo.Context) error {
 
 	file, err := c.FormFile("icon")
@@ -176,6 +196,7 @@ func (u userController) UploadIcon(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.ToJSON("Icon uploaded successfully"))
 }
 
+// Elimina el icono del usuario actual
 func (u userController) DeleteIcon(c echo.Context) error {
 
 	id := c.Get("user_id").(uint)

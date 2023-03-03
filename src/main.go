@@ -8,7 +8,6 @@ import (
 	"gosfV2/src/models/database"
 	"gosfV2/src/models/env"
 	"gosfV2/src/routes"
-	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -23,22 +22,22 @@ const Version = "v1.0.0"
 
 func main() {
 
+	// Si hubo un error en el proceso de inicialización, se detiene el programa
 	if err := recover(); err != nil {
 		log.Fatal(err)
 	}
 
 	e := echo.New()
 
+	// Configuración de los archivos estáticos
 	e.Static("/static", env.Config.StaticFiles)
 
+	// Configuración de los middlewares
 	e.Use(logger.RequestLoggerConfig())
+	e.Use(middleware.Secure())
 	e.Use(middleware.Recover())
 
-	// Test Endpoint
-	e.GET("/ping", func(c echo.Context) error {
-		return c.String(http.StatusOK, "pong")
-	})
-
+	// Configuración de las rutas
 	tokens := e.Group("/auth")
 	routes.Auth.AddAuthRoutes(tokens)
 
@@ -46,6 +45,7 @@ func main() {
 	routes.Files.AddRoutesToGroup(api)
 	routes.User.AddRoutesToGroup(api)
 
+	// Configuración del cierre del servidor
 	go func() {
 		quit := make(chan os.Signal, 1)
 		signal.Notify(quit, os.Interrupt)
@@ -64,10 +64,13 @@ func main() {
 		}
 	}()
 
+	// Configuración de la salida del servidor
 	e.HideBanner = true
 	e.HidePort = true
 	e.Logger = logger.Logger(log.ERROR)
+	e.Debug = false
 
+	// Configuración de la salida de la información del servidor
 	staticAbs, err := filepath.Abs(env.Config.StaticFiles)
 	if err != nil {
 		log.Fatal(err.Error())
@@ -110,6 +113,8 @@ Powered By Echo v4 with Go Language - ` + Version)
 	fmt.Println()
 	fmt.Println("Starting server...")
 	fmt.Println("Press CTRL+C to stop the server")
+
+	// Inicio del servidor
 	if err := e.Start(":" + strconv.Itoa(env.Config.Port)); err != nil {
 		e.Logger.Fatal(err.Error())
 	}

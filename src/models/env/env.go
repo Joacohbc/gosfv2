@@ -35,6 +35,7 @@ type redis struct {
 	DB       int    `json:"redis_db"`
 }
 
+// Config es la variable que contiene la configuración del servidor
 var Config config
 
 func init() {

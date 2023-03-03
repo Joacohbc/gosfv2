@@ -35,6 +35,7 @@ func IsNotFound(err error) bool {
 
 func init() {
 
+	// Se conecta a MySQL, 10 intentos
 	for i := 1; i <= 10; i++ {
 		dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local", env.Config.SQL.User, env.Config.SQL.Password, env.Config.SQL.Host, env.Config.SQL.Port, env.Config.SQL.Name, env.Config.SQL.Charset)
 
@@ -59,6 +60,7 @@ func init() {
 		log.Fatal("Error to connect to MySQL")
 	}
 
+	// Se conecta a Redis, 10 intentos
 	for i := 1; i <= 10; i++ {
 		temp := redis.NewClient(&redis.Options{
 			Addr:     env.Config.Redis.Host + ":" + strconv.Itoa(env.Config.Redis.Port),

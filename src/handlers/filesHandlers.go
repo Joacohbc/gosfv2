@@ -37,13 +37,13 @@ func (fc *fileController) GetIdFromURL(c echo.Context, param string) (uint, erro
 	return uint(id), nil
 }
 
-// Obtiene el ID del usuario logueado
+// Obtiene el ID del usuario logueado del contexto
 func (fc *fileController) getUserId(c echo.Context) uint {
 	return c.Get("user_id").(uint)
 }
 
 // Obtiene el Id del URL para retornar el archivo
-// SI el usuario logueado es el dueño del archivo
+// Si el usuario logueado es el dueño del archivo
 //
 // PathParams:
 // - Id de Archivo | Uint
@@ -60,21 +60,6 @@ func (fc *fileController) GetFile(c echo.Context) error {
 
 	return c.Inline(file.GetPath(), file.Filename)
 }
-
-// Download file
-// func (fc *fileController) DownloadFile(c echo.Context) error {
-// 	idFile, err := fc.GetIdFromURL(c, "id")
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	file, err := models.Files(c).GetByIdFromUser(idFile, fc.getUserId(c))
-// 	if err != nil {
-// 		return HandleFileError(err)
-// 	}
-
-// 	return c.Attachment(models.Files(c).GetPath(file.ID, filepath.Ext(file.Filename)), file.Filename)
-// }
 
 // Obtiene el Id del URL para retornar la Información del archivo
 // SI el usuario logueado es el dueño del archivo
@@ -159,9 +144,6 @@ func (fc *fileController) GetAllShareFiles(c echo.Context) error {
 
 // Obtiene los archivos subidos desde el Body de la Request (Formulario)
 // y los guarda en la base de datos para el usuario logueado
-//
-// PathParams:
-// - Id de Archivo | Uint
 func (fc *fileController) UploadFile(c echo.Context) error {
 	mf, err := c.MultipartForm()
 	if err != nil {
