@@ -9,7 +9,7 @@ import (
 	"net/http"
 
 	"github.com/go-redis/redis/v9"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 var (

@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 // ToJSON convierte un mensaje a un objeto JSON
