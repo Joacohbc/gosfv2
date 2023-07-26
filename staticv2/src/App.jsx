@@ -6,12 +6,14 @@ import User from "./pages/User";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import './css/index.css';
+import { AuthContextProvider } from "./context/auth-context";
 
 function App() {
   return (
     <BrowserRouter>
+      <AuthContextProvider>
       <Routes>
-        <Route path="/login" element={<Login/>}/>
+        <Route path="/login" element={ <Login/> }/>
         <Route path="/register" element={ <Register/> } />
         <Route path="/" element={<Layout />}>
           <Route path="me" element={<User />} />
@@ -19,6 +21,7 @@ function App() {
           <Route path="*" element={<NoPage />} />
         </Route>
       </Routes>
+      </AuthContextProvider>
     </BrowserRouter>
   );
 }
