@@ -1,4 +1,4 @@
-import '../css/header.css';
+import './Header.css';
 import Logo from '../assets/gosf-icon.png';
 import { Link } from "react-router-dom";
 import { useContext } from 'react';

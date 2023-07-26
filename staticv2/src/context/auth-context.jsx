@@ -6,6 +6,7 @@ import axios from "axios";
 const AuthContext = createContext({
     token: '',
     isLogged: false,
+    cAxios: null,
     onLogOut: async () => {},
     onLogin: async (username, password) => {}
 });
@@ -20,35 +21,38 @@ const setAuthData = (token, duration) => {
 }
 
 const resetAuthData = () => {
-    axios.defaults.baseURL = undefined;
-    axios.defaults.headers.common.Authorization = undefined;
     localStorage.removeItem('token');
     localStorage.removeItem('duration');
     localStorage.removeItem('expires');
 }
+
 export const AuthContextProvider = (props) => { 
     const navigate = useNavigate();
     const location = useLocation();
 
     const [ isLogged, setIsLogged ] = useState(false);
     const [ token, setToken ] = useState('');
+    const [ cAxios, setCAxios ] = useState(null);
 
     const { pathname: currentRoute } = location;
 
     useEffect(() => {
         const token = localStorage.getItem('token');
-        
+
         // If token is set not redirect to login
         if (token) {
             setIsLogged(true);
             setToken(token);
-            axios.defaults.baseURL = window.location.origin;
-            axios.defaults.headers.common.Authorization = 'Bearer ' + token;
+            setCAxios(() => axios.create({
+                baseURL: window.location.origin,
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }));
 
             if(currentRoute == '/login' || currentRoute == '/register') {
                 navigate("/files");
             }
-
             
             // Refresh token
             const expire = Date.parse(localStorage.getItem('expires'));
@@ -65,7 +69,7 @@ export const AuthContextProvider = (props) => {
         // If token is not set redirect to login
         navigate("/login");
         resetAuthData();
-    }, [navigate, token, isLogged, currentRoute]);
+    }, [ token, currentRoute, navigate ]);
 
     const loginHandler = async (username, password) => {
         let url = window.location.origin + '/auth/login';
@@ -100,7 +104,8 @@ export const AuthContextProvider = (props) => {
         token: token,
         isLogged: isLogged,
         onLogin: loginHandler,
-        onLogOut: logOutHandler
+        onLogOut: logOutHandler,
+        cAxios: cAxios
     }}>{props.children}</AuthContext.Provider>
 };
 

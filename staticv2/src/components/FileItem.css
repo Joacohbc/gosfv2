@@ -1,0 +1,37 @@
+@import url("../css/index.css");
+
+.file {
+    color: var(--color-text-dark);
+    border:  1px dashed var(--color-text-dark);
+    background-color: transparent;
+}
+
+.file:hover {
+    background-color: var(--color-row-selected);
+    color: var(--color-text);
+}
+
+.file-filename {
+    /* text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden; */
+    text-decoration: none;
+}
+
+.file-filename:hover {
+    font-weight: bold;
+}
+
+.file-actions-item {
+    border-radius: 5px;
+    color: var(--color-text-dark);
+    background-color: transparent;
+    border: none;
+    outline: none;
+    padding: 5px;
+}
+
+.file-actions-item:hover {
+    background-color: var(--color-hover);
+    color: var(--color-text);
+}
