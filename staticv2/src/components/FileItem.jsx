@@ -1,24 +1,31 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Card from 'react-bootstrap/Card';
-import '../components/FileItem.css';
+import './FileItem.css';
 import ToolTip from './ToolTip';
 import PropTypes from 'prop-types';
 import Button from './Button';
 import { createPortal } from 'react-dom';
-import { useRef } from 'react';
+import { useContext, useRef } from 'react';
 import Modal from './Modal';
+import AuthContext from '../context/auth-context';
 
 const filesModal = document.getElementById('files-modals');
 
 const FileItem = (props) => {
     const modalRef = useRef(null);
+    const auth = useContext(AuthContext);
 
     const handleDownload = () => {
         console.log('Download');
     };
     
-    const handleDelete = () => {
-        console.log('Delete');
+    const handleDelete = async() => {
+        try {
+            const res = await auth.cAxios.delete(`/api/files/${props.id}`);
+            props.onDelete(props.id, res.data.message);
+        } catch(err) {
+            props.onDelete(null, err.data.message);
+        }
     };
 
     const handleUpdate = () => {
@@ -33,6 +40,10 @@ const FileItem = (props) => {
         <p>{props.id}</p>
     </Modal>;
 
+    const handleOpen = () => {
+        props.onOpen(props.id, props.filename);
+    };
+
     return <>
         {createPortal(modal, filesModal) }
         <Card className='file'>
@@ -40,7 +51,7 @@ const FileItem = (props) => {
                 <Card.Title className='text-center'>File #{props.id}</Card.Title>
                 <Card.Text>
                     <ToolTip toolTipMessage={props.filename} placement={'bottom'}>
-                        <p className="text-center file-filename">{props.filename}</p>
+                        <p className="text-center file-filename" onClick={handleOpen}>{props.filename}</p>
                     </ToolTip>
                 </Card.Text>
 
@@ -57,7 +68,12 @@ const FileItem = (props) => {
 
 FileItem.propTypes = {
     filename: PropTypes.string.isRequired,
-    id: PropTypes.number.isRequired
+    id: PropTypes.number.isRequired,
+    onOpen: PropTypes.func.isRequired,
+    onDelete: PropTypes.func.isRequired,
+    onShare: PropTypes.func.isRequired,
+    onUpdate: PropTypes.func.isRequired,
+    onDownload: PropTypes.func.isRequired
 };
 
 export default FileItem;

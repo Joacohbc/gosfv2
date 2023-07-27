@@ -1,0 +1,74 @@
+@import url("/static/main.css");
+
+
+/* Register Container */
+.register {
+    position: relative;
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    padding: 5%;
+    margin: 0 auto;
+    width: 65%;
+    background-color: var(--color-background-light);
+    border-radius: 10px;
+}
+
+/* Register Titles */
+.register-title {
+    color: var(--color-text);
+    font-size: 2em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.register-title:hover {
+    text-decoration: underline;
+}
+
+/* Register Fields */
+.register label {
+    color: var(--color-text);
+    padding: 10px;
+}
+
+/* .register input {
+    background-color: var(--color-background);
+    color: var(--color-text);
+}
+
+.register input:focus, .register input:hover {
+    background-color: var(--color-background-light);
+    border: 1px solid var(--color-text);
+} */
+
+/* Register Button */
+.btn-menu {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.btn-menu:hover {
+    background-color: var(--color-hover);
+}
+
+.link {
+    margin-top: 1em;
+}
+
+img {
+    margin: 0 auto;
+    width: 11em;
+    height: 3em;
+}
+
+.logo-icon {
+    display: flex;
+    justify-content: center;
+    margin: 0 auto;
+    margin: 1em;
+}
+

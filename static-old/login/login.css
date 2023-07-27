@@ -1,0 +1,88 @@
+@import url("/static/main.css");
+
+
+/* Login Container */
+.login {
+    position: relative;
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    padding: 5%;
+    margin: 0 auto;
+    width: 65%;
+    height: 45%;
+    background-color: var(--color-background-light);
+    border-radius: 10px;
+}
+
+/* Login Titles */
+.login-title {
+    color: var(--color-text);
+    font-size: 2em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.login-title:hover {
+    text-decoration: underline;
+}
+
+/* Login Fields */
+.login label {
+    color: var(--color-text);
+    font-style: bold;
+    padding: 10px;
+}
+
+/* .login input {
+    background-color: var(--color-background);
+    color: var(--color-text);
+}
+
+.login input:focus, .login input:hover {
+    background-color: var(--color-background-light);
+    border: 1px solid var(--color-text);
+} */
+
+img {
+    margin: 0 auto;
+    width: 11em;
+    height: 3em;
+}
+
+.logo-icon {
+    display: flex;
+    justify-content: center;
+    margin: 0 auto;
+    margin: 1em;
+}
+
+
+/* Login Buttons */
+#btn-login {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+#btn-login:hover {
+    background-color: var(--color-hover);
+}
+
+.link {
+    margin-top: 1em;
+}
+
+#btn-restore {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+#btn-restore:hover {
+    background-color: var(--color-hover);
+}

@@ -1,0 +1,63 @@
+import { Message }  from '/static/modules/message.js';
+const message = new Message("message");
+
+window.addEventListener('DOMContentLoaded', function() {
+    const username = document.getElementById('username');
+    // username.addEventListener('keyup', function(e) {
+    //     username.style = "color: white;";
+    // });
+
+    // const password = document.getElementById('password');
+    // password.addEventListener('keyup', function(e) {
+    //     password.style = "color: white;";
+    // });
+
+    // Agrego el evento click al botón de Login
+    document.getElementById('btn-login').addEventListener('click', function(e) {
+        e.preventDefault();
+
+        // Defino el URL base de las peticiones
+        axios.defaults.baseURL = window.location.origin;
+        axios.post('/auth/login', {
+            username: username.current.value,
+            password: password.current.value
+        })
+        .then(req => {
+            localStorage.setItem('token', req.data.token);
+            localStorage.setItem('duration', req.data.duration);
+
+            let expires = new Date(Date.now() + req.data.duration * 1000 * 60);
+            localStorage.setItem('expires', expires);
+            console.log(req.data.duration);
+
+            axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('token');
+        })
+        .catch(err => {
+            console.log(err);
+            message.showError(err.response.data.message);
+        });
+    });
+
+    // Agrego el evento click al botón de Login
+    document.getElementById('btn-restore').addEventListener('click', function(e) {
+        e.preventDefault();
+
+        let url = window.location.origin + '/auth/restore';
+        
+        axios.post(url, {
+            username: username.value,
+            password: password.value
+        })
+        .then(req => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('duration');
+            localStorage.removeItem('expires');
+            
+            message.showSuccess(req.data.message);
+        })
+        .catch(err => {
+            console.log(err);
+            message.showError(err.response.data.message);
+        });
+    });
+});

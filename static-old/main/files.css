@@ -1,0 +1,135 @@
+@import url("/static/main.css");
+
+/* SEARCH CSS */
+.search {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 1.5em;
+}
+
+#search-input {
+    border-radius: 5px;
+    border: 1px solid var(--color-text);
+    padding: 10px;
+    width: 50%;
+    font-size: 1em;
+}
+
+/* FILES CSS */
+.table-container {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    border-radius: 10px;
+    color: var(--color-text);
+    width: 70%;
+    margin: auto;
+    overflow-wrap: break-word;
+    text-overflow: ellipsis;
+}
+
+.file td {
+    border: 1px solid var(--color-text);
+    color: var(--color-text-dark);
+    padding: 10px;
+    font-size: 1em;
+    max-width: 25em;
+}
+
+.file:hover td {
+    background-color: var(--color-row-selected);
+    color: var(--color-text);
+}
+
+.file-filename {
+    text-decoration: none;
+}
+
+.file-filename:hover {
+    text-decoration: underline;
+}
+
+.file-actions-item {
+    border-radius: 5px;
+    color: var(--color-text-dark);
+    margin-right: 5px;
+    background-color: transparent;
+    border: none;
+    outline: none;
+}
+
+.file-actions-item:hover {
+    background-color: var(--color-hover);
+    color: var(--color-text);
+}
+
+.table-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px;
+}
+
+#message {
+    position: fixed;
+    bottom: 0;
+    padding: 10px;
+    color: var(--color-text);
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2;
+}
+
+#file-loading {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    padding: 10px;
+    margin: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2;
+}
+
+.loader {
+    animation: loading 1s linear infinite;
+    color: var(--color-text);
+    border-radius: 5px;
+    padding: 10px;
+}
+
+@keyframes loading {
+    0% {
+        color: #96D373;
+    }
+
+    50% {
+        color: #F5F5F5;
+    }
+
+    100% {
+        color: #96D373;
+    }
+}
+
+#btn-upload {
+    color: var(--color-text);
+    border-radius: 5px;
+    padding: 10px;
+}
+
+#btn-upload:hover {
+    background-color: var(--color-hover);
+}
+
+#go-share {
+    color: var(--color-text);
+    border-radius: 5px;
+    padding: 10px;
+    background-color: transparent;
+    border: none;
+    outline: none;
+}
+
+#go-share:hover {
+    background-color: var(--color-hover);
+}
