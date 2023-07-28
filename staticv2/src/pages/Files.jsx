@@ -10,14 +10,16 @@ import { useCallback, useContext, useEffect,  useRef,  useState } from 'react';
 import Message from '../components/Message';
 import getContentType from '../utils/content-types';
 
+
+const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: ''});
+
 export default function Files() {
     const [ files, setFiles ] = useState([]);
-    const [ previewFile, setPreviewFile ] = useState({ id: null, filename: null});
-    const [ showPreview, setShowPreview ] = useState(false);
+    const [ previewFile, setPreviewFile ] = useState(emptyFile);
+    const [ showPreview, setShowPreview ] = useState(false); 
     const [ uploading, setUploading ] = useState(false);
-    const [ contentType, setContentType ] = useState(''); 
     const messageRef = useRef(null);
-
+    
     const auth = useContext(AuthContext);
     const { isLogged, cAxios } = auth;
 
@@ -48,14 +50,18 @@ export default function Files() {
     };
     
     const handleOpenPreview = (id, filename) => {
-        setContentType(getContentType(filename));
         setShowPreview(true);
-        setPreviewFile(() => ({ id: id, filename: filename }));
+        setPreviewFile({ 
+            id: id, 
+            filename: filename, 
+            contentType: getContentType(filename),
+            url: `${window.location.origin}/api/files/${id}?api-token=${auth.token}`
+        });
     };
 
     const handleClosePreview = () => {
         setShowPreview(false);
-        setPreviewFile(null);
+        setPreviewFile(emptyFile);
     };
     
     const handleDelete = async(id, message) => {
@@ -65,7 +71,6 @@ export default function Files() {
         }
         messageRef.current.showInfo(message);
         fetchDataFiles((data) => setFiles(data));
-
     };
 
     const hanadleFileUpload = (e) => {
@@ -95,16 +100,20 @@ export default function Files() {
         }, 0);
     }
 
+    const previewComponent = () => {
+        if(previewFile.contentType.includes('video'))
+            return <video className='flex-fill' controls><source src={previewFile.url} type={previewFile.contentType}/></video>;
+        
+        return <iframe src={previewFile.url} className='flex-fill'/>;
+    }
+    
     return <>
         {showPreview && 
         <Modal show={showPreview} onHide={handleClosePreview} className='d-flex modal-bg' fullscreen centered>
             <Modal.Header closeButton className='bg-modal' closeVariant='white'>{previewFile.filename}</Modal.Header>
-            { !contentType.includes('video') && <iframe src={window.location.origin + '/api/files/' + previewFile.id +'?api-token='+auth.token} className='flex-fill'/>}
-            
-            { contentType.includes('video') && 
-                <video className='flex-fill' controls>
-                    <source src={window.location.origin + '/api/files/' + previewFile.id +'?api-token='+auth.token} type={contentType}/>
-                </video>}
+            <div className='flex-fill'>
+                { previewComponent() }
+            </div>
         </Modal>}
 
         <div className="d-flex justify-content-center align-items-center mb-4">
