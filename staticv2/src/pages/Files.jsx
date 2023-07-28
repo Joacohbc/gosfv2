@@ -9,26 +9,35 @@ import Modal from 'react-bootstrap/Modal';
 import { useCallback, useContext, useEffect,  useRef,  useState } from 'react';
 import Message from '../components/Message';
 import getContentType from '../utils/content-types';
+import { handleKeyUpWithTimeout } from '../utils/input-text';
 
-const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: ''});
+const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extesion: ''});
 
 export default function Files() {
     const [ files, setFiles ] = useState([]);
     const [ previewFile, setPreviewFile ] = useState(emptyFile);
     const [ showPreview, setShowPreview ] = useState(false); 
     const [ uploading, setUploading ] = useState(false);
+    const { isLogged, cAxios, addTokenParam } = useContext(AuthContext);
     const messageRef = useRef(null);
-    
-    const auth = useContext(AuthContext);
-    const { isLogged, cAxios } = auth;
 
     const fetchDataFiles = useCallback(async (cb) => {
         try {
             const res = await cAxios.get('/api/files/');
             if(!res.data) return [];
-            cb(res.data)
+            cb(res.data.map(file => {
+                const filenameArray = file.filename.split('.');
+                return ({
+                    id: file.id,
+                    filename: file.filename,
+                    name: filenameArray.slice(0, -1).join('.'),
+                    extesion: filenameArray.length > 1 ? filenameArray.pop() : '',
+                    contentType: getContentType(file.filename),
+                    url: `${window.location.origin}/api/files/${file.id}`,
+                })
+            }))
         } catch(err) {
-            console.log(err);
+            messageRef.current.showError(err.data.message);
             return [];
         }
     }, [ cAxios ]);
@@ -38,40 +47,38 @@ export default function Files() {
         fetchDataFiles((data) => setFiles(data));
     }, [ isLogged, cAxios, fetchDataFiles ]);
 
-    let searchTimeout = null;
-    const handleSearch = (e) => {
-        if(searchTimeout) clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            fetchDataFiles((data) => {
-                setFiles(() => data.filter(file => file.filename.includes(e.target.value)));
-            });
-        }, 500);
-    };
+    const handleSearch = handleKeyUpWithTimeout((e) => {
+        fetchDataFiles((data) => setFiles(data.filter(file => file.filename.includes(e.target.value))));
+    }, 200);
+
+    const handleDelete = useCallback(async(openedFile, message, error) => {
+        if(error) {
+            messageRef.current.showError(error);
+            return;
+        }
+        messageRef.current.showInfo(message);
+        setFiles((files) => files.filter(file => file.id != openedFile.id));
+    }, [ ]);
     
-    const handleOpenPreview = (id, filename) => {
+    const handleUpdate = useCallback((openedFile, message, error) => {
+        if(error) {
+            messageRef.current.showError(error);
+            return;
+        }
+        messageRef.current.showInfo(message);
+        setFiles((files) => files.map(file => file.id == openedFile.id ? openedFile : file));
+    }, [ ]);
+
+    const handleOpenPreview = useCallback((file) => {
         setShowPreview(true);
-        setPreviewFile({ 
-            id: id, 
-            filename: filename, 
-            contentType: getContentType(filename),
-            url: `${window.location.origin}/api/files/${id}?api-token=${auth.token}`
-        });
-    };
+        setPreviewFile(file);
+    }, [ ]);
 
     const handleClosePreview = () => {
         setShowPreview(false);
         setPreviewFile(emptyFile);
     };
     
-    const handleDelete = async(id, message, error) => {
-        if(error) {
-            messageRef.current.showError(error);
-            return;
-        }
-        messageRef.current.showInfo(message);
-        setFiles((files) => files.filter(file => file.id != id));
-    };
-
     const handleFileUpload = (e) => {
         e.preventDefault();
 
@@ -101,9 +108,9 @@ export default function Files() {
 
     const previewComponent = () => {
         if(previewFile.contentType.includes('video'))
-            return <video className='flex-fill' controls><source src={previewFile.url} type={previewFile.contentType}/></video>;
+            return <video className='flex-fill' controls><source src={addTokenParam(previewFile.url)} type={previewFile.contentType}/></video>;
         
-        return <iframe src={previewFile.url} className='flex-fill'/>;
+        return <iframe src={addTokenParam(previewFile.url)} className='flex-fill'/>;
     }
     
     return <>
@@ -129,15 +136,22 @@ export default function Files() {
                     </div>
             </Col>}
 
-            {files.length != 0 && <Row xs={1} sm={2}  md={3} lg={4} xl={5} className='row-gap-3 d-flex justify-content-center'>
-                {files.map(file => <Col key={file.id}>
+            <Row xs={1} sm={2}  md={3} lg={4} xl={5} className='row-gap-3 d-flex justify-content-center'>
+                {files.map(file => 
+                <Col key={file.id}>
                     <FileItem 
-                        filename={file.filename} 
-                        id={file.id} 
+                        id={file.id}
+                        filename={file.filename}
+                        name={file.name} 
+                        contentType={file.contentType}
+                        extesion={file.extesion}
+                        url={file.url}
                         onOpen={handleOpenPreview}
-                        onDelete={handleDelete}/>
+                        onDelete={handleDelete}
+                        onUpdate={handleUpdate}
+                        />
                 </Col>)}
-            </Row>}
+            </Row>
         </Container>
         
         <div className="d-flex justify-content-center align-items-center mt-4">

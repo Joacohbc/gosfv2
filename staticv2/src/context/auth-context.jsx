@@ -8,14 +8,13 @@ const AuthContext = createContext({
     isLogged: false,
     cAxios: null,
     onLogOut: async () => {},
-    onLogin: async (username, password) => {}
+    onLogin: async (username, password) => {},
+    addTokenParam: (url) => {},
 });
 
 const setAuthData = (token, duration) => {
     localStorage.setItem('token', token);
     localStorage.setItem('duration', duration);
-    
-    // Minutes to milliseconds
     let expires = new Date(Date.now() + duration * 1000 * 60);
     localStorage.setItem('expires', expires);
 }
@@ -39,7 +38,7 @@ export const AuthContextProvider = (props) => {
     useEffect(() => {
         const token = localStorage.getItem('token');
 
-        // If token is set not redirect to login
+        // Si el token esta seteado y la ruta actual es login o register redireccionar a files
         if (token) {
             setIsLogged(true);
             setToken(token);
@@ -49,12 +48,12 @@ export const AuthContextProvider = (props) => {
                     Authorization: `Bearer ${token}`
                 }
             }));
-
+            
             if(currentRoute == '/login' || currentRoute == '/register') {
                 navigate("/files");
             }
             
-            // Refresh token
+            // Si el token expiro redireccionar a login
             const expire = Date.parse(localStorage.getItem('expires'));
             if(expire - Date.now() <= 0) {
                 navigate("/login");
@@ -63,10 +62,10 @@ export const AuthContextProvider = (props) => {
             return;
         } 
         
-        // If token is not set and current route is login or register not redirect to login
+        // Si el token no esta seteado y la ruta actual es login o register no redireccionar a login
         if(currentRoute == '/login' || currentRoute == '/register') return;
         
-        // If token is not set redirect to login
+        // Si el token no esta seteado redireccionar a login
         navigate("/login");
         resetAuthData();
     }, [ token, currentRoute, navigate ]);
@@ -100,12 +99,17 @@ export const AuthContextProvider = (props) => {
         navigate('/login');
     };
 
+    const addTokenParam = (url) => {
+        return url + `?api-token=${token}`;
+    };
+
     return <AuthContext.Provider value={{
         token: token,
         isLogged: isLogged,
+        cAxios: cAxios,
         onLogin: loginHandler,
         onLogOut: logOutHandler,
-        cAxios: cAxios
+        addTokenParam: addTokenParam
     }}>{props.children}</AuthContext.Provider>
 };
 

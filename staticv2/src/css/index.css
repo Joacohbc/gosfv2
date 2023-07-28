@@ -13,3 +13,8 @@ body {
     background-color: var(--color-background);
     font-family: var(--font);
 }
+
+.form-control {
+    --bs-body-bg: var(--color-text);
+    --bs-body-color: var(--color-background);
+}    

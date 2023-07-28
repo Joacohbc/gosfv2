@@ -1,9 +1,5 @@
 @import url("./index.css");
 
-.btn-bd-primary {
-    --bs-btn-bg: var(--color-background);
-}
-
 /* Login Container */
 .login {
     position: relative;

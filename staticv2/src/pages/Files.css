@@ -6,11 +6,8 @@
     padding: 10px;
     width: 50%;
     font-size: 1em;
-}
-
-.bg-modal {
-    background-color: var(--color-background);
-    color: var(--color-text);
+    background-color: var(--color-text);
+    color: var(--color-background);
 }
 
 .file-loading {
