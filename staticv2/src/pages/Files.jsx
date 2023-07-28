@@ -10,7 +10,6 @@ import { useCallback, useContext, useEffect,  useRef,  useState } from 'react';
 import Message from '../components/Message';
 import getContentType from '../utils/content-types';
 
-
 const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: ''});
 
 export default function Files() {
@@ -64,16 +63,16 @@ export default function Files() {
         setPreviewFile(emptyFile);
     };
     
-    const handleDelete = async(id, message) => {
-        if(!id) {
-            messageRef.current.showError(message);
+    const handleDelete = async(id, message, error) => {
+        if(error) {
+            messageRef.current.showError(error);
             return;
         }
         messageRef.current.showInfo(message);
-        fetchDataFiles((data) => setFiles(data));
+        setFiles((files) => files.filter(file => file.id != id));
     };
 
-    const hanadleFileUpload = (e) => {
+    const handleFileUpload = (e) => {
         e.preventDefault();
 
         const files = e.target.files;
@@ -108,6 +107,9 @@ export default function Files() {
     }
     
     return <>
+        <Message ref={messageRef} />  
+        <div className="loader file-loading" hidden={!uploading}> Uploading files </div> 
+
         {showPreview && 
         <Modal show={showPreview} onHide={handleClosePreview} className='d-flex modal-bg' fullscreen centered>
             <Modal.Header closeButton className='bg-modal' closeVariant='white'>{previewFile.filename}</Modal.Header>
@@ -120,9 +122,6 @@ export default function Files() {
             <input type="text" placeholder="Enter Search" className='search-input' onKeyUp={handleSearch}/>
         </div>
         
-        <div className="loader file-loading" hidden={!uploading}> Uploading files </div> 
-        <Message ref={messageRef} />
-
         <Container fluid="md">
             {files.length == 0 && <Col>
                     <div className="d-flex justify-content-center align-items-center">
@@ -143,7 +142,7 @@ export default function Files() {
         
         <div className="d-flex justify-content-center align-items-center mt-4">
             <label htmlFor="input-upload" className="btn-upload">Upload file/s</label>
-            <input id="input-upload" type="file" style={ {display: 'none'} } onChange={hanadleFileUpload} multiple/>
+            <input id="input-upload" type="file" style={ {display: 'none'} } onChange={handleFileUpload} multiple/>
         </div>
     </>;
 }

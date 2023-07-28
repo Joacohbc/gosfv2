@@ -22,9 +22,9 @@ const FileItem = (props) => {
     const handleDelete = async() => {
         try {
             const res = await auth.cAxios.delete(`/api/files/${props.id}`);
-            props.onDelete(props.id, res.data.message);
+            props.onDelete(props.id, res.data.message, null);
         } catch(err) {
-            props.onDelete(null, err.data.message);
+            props.onDelete(null, null, err.data.message);
         }
     };
 
@@ -36,13 +36,13 @@ const FileItem = (props) => {
         modalRef.current.setShowed(true);
     };
 
-    const modal = <Modal ref={modalRef} title={props.filename}>
-        <p>{props.id}</p>
-    </Modal>;
-
     const handleOpen = () => {
         props.onOpen(props.id, props.filename);
     };
+
+    const modal = <Modal ref={modalRef} title={props.filename}>
+        <p>{props.id}</p>
+    </Modal>;
 
     return <>
         {createPortal(modal, filesModal) }
