@@ -7,6 +7,7 @@ const AuthContext = createContext({
     token: '',
     isLogged: false,
     cAxios: null,
+    baseUrl: '',
     onLogOut: async () => {},
     onLogin: async (username, password) => {},
     onRegister: async (username, password) => {},
@@ -27,6 +28,8 @@ const resetAuthData = () => {
 }
 
 export const AuthContextProvider = (props) => { 
+    const BASE_URL = 'http://localhost:3000';
+    
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -44,8 +47,7 @@ export const AuthContextProvider = (props) => {
             setIsLogged(true);
             setToken(token);
             setCAxios(() => axios.create({
-                // baseURL: window.location.origin,
-                baseURL: 'http://localhost:3000',
+                baseURL: BASE_URL,
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -73,11 +75,8 @@ export const AuthContextProvider = (props) => {
     }, [ token, currentRoute, navigate ]);
 
     const loginHandler = async (username, password) => {
-        // const url = window.location.origin + '/auth/login';
-        let url = 'http://localhost:3000' + '/auth/login';
-
         try {
-            const req = await axios.post(url, {
+            const req = await axios.post(BASE_URL + '/auth/login', {
                 username: username,
                 password: password
             });
@@ -86,15 +85,13 @@ export const AuthContextProvider = (props) => {
             setToken(req.data.token);
             setIsLogged(true);
         } catch(e) {
-            console.log('Ocurrio un error');
             console.log(e);
         }
     };
 
     const logOutHandler = async () => {
         try {
-            // axios.delete(window.location.origin + '/auth/logout');
-            axios.delete('http://localhost:3000' + '/auth/logout');
+            await axios.delete(BASE_URL + '/auth/logout');
         } catch(e) {
             console.log("Error on logout:" + e);
         }
@@ -104,28 +101,27 @@ export const AuthContextProvider = (props) => {
     };
 
     const registerHandler = async (username, password) => {
-        // const url = window.location.origin + '/auth/register';
-        let url = 'http://localhost:3000' + '/auth/register';
-        
         try {
-            const req = await axios.post(url, {
+            await axios.post(BASE_URL + '/auth/register', {
                 username: username,
                 password: password
             });
         } catch(e) {
-            console.log('Ocurrio un error');
             console.log(e);
         }
     };
     
     const addTokenParam = (url) => {
-        return url + `?api-token=${token}`;
+        const urlObj = new URL(url);
+        urlObj.searchParams.append('api-token', token);
+        return urlObj.toString();
     };
 
     return <AuthContext.Provider value={{
         token: token,
         isLogged: isLogged,
         cAxios: cAxios,
+        baseUrl: BASE_URL,
         onLogin: loginHandler,
         onLogOut: logOutHandler,
         onRegister: registerHandler,    

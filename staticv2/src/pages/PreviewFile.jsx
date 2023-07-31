@@ -1,39 +1,40 @@
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useGetInfo } from "../hooks/files";
 import AuthContext from "../context/auth-context";
 import PropTypes from 'prop-types';
-import { getFileInfo } from "../utils/files";
 
 const PreviewFile = (props) => {
     const { sharedFileId } = useParams();
     const [ previewFile, setPreviewFile ] = useState(props.fileInfo);
-    const { cAxios, addTokenParam } = useContext(AuthContext);
+    const { cAxios } = useContext(AuthContext);
+    const { getFileInfo } = useGetInfo();
 
     useEffect(() => {
         if(!sharedFileId) return;
         if(!cAxios) return;
 
-        async function fetchDataFile() {
+        const fetchDataFile = async () => {
             try {
                 const res = await cAxios.get(`/api/files/share/${sharedFileId}/info`);
-                setPreviewFile(getFileInfo(res.data));
+                setPreviewFile(getFileInfo(res.data, true));
             } catch(err) {
                 console.log(err);
             }
         }
         
         fetchDataFile();
-    }, [ sharedFileId, cAxios ]);
+    }, [ sharedFileId, cAxios, getFileInfo ]);
 
     const previewComponent = () => {
         if(!previewFile) return <h1>404</h1>;
 
-        const urlWithToken = !sharedFileId ? addTokenParam(previewFile?.url) : addTokenParam(previewFile?.sharedUrl);
+        const url = !sharedFileId ? previewFile?.url : previewFile?.sharedUrl;
         
         if(previewFile?.filename?.contentType?.includes('video'))
-            return <video className={props.className} controls><source src={urlWithToken} type={previewFile?.contentType}/></video>;
+            return <video className={props.className} controls><source src={url} type={previewFile?.contentType}/></video>;
         
-        return <iframe src={urlWithToken} className={props.className}/>;
+        return <iframe src={url} className={props.className}/>;
     }
 
     return previewComponent();

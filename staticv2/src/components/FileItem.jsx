@@ -15,7 +15,7 @@ import Row from 'react-bootstrap/Row';
 import { useImperativeHandle } from 'react';
 import Col from 'react-bootstrap/esm/Col';
 import { MessageContext } from '../context/message-context';
-import { getUserInfo } from '../utils/files';
+import { useGetInfo } from '../hooks/files';
 
 const filesModal = document.getElementById('files-modals');
 
@@ -26,6 +26,7 @@ const FileItem = memo((props) => {
     const inputUpdate = useRef(null);
     const auth = useContext(AuthContext);
     const messageContext = useContext(MessageContext);
+    const { getUserInfo } = useGetInfo();
 
     const file = Object.preventExtensions({
         id: props.id,
@@ -85,10 +86,7 @@ const FileItem = memo((props) => {
         try {
             const res = await auth.cAxios.get(`/api/files/${file.id}/info`);
             file.shared = res.data.shared;
-            file.sharedWith = res.data.shared_with?.map(user => getUserInfo(user, userInfo => {
-                user.icon = auth.addTokenParam(userInfo.icon);
-                return user;
-            }))  ?? [];
+            file.sharedWith = res.data.shared_with?.map(user => getUserInfo(user, true)) ?? [];
             shareModal.current.open(file);
         } catch(err) {
             messageContext.showError(err.data.message);
@@ -173,9 +171,10 @@ export default FileItem;
 const SharedWithModal = forwardRef((props, ref) => {
     const shareModal = useRef(null);
     const messageContext = useContext(MessageContext);
-    const { cAxios, addTokenParam  } = useContext(AuthContext);
+    const { cAxios } = useContext(AuthContext);
     const userIdAdded = useRef(null);
     const [ file, setFile ] = useState(null);
+    const { getUserInfo } = useGetInfo();
 
     useImperativeHandle(ref, () => ({
         open: (file) => {
@@ -232,10 +231,7 @@ const SharedWithModal = forwardRef((props, ref) => {
             const fileInfo = await cAxios.get(`/api/files/${file.id}/info`);
             setFile((prevFile) => ({
                 ...prevFile,
-                sharedWith: fileInfo.data.shared_with.map(user => getUserInfo(user, userInfo => {
-                    user.icon = addTokenParam(userInfo.icon);
-                    return user;
-                })) 
+                sharedWith: fileInfo.data.shared_with.map(user => getUserInfo(user, true)) 
             }));
             props.onUpdate();
         } catch(err) {

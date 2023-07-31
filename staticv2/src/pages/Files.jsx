@@ -8,9 +8,9 @@ import AuthContext from '../context/auth-context';
 import Modal from 'react-bootstrap/Modal';
 import { useCallback, useContext, useEffect,  useState } from 'react';
 import { handleKeyUpWithTimeout } from '../utils/input-text';
-import { getFileInfo } from '../utils/files';
 import PreviewFile from './PreviewFile';
 import { MessageContext } from '../context/message-context';
+import { useGetInfo } from '../hooks/files';
 
 const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extesion: ''});
 
@@ -21,18 +21,19 @@ export default function Files() {
     const [ uploading, setUploading ] = useState(false);
     const { isLogged, cAxios } = useContext(AuthContext);
     const messageContext = useContext(MessageContext);
+    const { getFileInfo } = useGetInfo();
 
     const fetchDataFiles = useCallback(async (cb) => {
         try {
             const res = await cAxios.get('/api/files/');
             if(!res.data) return [];
-            const files = res.data.map(file => getFileInfo(file));
+            const files = res.data.map(file => getFileInfo(file, true));
             cb(files);
         } catch(err) {
             messageContext.showError(err.response.data.message);
             return [];
         }
-    }, [ cAxios, messageContext ]);
+    }, [ cAxios, messageContext, getFileInfo ]);
     
     useEffect(() => {
         if(!cAxios || !isLogged) return;
@@ -75,6 +76,7 @@ export default function Files() {
         }
 
         setUploading(true);
+
         setTimeout(async () => {
             try {
                 const res = await cAxios.post('/api/files/', form);
