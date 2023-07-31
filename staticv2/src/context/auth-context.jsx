@@ -9,6 +9,7 @@ const AuthContext = createContext({
     cAxios: null,
     onLogOut: async () => {},
     onLogin: async (username, password) => {},
+    onRegister: async (username, password) => {},
     addTokenParam: (url) => {},
 });
 
@@ -43,7 +44,8 @@ export const AuthContextProvider = (props) => {
             setIsLogged(true);
             setToken(token);
             setCAxios(() => axios.create({
-                baseURL: window.location.origin,
+                // baseURL: window.location.origin,
+                baseURL: 'http://localhost:3000',
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -71,7 +73,8 @@ export const AuthContextProvider = (props) => {
     }, [ token, currentRoute, navigate ]);
 
     const loginHandler = async (username, password) => {
-        let url = window.location.origin + '/auth/login';
+        // const url = window.location.origin + '/auth/login';
+        let url = 'http://localhost:3000' + '/auth/login';
 
         try {
             const req = await axios.post(url, {
@@ -90,7 +93,8 @@ export const AuthContextProvider = (props) => {
 
     const logOutHandler = async () => {
         try {
-            axios.delete(window.location.origin + '/auth/logout');
+            // axios.delete(window.location.origin + '/auth/logout');
+            axios.delete('http://localhost:3000' + '/auth/logout');
         } catch(e) {
             console.log("Error on logout:" + e);
         }
@@ -99,6 +103,21 @@ export const AuthContextProvider = (props) => {
         navigate('/login');
     };
 
+    const registerHandler = async (username, password) => {
+        // const url = window.location.origin + '/auth/register';
+        let url = 'http://localhost:3000' + '/auth/register';
+        
+        try {
+            const req = await axios.post(url, {
+                username: username,
+                password: password
+            });
+        } catch(e) {
+            console.log('Ocurrio un error');
+            console.log(e);
+        }
+    };
+    
     const addTokenParam = (url) => {
         return url + `?api-token=${token}`;
     };
@@ -109,6 +128,7 @@ export const AuthContextProvider = (props) => {
         cAxios: cAxios,
         onLogin: loginHandler,
         onLogOut: logOutHandler,
+        onRegister: registerHandler,    
         addTokenParam: addTokenParam
     }}>{props.children}</AuthContext.Provider>
 };

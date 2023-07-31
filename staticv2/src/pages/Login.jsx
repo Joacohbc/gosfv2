@@ -35,9 +35,7 @@ export default function Login() {
                     <button className='btn-login flex-fill'>Restore Tokens</button>
                 </div>
             </Form>
-
-            <div id="message"></div>
-
+            
             <div className="link">
                 <Link to="/register">{"Don't have an account yet? Sign up!"}</Link>
             </div>

@@ -49,7 +49,7 @@ func main() {
 	// Configuración de los middlewares
 	e.Use(logger.RequestLoggerConfig())
 	e.Use(middleware.Recover())
-	// e.Use(middleware.CORS())
+	e.Use(middleware.CORS())
 
 	// Configuración de las rutas
 	tokens := e.Group("/auth")

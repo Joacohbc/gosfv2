@@ -3,10 +3,10 @@ import './Message.css';
 import { forwardRef, useImperativeHandle, useState } from 'react';
 
 const colors = {
-    info: 'blue',
-    error: 'red',
-    success: 'green',
-    warning: 'yellow'
+    info: '#3498db',
+    error: '#e74c3c',
+    success: '#2ecc71',
+    warning: '#f1c40f'
 };
 
 const Message = forwardRef((prop, ref) => {

@@ -116,6 +116,48 @@ func (fc *fileController) GetSharedFile(c echo.Context) error {
 	return c.File(file.GetPath())
 }
 
+// Obtiene el Id del URL para retornar el archivo
+// SI el archivo esta compartido con el Usuario logueado
+//
+// PathParams:
+// - Id de Archivo | Uint
+func (fc *fileController) GetSharedFileInfo(c echo.Context) error {
+	idFile, err := getIdFromURL(c, "id")
+	if err != nil {
+		return err
+	}
+
+	file, err := models.Files(c).GetById(idFile)
+	if err != nil {
+		return HandleFileError(err)
+	}
+
+	idCurrentUser := auth.Middlewares.GetUserId(c)
+
+	// Si el usuario es el dueño del archivo, lo envío directamente
+	if file.UserID == idCurrentUser {
+		return c.File(file.GetPath())
+	}
+
+	// Si esta compartido lo envió directamente
+	if file.Shared {
+		return c.JSON(http.StatusOK, dtos.ToFileDTO(file))
+	}
+
+	sharedWithMe, err := models.Files(c).IsSharedWith(file.ID, idCurrentUser)
+	if err != nil {
+		return HandleFileError(err)
+	}
+
+	// Si el el usuario no es el dueño del archivo, por seguridad
+	// le digo que el archivo no existe
+	if !sharedWithMe {
+		return echo.NewHTTPError(http.StatusNotFound, models.ErrFileNotFound.Error())
+	}
+
+	return c.JSON(http.StatusOK, dtos.ToFileDTO(file))
+}
+
 // Obtiene todos los archivos del usuario (Su información)
 func (fc *fileController) GetAllShareFiles(c echo.Context) error {
 	files, err := models.Files(c).GetFilesShared(auth.Middlewares.GetUserId(c))
@@ -175,8 +217,7 @@ func (fc *fileController) UpdateFile(c echo.Context) error {
 	}
 
 	// Si el nombre del archivo es diferente al actual, lo renombro
-	if actual.Filename != file.Filename {
-
+	if actual.Filename != file.Filename && file.Filename != "" {
 		if filepath.Ext(file.Filename) != filepath.Ext(actual.Filename) {
 			return echo.NewHTTPError(http.StatusBadRequest, "The extension of the file cannot be changed")
 		}

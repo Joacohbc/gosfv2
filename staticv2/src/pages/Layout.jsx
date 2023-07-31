@@ -1,9 +1,10 @@
 import Header from "../components/Header";
 import { Outlet } from "react-router-dom";
+import MessageComponentProvider from "../context/message-context";
 
 export default function Layout() {
-    return <>
+    return <MessageComponentProvider>
         <Header></Header>
         <Outlet/>
-    </>;
+    </MessageComponentProvider>;
 }

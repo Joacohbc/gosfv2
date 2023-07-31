@@ -6,10 +6,11 @@ import Col from 'react-bootstrap/Col';
 import FileItem from '../components/FileItem';
 import AuthContext from '../context/auth-context';
 import Modal from 'react-bootstrap/Modal';
-import { useCallback, useContext, useEffect,  useRef,  useState } from 'react';
-import Message from '../components/Message';
-import getContentType from '../utils/content-types';
+import { useCallback, useContext, useEffect,  useState } from 'react';
 import { handleKeyUpWithTimeout } from '../utils/input-text';
+import { getFileInfo } from '../utils/files';
+import PreviewFile from './PreviewFile';
+import { MessageContext } from '../context/message-context';
 
 const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extesion: ''});
 
@@ -18,29 +19,20 @@ export default function Files() {
     const [ previewFile, setPreviewFile ] = useState(emptyFile);
     const [ showPreview, setShowPreview ] = useState(false); 
     const [ uploading, setUploading ] = useState(false);
-    const { isLogged, cAxios, addTokenParam } = useContext(AuthContext);
-    const messageRef = useRef(null);
+    const { isLogged, cAxios } = useContext(AuthContext);
+    const messageContext = useContext(MessageContext);
 
     const fetchDataFiles = useCallback(async (cb) => {
         try {
             const res = await cAxios.get('/api/files/');
             if(!res.data) return [];
-            cb(res.data.map(file => {
-                const filenameArray = file.filename.split('.');
-                return ({
-                    id: file.id,
-                    filename: file.filename,
-                    name: filenameArray.slice(0, -1).join('.'),
-                    extesion: filenameArray.length > 1 ? filenameArray.pop() : '',
-                    contentType: getContentType(file.filename),
-                    url: `${window.location.origin}/api/files/${file.id}`,
-                })
-            }))
+            const files = res.data.map(file => getFileInfo(file));
+            cb(files);
         } catch(err) {
-            messageRef.current.showError(err.data.message);
+            messageContext.showError(err.response.data.message);
             return [];
         }
-    }, [ cAxios ]);
+    }, [ cAxios, messageContext ]);
     
     useEffect(() => {
         if(!cAxios || !isLogged) return;
@@ -51,27 +43,17 @@ export default function Files() {
         fetchDataFiles((data) => setFiles(data.filter(file => file.filename.includes(e.target.value))));
     }, 200);
 
-    const handleDelete = useCallback(async(openedFile, message, error) => {
-        if(error) {
-            messageRef.current.showError(error);
-            return;
-        }
-        messageRef.current.showInfo(message);
+    const handleDelete = useCallback(async(openedFile) => {
         setFiles((files) => files.filter(file => file.id != openedFile.id));
     }, [ ]);
     
-    const handleUpdate = useCallback((openedFile, message, error) => {
-        if(error) {
-            messageRef.current.showError(error);
-            return;
-        }
-        messageRef.current.showInfo(message);
+    const handleUpdate = useCallback((openedFile) => {
         setFiles((files) => files.map(file => file.id == openedFile.id ? openedFile : file));
     }, [ ]);
 
     const handleOpenPreview = useCallback((file) => {
-        setShowPreview(true);
         setPreviewFile(file);
+        setShowPreview(true);
     }, [ ]);
 
     const handleClosePreview = () => {
@@ -97,31 +79,23 @@ export default function Files() {
             try {
                 const res = await cAxios.post('/api/files/', form);
                 fetchDataFiles((data) => setFiles(data));
-                messageRef.current.showSuccess(res.data.message);
+                messageContext.showSuccess(res.data.message);
             } catch(err) {
-                messageRef.current.showError(err.data.message);
+                messageContext.showError(err.response.data.message);
             } finally {
                 setUploading(false);
             }
         }, 0);
     }
 
-    const previewComponent = () => {
-        if(previewFile.contentType.includes('video'))
-            return <video className='flex-fill' controls><source src={addTokenParam(previewFile.url)} type={previewFile.contentType}/></video>;
-        
-        return <iframe src={addTokenParam(previewFile.url)} className='flex-fill'/>;
-    }
-    
     return <>
-        <Message ref={messageRef} />  
         <div className="loader file-loading" hidden={!uploading}> Uploading files </div> 
 
         {showPreview && 
         <Modal show={showPreview} onHide={handleClosePreview} className='d-flex modal-bg' fullscreen centered>
             <Modal.Header closeButton className='bg-modal' closeVariant='white'>{previewFile.filename}</Modal.Header>
             <div className='flex-fill'>
-                { previewComponent() }
+                <PreviewFile fileInfo={previewFile} className={"flex-fill"} />
             </div>
         </Modal>}
 

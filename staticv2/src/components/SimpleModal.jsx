@@ -13,6 +13,7 @@ const SimpleModal = forwardRef((props, ref) => {
         show: () => setShowed(true),
         hide: () => setShowed(false), 
         toogleShowed: () => setShowed(!showed),
+        isShowed: () => showed,
     }));
     
     const handleClose = () => {
@@ -24,20 +25,19 @@ const SimpleModal = forwardRef((props, ref) => {
             show={showed}
             onHide={handleClose}
             className="background"
-            backdrop="static"
-            size="lg"
+            size={props.size || "md"}
         >
             <Modal.Header closeButton closeVariant="white">
                 <Modal.Title className="text-center">{props.title}</Modal.Title>
             </Modal.Header>
             <Modal.Body>{props.children}</Modal.Body>
-            <Modal.Footer className="d-flex justify-content-center">
+            {props.buttonText && props.onClick && <Modal.Footer className="d-flex justify-content-center">
                 <Button
                     text={props.buttonText}
                     onClick={props.onClick}
                     className={"p-2"}
                 />
-            </Modal.Footer>
+            </Modal.Footer>}
         </Modal>
     );
 });
@@ -47,6 +47,7 @@ SimpleModal.displayName = 'Modal';
 SimpleModal.propTypes = {
     title: PropTypes.string,
     children: PropTypes.node,
+    size: PropTypes.string,
     buttonText: PropTypes.string,
     onClick: PropTypes.func,
 };

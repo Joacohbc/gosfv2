@@ -1,6 +1,6 @@
 @import url("./index.css");
 
-/* Register Container */
+/* register Container */
 .register {
     position: relative;
     display: grid;
@@ -9,11 +9,12 @@
     padding: 5%;
     margin: 0 auto;
     width: 65%;
+    height: 45%;
     background-color: var(--color-background-light);
     border-radius: 10px;
 }
 
-/* Register Titles */
+/* register Titles */
 .register-title {
     color: var(--color-text);
     font-size: 2em;
@@ -25,37 +26,11 @@
     text-decoration: underline;
 }
 
-/* Register Fields */
-.register label {
+/* register Fields */
+.register-label {
     color: var(--color-text);
-    padding: 10px;
-}
-
-/* .register input {
-    background-color: var(--color-background);
-    color: var(--color-text);
-}
-
-.register input:focus, .register input:hover {
-    background-color: var(--color-background-light);
-    border: 1px solid var(--color-text);
-} */
-
-/* Register Button */
-.btn-menu {
-    background-color: var(--color-background);
-    color: var(--color-text);
-    border: none;
-    border-radius: 5px;
-    padding: 10px;
-}
-
-.btn-menu:hover {
-    background-color: var(--color-hover);
-}
-
-.link {
-    margin-top: 1em;
+    font-style: bold;
+    margin-top: 10px;
 }
 
 img {
@@ -71,3 +46,18 @@ img {
     margin: 1em;
 }
 
+/* register Buttons */
+.btn-register {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    border: none;
+    padding: 10px;
+}
+
+.btn-register:hover {
+    background-color: var(--color-hover);
+}
+
+.link {
+    margin-top: 1em;
+}

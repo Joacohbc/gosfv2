@@ -31,6 +31,7 @@ func (f *filesRoutes) AddRoutesToGroup(group *echo.Group) {
 	// Opciones de Share
 	files.GET("/share", handlers.Files.GetAllShareFiles)
 	files.GET("/share/:id", handlers.Files.GetSharedFile)
+	files.GET("/share/:id/info", handlers.Files.GetSharedFileInfo)
 	files.POST("/share/:idFile/user/:idUser", handlers.Files.AddUserToFile)
 	files.DELETE("/share/:idFile/user/:idUser", handlers.Files.RemoveUserFromFile)
 }
