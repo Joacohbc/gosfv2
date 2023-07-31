@@ -31,3 +31,102 @@ export const useGetInfo = () => {
         }, [ baseUrl, addTokenParam ])
     }
 }
+
+export const useHttp = () => {
+    const { cAxios } = useContext(AuthContext);
+
+    const getFileInfo = useCallback(async (fileId) => {
+        if(!fileId) throw new Error('File id is required')
+        if(!cAxios) return {};
+
+        try {
+            const res = await cAxios.get(`/api/files/${fileId}/info`);
+            return res.data || {};
+        } catch(err) {
+            throw new Error(err.response.data.message);
+        }
+    }, [ cAxios ]);
+
+    const getShareFileInfo = useCallback(async (fileId) => {
+        if(!fileId) throw new Error('File id is required')
+        if(!cAxios) return {};
+
+        try {
+            const res = await cAxios.get(`/api/files/share/${fileId}/info`);
+            return res.data || {};
+        } catch(err) {
+            throw new Error(err.response.data.message);
+        }
+    }, [ cAxios ]);
+
+    const getFiles = useCallback(async () => {
+        if(!cAxios) return [];
+
+        try {
+            const res = await cAxios.get('/api/files');
+            return res.data || [];
+        } catch(err) {
+            throw new Error(err.response.data.message);
+        }
+    }, [ cAxios ]);
+
+    const updateFile = useCallback(async (fileId, fileData) => {
+        if(!fileId) throw new Error('File id is required')
+        if(!cAxios) return '';
+
+        try {
+            const res = await cAxios.put(`/api/files/${fileId}`, fileData);
+            return res.data.message || '';
+        } catch(err) {
+            throw new Error(err.response.data.message);
+        }
+    }, [ cAxios ]);
+
+    const deleteFile = useCallback(async (fileId) => {
+        if(!fileId) throw new Error('File id is required')
+        if(!cAxios) return '';
+
+        try {
+            const res = await cAxios.delete(`/api/files/${fileId}`);
+            return res.data.message || '';
+        } catch(err) {
+            throw new Error(err.response.data.message);
+        }
+    }, [ cAxios ]);
+
+    const addUserToFile = useCallback(async (fileId, userId) => {
+        if(!fileId) throw new Error('File id is required')
+        if(!userId) throw new Error('User id is required')
+        if(!cAxios) return '';
+        
+        try {
+            const res = await cAxios.post(`/api/files/share/${fileId}/user/${userId}`);
+            return res.data.message || '';
+        } catch(err) {
+            throw new Error(err.response.data.message);
+        }
+    }, [ cAxios ]);
+
+    const removeUserFromFile = useCallback(async (fileId, userId) => {
+        if(!fileId) throw new Error('File id is required')
+        if(!userId) throw new Error('User id is required')
+        if(!cAxios) return '';
+
+        try {
+            const res = await cAxios.delete(`/api/files/share/${fileId}/user/${userId}`);
+            return res.data.message || '';
+        } catch(err) {
+            throw new Error(err.response.data.message);
+        }
+    }, [ cAxios ]);
+
+    return {
+        getFileInfo,
+        getShareFileInfo,
+        getFiles,
+        updateFile,
+        deleteFile,
+        addUserToFile,
+        removeUserFromFile,
+    }   
+}

@@ -1,4 +1,4 @@
-@import url("../css/index.css");
+@import url("../../css/index.css");
 
 .file {
     color: var(--color-text-dark);
@@ -31,21 +31,4 @@
 .file-actions-item:hover {
     background-color: var(--color-hover);
     color: var(--color-text);
-}
-
-.overlay-user-share {
-    padding: 5px;
-    border-radius: 5px;
-    margin-bottom: 10px;
-}
-
-.modal-user-share-icon {
-    left: 3em;
-    width: 3em;
-    border-radius: 50%;
-}
-
-.overlay-user-share:hover {
-    color: var(--color-text);
-    background-color: var(--color-row-selected);
 }

@@ -20,8 +20,8 @@ func ToUserListDTO(users []models.User) []UserDTO {
 func ToFileDTO(file models.File) FileDTO {
 	return FileDTO{
 		ID:         file.ID,
-		Filename:   file.Filename,
-		Shared:     file.Shared,
+		Filename:   &file.Filename,
+		Shared:     &file.Shared,
 		SharedWith: ToUserListDTO(file.SharedWith),
 	}
 }

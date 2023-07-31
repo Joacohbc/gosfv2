@@ -208,7 +208,7 @@ func (fc *fileController) UpdateFile(c echo.Context) error {
 
 	var file dtos.FileDTO
 	if err := c.Bind(&file); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid file data")
+		return echo.NewHTTPError(http.StatusBadRequest, utils.ToJSON("Invalid file data"))
 	}
 
 	actual, err := models.Files(c).GetByIdFromUser(idFile, auth.Middlewares.GetUserId(c))
@@ -217,18 +217,18 @@ func (fc *fileController) UpdateFile(c echo.Context) error {
 	}
 
 	// Si el nombre del archivo es diferente al actual, lo renombro
-	if actual.Filename != file.Filename && file.Filename != "" {
-		if filepath.Ext(file.Filename) != filepath.Ext(actual.Filename) {
-			return echo.NewHTTPError(http.StatusBadRequest, "The extension of the file cannot be changed")
+	if file.Filename != nil && actual.Filename != *file.Filename {
+		if filepath.Ext(*file.Filename) != filepath.Ext(actual.Filename) {
+			return echo.NewHTTPError(http.StatusBadRequest, utils.ToJSON("The extension of the file cannot be changed"))
 		}
 
-		if err := models.Files(c).Rename(idFile, file.Filename); err != nil {
+		if err := models.Files(c).Rename(idFile, *file.Filename); err != nil {
 			return HandleFileError(err)
 		}
 	}
 
-	if actual.Shared != file.Shared {
-		if err := models.Files(c).SetShared(idFile, file.Shared); err != nil {
+	if file.Shared != nil && actual.Shared != *file.Shared {
+		if err := models.Files(c).SetShared(idFile, *file.Shared); err != nil {
 			return HandleFileError(err)
 		}
 	}
@@ -269,7 +269,7 @@ func (fc *fileController) DeleteFile(c echo.Context) error {
 				}
 			}
 		} else {
-			return echo.NewHTTPError(http.StatusBadRequest, "File is shared with other users")
+			return echo.NewHTTPError(http.StatusBadRequest, utils.ToJSON("File is shared with other users"))
 		}
 	}
 

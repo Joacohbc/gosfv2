@@ -3,7 +3,7 @@ import './Files.css';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import FileItem from '../components/FileItem';
+import FileItem from '../components/fileItem/FileItem';
 import AuthContext from '../context/auth-context';
 import Modal from 'react-bootstrap/Modal';
 import { useCallback, useContext, useEffect,  useState } from 'react';
