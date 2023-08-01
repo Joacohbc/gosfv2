@@ -11,6 +11,7 @@ import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import { MessageContext } from '../../context/message-context';
 import { useGetInfo, useHttp } from '../../hooks/files';
+import ConfirmDialog from '../ConfirmDialog';
 import SharedWithModal from './ShareModal';
 
 const filesModal = document.getElementById('files-modals');
@@ -20,6 +21,9 @@ const FileItem = memo((props) => {
     const shareModal = useRef(null);
     const updateModal = useRef(null);
     const inputUpdate = useRef(null);
+    const forceDeleteDialog = useRef(null);
+    const deleteDialog = useRef(null);
+
     const { getFileInfo, deleteFile, updateFile } = useHttp();
     const messageContext = useContext(MessageContext);
     const { getUserInfo } = useGetInfo();
@@ -44,9 +48,36 @@ const FileItem = memo((props) => {
         props.onOpen(file);
     };
 
-    const handleDelete = async() => {
+    const handleDelete = async () => {
+        try {
+            const res = await getFileInfo(file.id);
+            file.shared = res.shared;
+            file.sharedWith = res.shared_with?.map(user => getUserInfo(user, true)) ?? [];
+
+            if(file.shared || file.sharedWith.length > 0) {
+                forceDeleteDialog.current.show();
+                return;
+            }
+    
+            deleteDialog.current.show();
+        } catch(err) {
+            messageContext.showError(err.message);
+        }
+    };
+
+    const normalDeleteFile = async () => {
         try {
             const message = await deleteFile(file.id);
+            messageContext.showSuccess(message);
+            props.onDelete(file);
+        } catch(err) {
+            messageContext.showError(err.message);
+        }
+    }
+
+    const forceFileDelete = async() => {
+        try {
+            const message = await deleteFile(file.id, true);
             messageContext.showSuccess(message);
             props.onDelete(file);
         } catch(err) {
@@ -100,8 +131,17 @@ const FileItem = memo((props) => {
         props.onShare(file);
     };
 
-
     return <>
+        <ConfirmDialog 
+            title="Are you sure you want to delete this file?"
+            message="This file it shared with other users, if you delete it, it will be deleted for you and all users permanently."
+            onOk={forceFileDelete} ref={forceDeleteDialog}/>
+
+        <ConfirmDialog 
+            title="Are you sure you want to delete this file?"
+            message="This file will be deleted permanently."
+            onOk={normalDeleteFile} ref={deleteDialog}/>
+
         {createPortal(<SharedWithModal
             ref={shareModal} 
             onUpdate={handleShare}

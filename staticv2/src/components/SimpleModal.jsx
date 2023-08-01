@@ -24,8 +24,10 @@ const SimpleModal = forwardRef((props, ref) => {
         <Modal
             show={showed}
             onHide={handleClose}
-            className="background"
             size={props.size || "md"}
+            enforceFocus
+            scrollable
+            autoFocus
         >
             <Modal.Header closeButton closeVariant="white">
                 <Modal.Title className="text-center">{props.title}</Modal.Title>

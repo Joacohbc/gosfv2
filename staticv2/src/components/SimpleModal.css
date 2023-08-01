@@ -3,7 +3,3 @@
 .modal-dialog {
     --bs-modal-bg: var(--color-background-light);
 }
-
-.input-group-text {
-    --bs-tertiary-bg: var(--color-background-light);
-}

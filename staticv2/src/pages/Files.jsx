@@ -90,6 +90,7 @@ export default function Files() {
         }, 0);
     }
 
+
     return <>
         <div className="loader file-loading" hidden={!uploading}> Uploading files </div> 
 

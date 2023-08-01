@@ -82,12 +82,12 @@ export const useHttp = () => {
         }
     }, [ cAxios ]);
 
-    const deleteFile = useCallback(async (fileId) => {
+    const deleteFile = useCallback(async (fileId, force) => {
         if(!fileId) throw new Error('File id is required')
         if(!cAxios) return '';
 
         try {
-            const res = await cAxios.delete(`/api/files/${fileId}`);
+            const res = await cAxios.delete(`/api/files/${fileId}${force ? '?force=yes' : ''}`);
             return res.data.message || '';
         } catch(err) {
             throw new Error(err.response.data.message);

@@ -14,3 +14,7 @@
     color: var(--color-text);
     background-color: var(--color-row-selected);
 }
+
+.input-group-text {
+    --bs-tertiary-bg: var(--color-background-light);
+}

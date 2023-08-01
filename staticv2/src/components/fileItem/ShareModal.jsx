@@ -121,7 +121,7 @@ const SharedWithModal = forwardRef((props, ref) => {
         <hr className="hr" />
         <Form>
             <InputGroup>
-                <Form.Control value={`${window.location.origin}/shared/${file?.id}`} onClick={handleCopyLink}/>
+                <Form.Control value={`${window.location.origin}/shared/${file?.id}`} onClick={handleCopyLink} readOnly/>
                 <InputGroup.Checkbox label="Public" onChange={handleMarkAsPublic} defaultChecked={file?.shared}/>
             </InputGroup>
         </Form>
