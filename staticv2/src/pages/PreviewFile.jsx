@@ -31,7 +31,7 @@ const PreviewFile = (props) => {
 
         const url = !sharedFileId ? previewFile?.url : previewFile?.sharedUrl;
         
-        if(previewFile?.filename?.contentType?.includes('video'))
+        if(previewFile?.contentType?.includes('video'))
             return <video className={props.className} controls><source src={url} type={previewFile?.contentType}/></video>;
         
         return <iframe src={url} className={props.className}/>;

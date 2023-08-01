@@ -8,11 +8,13 @@ import Register from "./pages/Register";
 import './css/index.css';
 import { AuthContextProvider } from "./context/auth-context";
 import PreviewFile from "./pages/PreviewFile";
+import MessageComponentProvider from "./context/message-context";
 
 function App() {
   return (
     <BrowserRouter>
       <AuthContextProvider>
+      <MessageComponentProvider>
       <Routes>
         <Route path="/login" element={ <Login/> }/>
         <Route path="/register" element={ <Register/> } />
@@ -23,6 +25,7 @@ function App() {
           <Route path="*" element={<NoPage />} />
         </Route>
       </Routes>
+      </MessageComponentProvider>
       </AuthContextProvider>
     </BrowserRouter>
   );

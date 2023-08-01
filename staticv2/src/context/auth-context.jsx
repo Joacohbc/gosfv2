@@ -84,16 +84,20 @@ export const AuthContextProvider = (props) => {
             setAuthData(req.data.token, req.data.duration);
             setToken(req.data.token);
             setIsLogged(true);
-        } catch(e) {
-            console.log(e);
+        } catch(err) {
+            return Promise.reject(new Error(err.response.data.message));
         }
     };
 
     const logOutHandler = async () => {
         try {
-            await axios.delete(BASE_URL + '/auth/logout');
-        } catch(e) {
-            console.log("Error on logout:" + e);
+            await axios.delete(BASE_URL + '/auth/logout', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+        } catch(err) {
+            return Promise.reject(new Error(err.response.data.message));
         }
 
         resetAuthData();
@@ -106,8 +110,9 @@ export const AuthContextProvider = (props) => {
                 username: username,
                 password: password
             });
-        } catch(e) {
-            console.log(e);
+            return Promise.resolve('User created successfully');
+        } catch(err) {
+            return Promise.reject(new Error(err.response.data.message));
         }
     };
     

@@ -4,15 +4,19 @@ import { Link } from 'react-router-dom';
 import Form from 'react-bootstrap/Form';
 import { useRef, useContext } from 'react';
 import AuthContext from '../context/auth-context';
+import { MessageContext } from '../context/message-context';
 
 export default function Register() {
     const username = useRef();
     const password = useRef();
     const { onRegister } = useContext(AuthContext);
-    
+    const messageContext = useContext(MessageContext);
+
     const registerHandler = (e) => {
         e.preventDefault();
-        onRegister(username.current.value, password.current.value);
+        onRegister(username.current.value, password.current.value)
+        .then((mes) => messageContext.showSuccess(mes))
+        .catch(err => messageContext.showError(err.message));
     };
 
     return <>

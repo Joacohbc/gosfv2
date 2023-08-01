@@ -4,16 +4,19 @@ import Logo from '../assets/gosf-icon.png';
 import Form from 'react-bootstrap/Form';
 import { useContext, useRef } from 'react';
 import AuthContext from '../context/auth-context';
+import { MessageContext } from '../context/message-context';
 import { Link } from 'react-router-dom';
 
 export default function Login() {
     const username = useRef();
     const password = useRef();
     const auth = useContext(AuthContext);
-
+    const messageContext = useContext(MessageContext);
+    
     const loginHandler = (e) => {
         e.preventDefault();
-        auth.onLogin(username.current.value, password.current.value);
+        auth.onLogin(username.current.value, password.current.value)
+        .catch(err => messageContext.showError(err.message));
     };
     
     return <>
