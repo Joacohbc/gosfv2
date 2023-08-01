@@ -84,6 +84,7 @@ export const AuthContextProvider = (props) => {
             setAuthData(req.data.token, req.data.duration);
             setToken(req.data.token);
             setIsLogged(true);
+            return Promise.resolve('User logged in successfully');
         } catch(err) {
             return Promise.reject(new Error(err.response.data.message));
         }
@@ -96,12 +97,13 @@ export const AuthContextProvider = (props) => {
                     Authorization: `Bearer ${token}`
                 }
             });
+            return Promise.resolve('User logged out successfully');
         } catch(err) {
             return Promise.reject(new Error(err.response.data.message));
+        } finally {
+            resetAuthData();
+            navigate('/login');
         }
-
-        resetAuthData();
-        navigate('/login');
     };
 
     const registerHandler = async (username, password) => {

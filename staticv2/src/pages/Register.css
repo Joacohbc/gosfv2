@@ -1,7 +1,7 @@
-@import url("./index.css");
+@import url("../css/index.css");
 
-/* Login Container */
-.login {
+/* register Container */
+.register {
     position: relative;
     display: grid;
     justify-content: center;
@@ -14,20 +14,20 @@
     border-radius: 10px;
 }
 
-/* Login Titles */
-.login-title {
+/* register Titles */
+.register-title {
     color: var(--color-text);
     font-size: 2em;
     font-weight: bold;
     text-align: center;
 }
 
-.login-title:hover {
+.register-title:hover {
     text-decoration: underline;
 }
 
-/* Login Fields */
-.login-label {
+/* register Fields */
+.register-label {
     color: var(--color-text);
     font-style: bold;
     margin-top: 10px;
@@ -46,15 +46,15 @@ img {
     margin: 1em;
 }
 
-/* Login Buttons */
-.btn-login {
+/* register Buttons */
+.btn-register {
     background-color: var(--color-background);
     color: var(--color-text);
     border: none;
     padding: 10px;
 }
 
-.btn-login:hover {
+.btn-register:hover {
     background-color: var(--color-hover);
 }
 

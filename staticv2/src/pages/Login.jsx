@@ -1,4 +1,4 @@
-import '../css/login.css';
+import './Login.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Logo from '../assets/gosf-icon.png';
 import Form from 'react-bootstrap/Form';

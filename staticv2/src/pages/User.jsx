@@ -1,4 +1,4 @@
-import '../css/user.css';
+import './User.css';
 
 export default function User() {
     return <>

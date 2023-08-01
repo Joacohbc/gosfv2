@@ -1,4 +1,4 @@
-import '../css/register.css';
+import './Register.css';
 import Logo from '../assets/gosf-icon.png';
 import { Link } from 'react-router-dom';
 import Form from 'react-bootstrap/Form';
