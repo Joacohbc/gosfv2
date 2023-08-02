@@ -19,7 +19,7 @@ const SharedWithModal = forwardRef((props, ref) => {
     const userIdAdded = useRef(null);
     const [ file, setFile ] = useState(null);
     const { getUserInfo } = useGetInfo();
-    const { updateFile, removeUserFromFile, addUserToFile, getFileInfo } = useHttp();
+    const { updateFile, removeUserFromFile, addUserToFile } = useHttp();
 
     useImperativeHandle(ref, () => ({
         open: (file) => {
@@ -34,7 +34,7 @@ const SharedWithModal = forwardRef((props, ref) => {
                 shared: e.target.checked,
             });
             setFile((file) => ({ ...file, shared: e.target.checked }));
-            messageContext.showSuccess(res);
+            messageContext.showSuccess(res.data.shared ? "File updated to: public" : "File updated to: restricted");
             props.onUpdate();
         } catch(err) {
             messageContext.showError(err.message);
@@ -48,9 +48,9 @@ const SharedWithModal = forwardRef((props, ref) => {
                 const res = await removeUserFromFile(file.id, userId);
                 setFile((file) => ({
                     ...file,
-                    sharedWith: file.sharedWith.filter(user => user.id != userId)
+                    sharedWith: res.data.sharedWith.map(user => getUserInfo(user, true)),
                 }));
-                messageContext.showSuccess(res);
+                messageContext.showSuccess(res.message);
                 props.onUpdate();
             } catch(err) {
                 messageContext.showError(err.message);
@@ -70,14 +70,12 @@ const SharedWithModal = forwardRef((props, ref) => {
 
         try {
             const userId = username.substring(username.lastIndexOf('#') + 1);
-            const res = await addUserToFile(file.id, userId);
-            messageContext.showSuccess(res);
-
-            const fileInfo = await getFileInfo(file.id);
-            setFile((prevFile) => ({
-                ...prevFile,
-                sharedWith: fileInfo.shared_with.map(user => getUserInfo(user, true)) 
+            const res = await addUserToFile(file.id, userId)
+            setFile((file) => ({
+                ...file,
+                sharedWith: res.data.sharedWith.map(user => getUserInfo(user, true)),
             }));
+            messageContext.showSuccess(res.message);
             props.onUpdate();
         } catch(err) {
             messageContext.showError(err.message);

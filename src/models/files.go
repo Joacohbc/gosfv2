@@ -28,8 +28,8 @@ type File struct {
 	// Shared: Indica que esta compartido con TODOS los usuarios
 	Shared     bool   `json:"shared"`
 	UserID     uint   `json:"owner_id" db:"user_id"`
-	User       User   `json:"owner" bd:"user"`                        // "user" es un prefix para usar sqlx.Get y sqlx.Select con una sola consulta
-	SharedWith []User `json:"shared_with,omitempty" db:"shared_with"` // "shared_with" es un prefix para usar sqlx.Get y sqlx.Select con una sola consulta
+	User       User   `json:"owner" bd:"user"`                      // "user" es un prefix para usar sqlx.Get y sqlx.Select con una sola consulta
+	SharedWith []User `json:"sharedWith,omitempty" db:"sharedWith"` // "sharedWith" es un prefix para usar sqlx.Get y sqlx.Select con una sola consulta
 }
 
 func (f *File) Validate() error {

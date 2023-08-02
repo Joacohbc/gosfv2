@@ -76,7 +76,11 @@ export const useHttp = () => {
 
         try {
             const res = await cAxios.put(`/api/files/${fileId}`, fileData);
-            return res.data.message || '';
+
+            return {
+                data: res.data,
+                message: `${res.data.filename} (${res.data.id}) updated successfully`,
+            }
         } catch(err) {
             throw new Error(err.response.data.message);
         }
@@ -88,7 +92,10 @@ export const useHttp = () => {
 
         try {
             const res = await cAxios.delete(`/api/files/${fileId}${force ? '?force=yes' : ''}`);
-            return res.data.message || '';
+            return {
+                data: res.data,
+                message: `${res.data.filename} (${res.data.id}) deleted successfully`,
+            };
         } catch(err) {
             throw new Error(err.response.data.message);
         }
@@ -101,7 +108,11 @@ export const useHttp = () => {
         
         try {
             const res = await cAxios.post(`/api/files/share/${fileId}/user/${userId}`);
-            return res.data.message || '';
+            res.data.sharedWith ||= [];
+            return {
+                data: res.data,
+                message: 'User added successfully',
+            }
         } catch(err) {
             throw new Error(err.response.data.message);
         }
@@ -114,14 +125,18 @@ export const useHttp = () => {
 
         try {
             const res = await cAxios.delete(`/api/files/share/${fileId}/user/${userId}`);
-            return res.data.message || '';
+            res.data.sharedWith ||= [];
+            return {
+                data: res.data,
+                message: 'User removed successfully',
+            };
         } catch(err) {
             throw new Error(err.response.data.message);
         }
     }, [ cAxios ]);
 
     return {
-        getFileInfo,
+        getFileInfo, 
         getShareFileInfo,
         getFiles,
         updateFile,

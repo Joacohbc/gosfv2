@@ -10,7 +10,7 @@ import { useCallback, useContext, useEffect,  useState } from 'react';
 import { handleKeyUpWithTimeout } from '../utils/input-text';
 import PreviewFile from './PreviewFile';
 import { MessageContext } from '../context/message-context';
-import { useGetInfo } from '../hooks/files';
+import { useGetInfo, useHttp } from '../hooks/files';
 
 const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extesion: ''});
 
@@ -22,18 +22,17 @@ export default function Files() {
     const { isLogged, cAxios } = useContext(AuthContext);
     const messageContext = useContext(MessageContext);
     const { getFileInfo } = useGetInfo();
+    const { getFiles } = useHttp();
 
     const fetchDataFiles = useCallback(async (cb) => {
         try {
-            const res = await cAxios.get('/api/files/');
-            if(!res.data) return [];
-            const files = res.data.map(file => getFileInfo(file, true));
-            cb(files);
+            const files = await getFiles();
+            cb(files.map(file => getFileInfo(file, true)));
         } catch(err) {
-            messageContext.showError(err.response.data.message);
+            messageContext.showError(err.message);
             return [];
         }
-    }, [ cAxios, messageContext, getFileInfo ]);
+    }, [ messageContext, getFileInfo, getFiles ]);
     
     useEffect(() => {
         if(!cAxios || !isLogged) return;
@@ -89,7 +88,6 @@ export default function Files() {
             }
         }, 0);
     }
-
 
     return <>
         <div className="loader file-loading" hidden={!uploading}> Uploading files </div> 

@@ -391,7 +391,7 @@ func (fc *fileController) RemoveUserFromFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	fileUpdated, err := models.Files(c).GetById(fileId)
+	fileUpdated, err := models.Files(c).GetByIdFromUser(fileId, auth.Middlewares.GetUserId(c))
 	if err != nil {
 		return HandleFileError(err)
 	}

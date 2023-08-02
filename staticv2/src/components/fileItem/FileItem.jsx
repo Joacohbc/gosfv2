@@ -52,7 +52,7 @@ const FileItem = memo((props) => {
         try {
             const res = await getFileInfo(file.id);
             file.shared = res.shared;
-            file.sharedWith = res.shared_with?.map(user => getUserInfo(user, true)) ?? [];
+            file.sharedWith = res.sharedWith?.map(user => getUserInfo(user, true)) ?? [];
 
             if(file.shared || file.sharedWith.length > 0) {
                 forceDeleteDialog.current.show();
@@ -67,8 +67,8 @@ const FileItem = memo((props) => {
 
     const normalDeleteFile = async () => {
         try {
-            const message = await deleteFile(file.id);
-            messageContext.showSuccess(message);
+            const res = await deleteFile(file.id);
+            messageContext.showSuccess(res.message);
             props.onDelete(file);
         } catch(err) {
             messageContext.showError(err.message);
@@ -77,8 +77,8 @@ const FileItem = memo((props) => {
 
     const forceFileDelete = async() => {
         try {
-            const message = await deleteFile(file.id, true);
-            messageContext.showSuccess(message);
+            const res = await deleteFile(file.id, true);
+            messageContext.showSuccess(res.message);
             props.onDelete(file);
         } catch(err) {
             messageContext.showError(err.message);
@@ -98,11 +98,11 @@ const FileItem = memo((props) => {
 
         try {
             const newFilename = inputUpdate.current.value.trim() + '.' + file.extesion;
-            const message = await updateFile(file.id, {
+            const res = await updateFile(file.id, {
                 filename: newFilename,
             })
             updateModal.current.hide();
-            messageContext.showSuccess(message);
+            messageContext.showSuccess(res.message);
             props.onUpdate({
                 ...file,
                 filename: newFilename,
@@ -116,7 +116,7 @@ const FileItem = memo((props) => {
         try {
             const res = await getFileInfo(file.id);
             file.shared = res.shared;
-            file.sharedWith = res.shared_with?.map(user => getUserInfo(user, true)) ?? [];
+            file.sharedWith = res.sharedWith?.map(user => getUserInfo(user, true)) ?? [];
             shareModal.current.open(file);
         } catch(err) {
             messageContext.showError(err.message);

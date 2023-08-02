@@ -15,7 +15,7 @@ func (f *filesRoutes) AddRoutesToGroup(group *echo.Group) {
 	files := group.Group("/files")
 
 	// Consultas
-	files.GET("/", handlers.Files.GetAllFiles)
+	files.GET("", handlers.Files.GetAllFiles)
 	files.GET("/:id", handlers.Files.GetFile)
 	files.GET("/:id/info", handlers.Files.GetInfo)
 

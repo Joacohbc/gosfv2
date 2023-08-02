@@ -11,5 +11,5 @@ type FileDTO struct {
 	OwnerID    uint      `json:"owner_id"`
 	Filename   *string   `json:"filename"`
 	Shared     *bool     `json:"shared,omitempty"`
-	SharedWith []UserDTO `json:"shared_with,omitempty"`
+	SharedWith []UserDTO `json:"sharedWith,omitempty"`
 }
