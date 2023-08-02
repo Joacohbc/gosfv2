@@ -6,11 +6,12 @@ import Col from 'react-bootstrap/Col';
 import FileItem from '../components/fileItem/FileItem';
 import AuthContext from '../context/auth-context';
 import Modal from 'react-bootstrap/Modal';
-import { useCallback, useContext, useEffect,  useState } from 'react';
+import { useCallback, useContext, useEffect,  useRef,  useState } from 'react';
 import { handleKeyUpWithTimeout } from '../utils/input-text';
 import PreviewFile from './PreviewFile';
 import { MessageContext } from '../context/message-context';
 import { useGetInfo, useHttp } from '../hooks/files';
+import SpinnerDiv from '../components/SpinnerDiv';
 
 const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extesion: ''});
 
@@ -19,6 +20,7 @@ export default function Files() {
     const [ previewFile, setPreviewFile ] = useState(emptyFile);
     const [ showPreview, setShowPreview ] = useState(false); 
     const [ uploading, setUploading ] = useState(false);
+    const searching = useRef(false);
     const { isLogged, cAxios } = useContext(AuthContext);
     const messageContext = useContext(MessageContext);
     const { getFileInfo } = useGetInfo();
@@ -36,12 +38,18 @@ export default function Files() {
     
     useEffect(() => {
         if(!cAxios || !isLogged) return;
-        fetchDataFiles((data) => setFiles(data));
+        searching.current.loading();
+        fetchDataFiles((data) => setFiles(data))
+        .finally(() => searching.current.stopLoading());
     }, [ isLogged, cAxios, fetchDataFiles ]);
 
     const handleSearch = handleKeyUpWithTimeout((e) => {
-        fetchDataFiles((data) => setFiles(data.filter(file => file.filename.includes(e.target.value))));
-    }, 200);
+        searching.current.loading();
+        fetchDataFiles(async (data) => {
+            const value = e.target.value.toLowerCase();
+            setFiles(data.filter(file => file.filename.toLowerCase().includes(value)));
+        }).finally(() => searching.current.stopLoading());
+    }, 500);
 
     const handleDelete = useCallback(async(openedFile) => {
         setFiles((files) => files.filter(file => file.id != openedFile.id));
@@ -104,15 +112,16 @@ export default function Files() {
             <input type="text" placeholder="Enter Search" className='search-input' onKeyUp={handleSearch}/>
         </div>
         
+        <SpinnerDiv ref={searching}>
         <Container fluid="md">
-            {files.length == 0 && <Col>
-                    <div className="d-flex justify-content-center align-items-center">
-                        <p className="text-center text-white">No files, start uploading files c:</p>
-                    </div>
-            </Col>}
-
+            <Col>
+                <div className="d-flex justify-content-center align-items-center">
+                    { files.length == 0 && <p className="text-center text-white">No files, start uploading files c:</p> }
+                </div>
+            </Col>
+            
             <Row xs={1} sm={2}  md={3} lg={4} xl={5} className='row-gap-3 d-flex justify-content-center'>
-                {files.map(file => 
+            { files.map(file => 
                 <Col key={file.id}>
                     <FileItem 
                         id={file.id}
@@ -124,14 +133,15 @@ export default function Files() {
                         onOpen={handleOpenPreview}
                         onDelete={handleDelete}
                         onUpdate={handleUpdate}
-                        />
+                    />
                 </Col>)}
             </Row>
         </Container>
+        </SpinnerDiv>
         
         <div className="d-flex justify-content-center align-items-center mt-4">
             <label htmlFor="input-upload" className="btn-upload">Upload file/s</label>
             <input id="input-upload" type="file" style={ {display: 'none'} } onChange={handleFileUpload} multiple/>
         </div>
-    </>;
+    </>
 }

@@ -72,7 +72,7 @@ export const AuthContextProvider = (props) => {
         // Si el token no esta seteado redireccionar a login
         navigate("/login");
         resetAuthData();
-    }, [ token, currentRoute, navigate ]);
+    }, [ token, currentRoute, navigate, BASE_URL ]);
 
     const loginHandler = async (username, password) => {
         try {
