@@ -1,11 +1,9 @@
 package handlers
 
 import (
-	"fmt"
 	"gosfV2/src/auth"
 	"gosfV2/src/dtos"
 	"gosfV2/src/models"
-	"gosfV2/src/utils"
 	"net/http"
 	"path/filepath"
 
@@ -45,8 +43,8 @@ func (fc *fileController) GetFile(c echo.Context) error {
 	return c.Inline(file.GetPath(), file.Filename)
 }
 
-// Obtiene el Id del URL para retornar la Información del archivo
-// SI el usuario logueado es el dueño del archivo
+// Obtiene el Id del URL para retornar la información del archivo
+// Si el usuario logueado es el dueño del archivo
 //
 // PathParams:
 // - Id de Archivo | Uint
@@ -61,7 +59,7 @@ func (fc *fileController) GetInfo(c echo.Context) error {
 		return HandleFileError(err)
 	}
 
-	return c.JSON(http.StatusOK, dtos.ToFileDTO(file))
+	return jsonDTO(c, http.StatusOK, file)
 }
 
 // Obtiene todos los archivos del usuario (Su información)
@@ -71,7 +69,7 @@ func (fc *fileController) GetAllFiles(c echo.Context) error {
 		return HandleFileError(err)
 	}
 
-	return c.JSON(http.StatusOK, dtos.ToFileListDTO(files))
+	return jsonDTO(c, http.StatusOK, files)
 }
 
 // Obtiene el Id del URL para retornar el archivo
@@ -116,7 +114,7 @@ func (fc *fileController) GetSharedFile(c echo.Context) error {
 	return c.File(file.GetPath())
 }
 
-// Obtiene el Id del URL para retornar el archivo
+// Obtiene el Id del URL para retornar la informacion del archivo
 // SI el archivo esta compartido con el Usuario logueado
 //
 // PathParams:
@@ -141,7 +139,7 @@ func (fc *fileController) GetSharedFileInfo(c echo.Context) error {
 
 	// Si esta compartido lo envió directamente
 	if file.Shared {
-		return c.JSON(http.StatusOK, dtos.ToFileDTO(file))
+		return jsonDTO(c, http.StatusOK, file)
 	}
 
 	sharedWithMe, err := models.Files(c).IsSharedWith(file.ID, idCurrentUser)
@@ -155,26 +153,28 @@ func (fc *fileController) GetSharedFileInfo(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, models.ErrFileNotFound.Error())
 	}
 
-	return c.JSON(http.StatusOK, dtos.ToFileDTO(file))
+	return jsonDTO(c, http.StatusOK, file)
 }
 
-// Obtiene todos los archivos del usuario (Su información)
+// Obtiene todos los archivos compartidos con el usuario logueado
 func (fc *fileController) GetAllShareFiles(c echo.Context) error {
 	files, err := models.Files(c).GetFilesShared(auth.Middlewares.GetUserId(c))
 	if err != nil {
 		return HandleFileError(err)
 	}
 
-	return c.JSON(http.StatusOK, dtos.ToFileListDTO(files))
+	return jsonDTO(c, http.StatusOK, files)
 }
 
 // Obtiene los archivos subidos desde el Body de la Request (Formulario)
-// y los guarda en la base de datos para el usuario logueado
+// y los guarda en la base de datos (y en file system) para el usuario logueado
 func (fc *fileController) UploadFile(c echo.Context) error {
 	mf, err := c.MultipartForm()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+
+	filesIds := make([]uint, len(mf.File["files"]))
 
 	for _, file := range mf.File["files"] {
 		src, err := file.Open()
@@ -182,16 +182,24 @@ func (fc *fileController) UploadFile(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
-		if err := models.Files(c).Create(file.Filename, auth.Middlewares.GetUserId(c), src); err != nil {
+		fileId, err := models.Files(c).Create(file.Filename, auth.Middlewares.GetUserId(c), src)
+		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		if err := src.Close(); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
+
+		filesIds = append(filesIds, fileId)
 	}
 
-	return c.JSON(http.StatusOK, utils.ToJSON(fmt.Sprintf("%d was file/s uploaded successfully", len(mf.File["files"]))))
+	filesCreated, err := models.Files(c).GetByIds(filesIds)
+	if err != nil {
+		return HandleFileError(err)
+	}
+
+	return jsonDTO(c, http.StatusOK, filesCreated)
 }
 
 // Obtiene los archivos subidos desde el Body (Formulario)
@@ -208,7 +216,7 @@ func (fc *fileController) UpdateFile(c echo.Context) error {
 
 	var file dtos.FileDTO
 	if err := c.Bind(&file); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, utils.ToJSON("Invalid file data"))
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid file data")
 	}
 
 	actual, err := models.Files(c).GetByIdFromUser(idFile, auth.Middlewares.GetUserId(c))
@@ -219,7 +227,7 @@ func (fc *fileController) UpdateFile(c echo.Context) error {
 	// Si el nombre del archivo es diferente al actual, lo renombro
 	if file.Filename != nil && actual.Filename != *file.Filename {
 		if filepath.Ext(*file.Filename) != filepath.Ext(actual.Filename) {
-			return echo.NewHTTPError(http.StatusBadRequest, utils.ToJSON("The extension of the file cannot be changed"))
+			return echo.NewHTTPError(http.StatusBadRequest, "The extension of the file cannot be changed")
 		}
 
 		if err := models.Files(c).Rename(idFile, *file.Filename); err != nil {
@@ -233,10 +241,15 @@ func (fc *fileController) UpdateFile(c echo.Context) error {
 		}
 	}
 
-	return c.JSON(http.StatusOK, utils.ToJSON(fmt.Sprintf("File %d updated successfully", idFile)))
+	fileUpdated, err := models.Files(c).GetById(idFile)
+	if err != nil {
+		return HandleFileError(err)
+	}
+
+	return jsonDTO(c, http.StatusOK, fileUpdated)
 }
 
-// Elimina el archivo de la base de datos y del disco
+// Elimina el archivo de la base de datos y del file system
 // SI el usuario logueado es el dueño del archivo
 //
 // PathParams:
@@ -250,7 +263,7 @@ func (fc *fileController) DeleteFile(c echo.Context) error {
 		return err
 	}
 
-	file, err := models.Files(c).GetByIdFromUser(idNum, auth.Middlewares.GetUserId(c))
+	fileDeleted, err := models.Files(c).GetByIdFromUser(idNum, auth.Middlewares.GetUserId(c))
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -259,17 +272,17 @@ func (fc *fileController) DeleteFile(c echo.Context) error {
 	force := c.QueryParam("force")
 
 	// Verifico si el archivo esta compartido con otros usuarios
-	if len(file.SharedWith) != 0 {
+	if len(fileDeleted.SharedWith) != 0 {
 
 		// Si viene el QueryParam "force" y es true, elimino el archivo (aunque este compartido)
 		if force == "yes" {
-			for _, user := range file.SharedWith {
-				if err := models.Files(c).RemoveUserFromFile(user.ID, file.ID); err != nil {
+			for _, user := range fileDeleted.SharedWith {
+				if err := models.Files(c).RemoveUserFromFile(user.ID, fileDeleted.ID); err != nil {
 					return HandleFileError(err)
 				}
 			}
 		} else {
-			return echo.NewHTTPError(http.StatusBadRequest, utils.ToJSON("File is shared with other users"))
+			return echo.NewHTTPError(http.StatusBadRequest, "File is shared with other users")
 		}
 	}
 
@@ -277,7 +290,7 @@ func (fc *fileController) DeleteFile(c echo.Context) error {
 		return HandleFileError(err)
 	}
 
-	return c.JSON(http.StatusOK, utils.ToJSON(fmt.Sprintf("File %d deleted successfully", idNum)))
+	return jsonDTO(c, http.StatusOK, fileDeleted)
 }
 
 // Agrega un usuario a la lista de usuarios con los que se comparte el archivo
@@ -303,7 +316,7 @@ func (fc *fileController) AddUserToFile(c echo.Context) error {
 	}
 
 	if file.UserID == userId {
-		return echo.NewHTTPError(http.StatusBadRequest, utils.ToJSON("The user is the owner of the file"))
+		return echo.NewHTTPError(http.StatusBadRequest, "The user is the owner of the file")
 	}
 
 	// Verifico que exista el usuario con el userId
@@ -317,14 +330,19 @@ func (fc *fileController) AddUserToFile(c echo.Context) error {
 	}
 
 	if ok {
-		return echo.NewHTTPError(http.StatusBadRequest, utils.ToJSON("The File is already shared with that user"))
+		return echo.NewHTTPError(http.StatusBadRequest, "The File is already shared with that user")
 	}
 
 	if err := models.Files(c).AddUserToFile(userId, fileId); err != nil {
 		return HandleFileError(err)
 	}
 
-	return c.JSON(http.StatusOK, utils.ToJSON(fmt.Sprintf("User %d added to file %d successfully", userId, fileId)))
+	fileUpdated, err := models.Files(c).GetById(fileId)
+	if err != nil {
+		return HandleFileError(err)
+	}
+
+	return jsonDTO(c, http.StatusOK, fileUpdated)
 }
 
 // Remueve un usuario a la lista de usuarios con los que se comparte el archivo
@@ -360,7 +378,7 @@ func (fc *fileController) RemoveUserFromFile(c echo.Context) error {
 	}
 
 	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, utils.ToJSON("The File is not shared with that user"))
+		return echo.NewHTTPError(http.StatusBadRequest, "The File is not shared with that user")
 	}
 
 	// Si el el usuario no es el dueño del archivo, por seguridad
@@ -373,5 +391,10 @@ func (fc *fileController) RemoveUserFromFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, utils.ToJSON(fmt.Sprintf("User %d removed from file %d successfully", userId, fileId)))
+	fileUpdated, err := models.Files(c).GetById(fileId)
+	if err != nil {
+		return HandleFileError(err)
+	}
+
+	return jsonDTO(c, http.StatusOK, fileUpdated)
 }
