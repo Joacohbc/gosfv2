@@ -12,6 +12,8 @@ import PreviewFile from './PreviewFile';
 import { MessageContext } from '../context/message-context';
 import { useGetInfo, useHttp } from '../hooks/files';
 import SpinnerDiv from '../components/SpinnerDiv';
+import useJobsQueue from '../hooks/jobsQueue';
+import '../components/Message.css';
 
 const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extesion: ''});
 
@@ -25,6 +27,7 @@ export default function Files() {
     const messageContext = useContext(MessageContext);
     const { getFileInfo } = useGetInfo();
     const { getFiles } = useHttp();
+    const { addJob, undoLastJob, jobsQueue } = useJobsQueue(5000);
 
     const fetchDataFiles = useCallback(async (cb) => {
         try {
@@ -40,20 +43,25 @@ export default function Files() {
         if(!cAxios || !isLogged) return;
         searching.current.loading();
         fetchDataFiles((data) => setFiles(data))
-        .finally(() => searching.current.stopLoading());
+            .finally(() => searching.current.stopLoading());
     }, [ isLogged, cAxios, fetchDataFiles ]);
 
     const handleSearch = handleKeyUpWithTimeout((e) => {
         searching.current.loading();
         fetchDataFiles(async (data) => {
             const value = e.target.value.toLowerCase();
-            setFiles(data.filter(file => file.filename.toLowerCase().includes(value)));
+            setFiles(data.filter(file => file.filename.toLowerCase().includes(value) || file.id == value));
         }).finally(() => searching.current.stopLoading());
     }, 500);
 
-    const handleDelete = useCallback(async(openedFile) => {
-        setFiles((files) => files.filter(file => file.id != openedFile.id));
-    }, [ ]);
+    const handleDelete = useCallback(async(deleteFunc, deletedFile) => {
+        const undoDelete = () => {
+            setFiles((files) => [ deletedFile, ...files ]);
+            messageContext.showSuccess(`File ${deletedFile.filename} (${deletedFile.id}) restored`);
+        };
+        addJob(deleteFunc, undoDelete);
+        setFiles((files) => files.filter(file => file.id != deletedFile.id));
+    }, [ addJob, messageContext ]);
     
     const handleUpdate = useCallback((openedFile) => {
         setFiles((files) => files.map(file => file.id == openedFile.id ? openedFile : file));
@@ -138,9 +146,10 @@ export default function Files() {
             </Row>
         </Container>
         </SpinnerDiv>
-        
-        <div className="d-flex justify-content-center align-items-center mt-4">
-            <label htmlFor="input-upload" className="btn-upload">Upload file/s</label>
+                
+        <div className='fixed-bottom d-flex justify-content-end mb-1'>
+            { jobsQueue.length > 0 && <label className='undo-button' onClick={undoLastJob}><i className="bi bi-arrow-clockwise"/></label> }
+            <label htmlFor="input-upload" className="btn-upload"><i className='bi bi-plus-square-dotted'/></label>
             <input id="input-upload" type="file" style={ {display: 'none'} } onChange={handleFileUpload} multiple/>
         </div>
     </>

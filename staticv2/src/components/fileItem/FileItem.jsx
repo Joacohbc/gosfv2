@@ -3,7 +3,6 @@ import Card from 'react-bootstrap/Card';
 import './FileItem.css';
 import ToolTip from '../ToolTip';
 import PropTypes from 'prop-types';
-import Button from '../Button';
 import { createPortal } from 'react-dom';
 import { memo, useContext, useRef  } from 'react';
 import SimpleModal from '../SimpleModal';
@@ -13,6 +12,7 @@ import { MessageContext } from '../../context/message-context';
 import { useGetInfo, useHttp } from '../../hooks/files';
 import ConfirmDialog from '../ConfirmDialog';
 import SharedWithModal from './ShareModal';
+import 'bootstrap-icons/font/bootstrap-icons.css'
 
 const filesModal = document.getElementById('files-modals');
 
@@ -22,7 +22,6 @@ const FileItem = memo((props) => {
     const updateModal = useRef(null);
     const inputUpdate = useRef(null);
     const forceDeleteDialog = useRef(null);
-    const deleteDialog = useRef(null);
 
     const { getFileInfo, deleteFile, updateFile } = useHttp();
     const messageContext = useContext(MessageContext);
@@ -54,35 +53,34 @@ const FileItem = memo((props) => {
             file.shared = res.shared;
             file.sharedWith = res.sharedWith?.map(user => getUserInfo(user, true)) ?? [];
 
+            // Si el archivo esta compartido, se muestra el dialogo de confirmacion
             if(file.shared || file.sharedWith.length > 0) {
                 forceDeleteDialog.current.show();
                 return;
             }
-    
-            deleteDialog.current.show();
+            
+            props.onDelete(async () => {
+                try {
+                    const res = await deleteFile(file.id);
+                    messageContext.showSuccess(res.message);
+                } catch(err) {
+                    messageContext.showError(err.message);
+                }
+            }, file);
         } catch(err) {
             messageContext.showError(err.message);
         }
     };
 
-    const normalDeleteFile = async () => {
-        try {
-            const res = await deleteFile(file.id);
-            messageContext.showSuccess(res.message);
-            props.onDelete(file);
-        } catch(err) {
-            messageContext.showError(err.message);
-        }
-    }
-
     const forceFileDelete = async() => {
-        try {
-            const res = await deleteFile(file.id, true);
-            messageContext.showSuccess(res.message);
-            props.onDelete(file);
-        } catch(err) {
-            messageContext.showError(err.message);
-        }
+        props.onDelete(async () => {
+            try {
+                const res = await deleteFile(file.id, true);
+                messageContext.showSuccess(res.message);
+            } catch(err) {
+                messageContext.showError(err.message);
+            }
+        }, file);
     };
 
     const handleUpdate = async () => {
@@ -137,11 +135,6 @@ const FileItem = memo((props) => {
             message="This file it shared with other users, if you delete it, it will be deleted for you and all users permanently."
             onOk={forceFileDelete} ref={forceDeleteDialog}/>
 
-        <ConfirmDialog 
-            title="Are you sure you want to delete this file?"
-            message="This file will be deleted permanently."
-            onOk={normalDeleteFile} ref={deleteDialog}/>
-
         {createPortal(<SharedWithModal
             ref={shareModal} 
             onUpdate={handleShare}
@@ -169,10 +162,10 @@ const FileItem = memo((props) => {
 
                 <div className='text-center'>
                     <a href={file.url} download={file.filename} ref={download} hidden/>
-                    <Button text="Download" className="file-actions-item" onClick={handleDownload}/>
-                    <Button text="Delete" className="file-actions-item" onClick={handleDelete}/>
-                    <Button text="Update" className="file-actions-item" onClick={openUpdateNameModel}/>
-                    <Button text="Share" className="file-actions-item" onClick={openShareModel}/>
+                    <button className='file-actions-item' onClick={handleDownload}><i className='bi bi-file-arrow-down-fill'/></button>
+                    <button className='file-actions-item' onClick={handleDelete}><i className='bi bi-trash3-fill'/></button>
+                    <button className='file-actions-item' onClick={openUpdateNameModel}><i className='bi bi-pencil-square'/></button>
+                    <button className='file-actions-item' onClick={openShareModel}><i className='bi bi-share-fill'/></button>
                 </div>
             </Card.Body>
         </Card>

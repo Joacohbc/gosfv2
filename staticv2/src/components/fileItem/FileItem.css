@@ -26,9 +26,11 @@
     border: none;
     outline: none;
     padding: 5px;
+    width: 2em;
 }
 
 .file-actions-item:hover {
     background-color: var(--color-hover);
     color: var(--color-text);
+    transform: scale(1.1);
 }

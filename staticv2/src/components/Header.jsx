@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useContext } from 'react';
 import AuthContext from '../context/auth-context';
 import { MessageContext } from '../context/message-context';
+import 'bootstrap-icons/font/bootstrap-icons.css'
 
 export default function Header() {
     const auth = useContext(AuthContext);
@@ -20,9 +21,9 @@ export default function Header() {
         </div>
 
         <header>
-            <Link to="/files" className="header-btn">Files</Link>
-            <Link to="/me" className="header-btn">User Info</Link>
-            <button className="header-btn" onClick={logoutHandler}>Logout</button>
+            <Link to="/me" className="header-btn"><i className="bi bi-person-fill"/> Me</Link>
+            <Link to="/files" className="header-btn"><i className="bi bi-archive-fill"/> My Files</Link>
+            <button className="header-btn" onClick={logoutHandler}><i className='bi bi-door-open-fill'/> Bye!</button>
         </header>
     </>;
 }

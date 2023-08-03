@@ -36,7 +36,9 @@ const Message = forwardRef((prop, ref) => {
         }
     }));
 
-    return <div className="fixed-bottom p-3 message" style={{ color: color}}>{message}</div>
+    return message.length > 0 && <div className="fixed-bottom message" style={{ color: color}}>
+        <p className="text-center">{message}</p>
+    </div>
 });
 
 Message.displayName = 'Message';

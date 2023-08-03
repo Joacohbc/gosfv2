@@ -13,7 +13,7 @@
 .file-loading {
     position: fixed;
     bottom: 0;
-    right: 0;
+    left: 0;
     padding: 10px;
     margin: 10px;
     background-color: rgba(0, 0, 0, 0.5);
@@ -45,23 +45,22 @@
     color: var(--color-text);
     border-radius: 5px;
     padding: 10px;
-    font-size: 1em;
+    font-size: 2em;
 }
 
 .btn-upload:hover {
     background-color: var(--color-hover);
-    font-size: 1.1em;
+    transform: scale(1.1);
 }
 
-#go-share {
+.undo-button {
     color: var(--color-text);
     border-radius: 5px;
     padding: 10px;
-    background-color: transparent;
-    border: none;
-    outline: none;
+    font-size: 2em;
 }
 
-#go-share:hover {
+.undo-button:hover {
     background-color: var(--color-hover);
+    transform: scale(1.1);
 }

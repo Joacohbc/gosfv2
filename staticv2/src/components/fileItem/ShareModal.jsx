@@ -15,8 +15,8 @@ import { useGetInfo, useHttp } from '../../hooks/files';
 
 const SharedWithModal = forwardRef((props, ref) => {
     const shareModal = useRef(null);
-    const messageContext = useContext(MessageContext);
     const userIdAdded = useRef(null);
+    const messageContext = useContext(MessageContext);
     const [ file, setFile ] = useState(null);
     const { getUserInfo } = useGetInfo();
     const { updateFile, removeUserFromFile, addUserToFile } = useHttp();
@@ -41,7 +41,7 @@ const SharedWithModal = forwardRef((props, ref) => {
         }
     };
 
-    const handleRemvoeUser = (userId) => {
+    const handleRemoveUser = (userId) => {
         return async (e) => {
             e.preventDefault();
             try {
@@ -108,7 +108,7 @@ const SharedWithModal = forwardRef((props, ref) => {
                         <span className='ms-3'>{user.username} #{user.id}</span>
                     </Col>
                     <Col className='p-2 d-flex justify-content-end'>
-                        <Button text={"Delete"} onClick={handleRemvoeUser(user.id)}/>
+                        <Button text={"Delete"} onClick={handleRemoveUser(user.id)}/>
                     </Col>
                 </Row>
             }) }
