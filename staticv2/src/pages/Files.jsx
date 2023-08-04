@@ -18,15 +18,15 @@ import '../components/Message.css';
 const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extesion: ''});
 
 export default function Files() {
+    const messageContext = useContext(MessageContext);
+    const searching = useRef(false);
     const [ files, setFiles ] = useState([]);
     const [ previewFile, setPreviewFile ] = useState(emptyFile);
     const [ showPreview, setShowPreview ] = useState(false); 
     const [ uploading, setUploading ] = useState(false);
-    const searching = useRef(false);
     const { isLogged, cAxios } = useContext(AuthContext);
-    const messageContext = useContext(MessageContext);
     const { getFileInfo } = useGetInfo();
-    const { getFiles } = useHttp();
+    const { getFiles, uploadFile } = useHttp();
     const { addJob, undoLastJob, jobsQueue } = useJobsQueue(5000);
 
     const fetchDataFiles = useCallback(async (cb) => {
@@ -92,17 +92,11 @@ export default function Files() {
 
         setUploading(true);
 
-        setTimeout(async () => {
-            try {
-                const res = await cAxios.post('/api/files/', form);
-                fetchDataFiles((data) => setFiles(data));
-                messageContext.showSuccess(res.data.message);
-            } catch(err) {
-                messageContext.showError(err.response.data.message);
-            } finally {
-                setUploading(false);
-            }
-        }, 0);
+        uploadFile(form).then(res => {
+            fetchDataFiles((data) => setFiles(data));
+            messageContext.showSuccess(res.message);
+        }).catch(err => messageContext.showError(err.message))
+        .finally(() => setUploading(false));
     }
 
     return <>

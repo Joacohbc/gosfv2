@@ -135,6 +135,18 @@ export const useHttp = () => {
         }
     }, [ cAxios ]);
 
+    const uploadFile = useCallback(async (files) => {
+        try {
+            const res = await cAxios.post('/api/files', files);
+            return {
+                data: res.data,
+                message: `${res.data.length} files uploaded successfully`,
+            }
+        } catch(err) {
+            throw new Error(err.response.data.message);
+        }
+    }, [ cAxios ]);
+    
     return {
         getFileInfo, 
         getShareFileInfo,
@@ -143,5 +155,6 @@ export const useHttp = () => {
         deleteFile,
         addUserToFile,
         removeUserFromFile,
+        uploadFile
     }   
 }

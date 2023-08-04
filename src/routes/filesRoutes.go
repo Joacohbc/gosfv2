@@ -20,7 +20,7 @@ func (f *filesRoutes) AddRoutesToGroup(group *echo.Group) {
 	files.GET("/:id/info", handlers.Files.GetInfo)
 
 	// Creación
-	files.POST("/", handlers.Files.UploadFile)
+	files.POST("", handlers.Files.UploadFile)
 
 	// Borrar
 	files.DELETE("/:id", handlers.Files.DeleteFile)
