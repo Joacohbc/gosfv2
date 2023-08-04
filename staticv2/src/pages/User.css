@@ -53,6 +53,8 @@
     color: var(--color-text);
     border: 1px  var(--color-text);
     border-style: dashed;
+    text-align: center;
+    width: 100%;
 }
 
 .btn-icon:hover {
