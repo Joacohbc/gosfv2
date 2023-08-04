@@ -1,8 +1,8 @@
 package dtos
 
 type UserDTO struct {
-	ID       uint   `json:"id"`
-	Username string `json:"username"`
+	ID       uint    `json:"id"`
+	Username *string `json:"username"`
 }
 
 // FileDTO: Representa un archivo en el sistema pero sin la información de su Owner

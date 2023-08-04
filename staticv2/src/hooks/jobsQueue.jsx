@@ -3,9 +3,9 @@ import { useCallback,useState } from 'react';
 const useJobsQueue = (ms) => {
     const [ jobsQueue, setJobsQueue ] = useState([]);
 
-    const addJob = useCallback((cb, undoCb) => {
+    const addJob = useCallback((actionCb, undoCb) => {
         const timeoutId = setTimeout(() => {
-            cb();
+            actionCb();
             setJobsQueue((jobsQueue) => jobsQueue.filter(job => job.timeoutId != timeoutId));
         }, ms);
 

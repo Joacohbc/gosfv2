@@ -1,18 +1,13 @@
 @import url("../css/index.css");
 
-.container {
-    display: flex;
-    justify-content: center;
-}
-
-#user-username {
+.user-username {
     font-size: 2em;
     font-weight: bold;
     text-align: center;
     color: var(--color-text);
 }
 
-#copy-id {
+.copy-id {
     font-size: 1em;
     font-weight: bold;
     text-align: center;
@@ -20,11 +15,11 @@
     color: var(--color-text);
 }
 
-#copy-id:hover {
+.copy-id:hover {
     text-decoration: underline;
 }
 
-#user-icon {
+.user-icon {
     width:  45%;
     height: 45%;
     margin: 0 auto;
@@ -41,22 +36,15 @@
     margin-bottom: 10px;
 }
 
-#user-info {
+.user-info {
     position: relative;
     display: flex;
     flex-direction: column;
     gap: 10px;
     padding: 5%;
-    width: 60%;
     background-color: var(--color-background-light);
     border-radius: 10px;
 }
-
-input {
-    padding: .5em;
-    border-radius: 10px;
-}
-
 
 .btn-icon {
     padding: .5em;
@@ -82,17 +70,4 @@ input {
 .btn-form:hover {
     background-color: var(--color-hover);
     font-size: 1.1em;
-}
-
-#message {
-    position: fixed;
-    bottom: 0;
-    padding: 10px;
-    color: var(--color-text);
-    background-color: rgba(0, 0, 0, 0.8);
-    z-index: 2;
-}
-
-#message:empty {
-    display: none;
 }

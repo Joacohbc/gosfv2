@@ -10,7 +10,7 @@ import { useCallback, useContext, useEffect,  useRef,  useState } from 'react';
 import { handleKeyUpWithTimeout } from '../utils/input-text';
 import PreviewFile from './PreviewFile';
 import { MessageContext } from '../context/message-context';
-import { useGetInfo, useHttp } from '../hooks/files';
+import { useGetInfo, useFiles } from '../hooks/files';
 import SpinnerDiv from '../components/SpinnerDiv';
 import useJobsQueue from '../hooks/jobsQueue';
 import '../components/Message.css';
@@ -26,7 +26,7 @@ export default function Files() {
     const [ uploading, setUploading ] = useState(false);
     const { isLogged, cAxios } = useContext(AuthContext);
     const { getFileInfo } = useGetInfo();
-    const { getFiles, uploadFile } = useHttp();
+    const { getFiles, uploadFile } = useFiles();
     const { addJob, undoLastJob, jobsQueue } = useJobsQueue(5000);
 
     const fetchDataFiles = useCallback(async (cb) => {

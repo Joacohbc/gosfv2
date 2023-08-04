@@ -18,7 +18,7 @@ const Message = forwardRef((prop, ref) => {
         setMessage(message[0].toUpperCase() + message.substring(1));
         setTimeout(() => {
             setMessage('');
-        }, 1500);
+        }, 2000);
     }
 
     useImperativeHandle(ref, () => ({
@@ -36,9 +36,7 @@ const Message = forwardRef((prop, ref) => {
         }
     }));
 
-    return message.length > 0 && <div className="fixed-bottom message" style={{ color: color}}>
-        <p className="text-center">{message}</p>
-    </div>
+    return message.length > 0 && <div className="fixed-bottom message m-2" style={{ color: color}}>{message}</div>
 });
 
 Message.displayName = 'Message';

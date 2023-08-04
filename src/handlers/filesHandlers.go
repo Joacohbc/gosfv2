@@ -105,10 +105,8 @@ func (fc *fileController) GetSharedFile(c echo.Context) error {
 		return HandleFileError(err)
 	}
 
-	// Si el el usuario no es el dueño del archivo, por seguridad
-	// le digo que el archivo no existe
 	if !sharedWithMe {
-		return echo.NewHTTPError(http.StatusNotFound, models.ErrFileNotFound.Error())
+		return echo.NewHTTPError(http.StatusForbidden, "The file is not shared with you, request access to the owner")
 	}
 
 	return c.File(file.GetPath())
@@ -150,7 +148,7 @@ func (fc *fileController) GetSharedFileInfo(c echo.Context) error {
 	// Si el el usuario no es el dueño del archivo, por seguridad
 	// le digo que el archivo no existe
 	if !sharedWithMe {
-		return echo.NewHTTPError(http.StatusNotFound, models.ErrFileNotFound.Error())
+		return echo.NewHTTPError(http.StatusForbidden, "The file is not shared with you, request access to the owner")
 	}
 
 	return jsonDTO(c, http.StatusOK, file)
@@ -199,7 +197,7 @@ func (fc *fileController) UploadFile(c echo.Context) error {
 		return HandleFileError(err)
 	}
 
-	return jsonDTO(c, http.StatusOK, filesCreated)
+	return jsonDTO(c, http.StatusCreated, filesCreated)
 }
 
 // Obtiene los archivos subidos desde el Body (Formulario)

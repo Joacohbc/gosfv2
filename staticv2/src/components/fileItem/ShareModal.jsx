@@ -11,7 +11,7 @@ import Row from 'react-bootstrap/Row';
 import { useImperativeHandle } from 'react';
 import Col from 'react-bootstrap/esm/Col';
 import { MessageContext } from '../../context/message-context';
-import { useGetInfo, useHttp } from '../../hooks/files';
+import { useFiles, useGetInfo } from '../../hooks/files';
 
 const SharedWithModal = forwardRef((props, ref) => {
     const shareModal = useRef(null);
@@ -19,7 +19,7 @@ const SharedWithModal = forwardRef((props, ref) => {
     const messageContext = useContext(MessageContext);
     const [ file, setFile ] = useState(null);
     const { getUserInfo } = useGetInfo();
-    const { updateFile, removeUserFromFile, addUserToFile } = useHttp();
+    const { updateFile, removeUserFromFile, addUserToFile } = useFiles();
 
     useImperativeHandle(ref, () => ({
         open: (file) => {

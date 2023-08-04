@@ -5,7 +5,7 @@ import "gosfV2/src/models"
 func ToUserDTO(user models.User) UserDTO {
 	return UserDTO{
 		ID:       user.ID,
-		Username: user.Username,
+		Username: &user.Username,
 	}
 }
 

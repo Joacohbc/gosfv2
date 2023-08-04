@@ -9,7 +9,7 @@ import SimpleModal from '../SimpleModal';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import { MessageContext } from '../../context/message-context';
-import { useGetInfo, useHttp } from '../../hooks/files';
+import { useGetInfo, useFiles } from '../../hooks/files';
 import ConfirmDialog from '../ConfirmDialog';
 import SharedWithModal from './ShareModal';
 import 'bootstrap-icons/font/bootstrap-icons.css'
@@ -23,7 +23,7 @@ const FileItem = memo((props) => {
     const inputUpdate = useRef(null);
     const forceDeleteDialog = useRef(null);
 
-    const { getFileInfo, deleteFile, updateFile } = useHttp();
+    const { getFileInfo, deleteFile, updateFile } = useFiles();
     const messageContext = useContext(MessageContext);
     const { getUserInfo } = useGetInfo();
 
