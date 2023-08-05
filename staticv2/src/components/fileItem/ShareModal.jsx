@@ -28,16 +28,19 @@ const SharedWithModal = forwardRef((props, ref) => {
         },
     }), [ shareModal ]);
 
-    const handleMarkAsPublic = async (e) => {
-        try {
-            const res = await updateFile(file.id, { 
-                shared: e.target.checked,
-            });
-            setFile((file) => ({ ...file, shared: e.target.checked }));
-            messageContext.showSuccess(res.data.shared ? "File updated to: public" : "File updated to: restricted");
-            props.onUpdate();
-        } catch(err) {
-            messageContext.showError(err.message);
+    const handleMarkAsPublic = (value) => {
+        return async (e) => {
+            e.preventDefault();
+            try {
+                const res = await updateFile(file.id, { 
+                    shared: value,
+                });
+                setFile((file) => ({ ...file, shared: value }));
+                messageContext.showSuccess(res.data.shared ? "File updated to: public" : "File updated to: restricted");
+                props.onUpdate();
+            } catch(err) {
+                messageContext.showError(err.message);
+            }
         }
     };
 
@@ -82,7 +85,8 @@ const SharedWithModal = forwardRef((props, ref) => {
         }
     } 
 
-    const handleCopyLink = async () => {
+    const handleCopyLink = async (e) => {
+        e.preventDefault();
         try {
             await navigator.clipboard.writeText(`${window.location.origin}/shared/${file?.id}`);
             messageContext.showSuccess("Link copied to clipboard");
@@ -95,7 +99,7 @@ const SharedWithModal = forwardRef((props, ref) => {
         <Form>
             <InputGroup>
                 <Form.Control placeholder='Enter User ID' ref={userIdAdded}/>
-                <Button text="Add" onClick={handleAddUser}/>
+                <Button text={<i className='bi bi-person-fill-add'/>} onClick={handleAddUser}/>
             </InputGroup>
         </Form>
         <hr className="hr" />
@@ -108,7 +112,7 @@ const SharedWithModal = forwardRef((props, ref) => {
                         <span className='ms-3'>{user.username} #{user.id}</span>
                     </Col>
                     <Col className='p-2 d-flex justify-content-end'>
-                        <Button text={"Delete"} onClick={handleRemoveUser(user.id)}/>
+                        <Button text={<i className='bi bi-person-fill-dash'/>} onClick={handleRemoveUser(user.id)}/>
                     </Col>
                 </Row>
             }) }
@@ -120,7 +124,15 @@ const SharedWithModal = forwardRef((props, ref) => {
         <Form>
             <InputGroup>
                 <Form.Control value={`${window.location.origin}/shared/${file?.id}`} onClick={handleCopyLink} readOnly/>
-                <InputGroup.Checkbox label="Public" onChange={handleMarkAsPublic} defaultChecked={file?.shared}/>
+                <InputGroup.Text className='cursor-pointer'>
+                    <Button text={<i className='bi bi-clipboard'/>} onClick={handleCopyLink}/>
+                </InputGroup.Text>
+                {/* <InputGroup.Checkbox onChange={handleMarkAsPublic} defaultChecked={fil<e?.shared}/> */}
+                <InputGroup.Text className='cursor-pointer'>
+                    { file?.shared ? 
+                        <Button text={<i className='bi bi-unlock-fill'/>} onClick={handleMarkAsPublic(false)}/> 
+                        : <Button text={<i className='bi bi-lock-fill'/>} onClick={handleMarkAsPublic(true)}/> }
+                </InputGroup.Text>
             </InputGroup>
         </Form>
     </SimpleModal>

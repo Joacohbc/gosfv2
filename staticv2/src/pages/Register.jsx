@@ -40,7 +40,7 @@ export default function Register() {
                 </div>
             </Form>
 
-            <div className="link">
+            <div className="link text-center">
                 <Link to="/login">{"Already have an account? Log in!"}</Link>
             </div>
         </div>
