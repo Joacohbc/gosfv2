@@ -11,6 +11,7 @@ const AuthContext = createContext({
     onLogOut: async () => {},
     onLogin: async (username, password) => {},
     onRegister: async (username, password) => {},
+    onRestore: async (username, password) => {},
     addTokenParam: (url) => {},
 });
 
@@ -28,8 +29,8 @@ const resetAuthData = () => {
 }
 
 export const AuthContextProvider = (props) => { 
-    const BASE_URL = 'http://localhost:3000';
-    // const BASE_URL = window.location.origin;
+    // const BASE_URL = 'http://localhost:3000';
+    const BASE_URL = window.location.origin;
     
     const navigate = useNavigate();
     const location = useLocation();
@@ -91,6 +92,19 @@ export const AuthContextProvider = (props) => {
         }
     };
 
+    const restoreTokenHandler = async (username, password) => {
+        try {
+            await axios.post(BASE_URL + '/auth/restore', {
+                username: username,
+                password: password
+            });
+            resetAuthData();
+            return Promise.resolve('All Tokens are restore successfully');
+        } catch(err) {
+            return Promise.reject(new Error(err.response.data.message));
+        }
+    };
+
     const logOutHandler = async () => {
         try {
             await axios.delete(BASE_URL + '/auth/logout', {
@@ -132,7 +146,8 @@ export const AuthContextProvider = (props) => {
         baseUrl: BASE_URL,
         onLogin: loginHandler,
         onLogOut: logOutHandler,
-        onRegister: registerHandler,    
+        onRegister: registerHandler,
+        onRestore: restoreTokenHandler,    
         addTokenParam: addTokenParam
     }}>{props.children}</AuthContext.Provider>
 };

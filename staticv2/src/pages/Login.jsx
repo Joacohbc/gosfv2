@@ -6,20 +6,38 @@ import { useContext, useRef } from 'react';
 import AuthContext from '../context/auth-context';
 import { MessageContext } from '../context/message-context';
 import { Link } from 'react-router-dom';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 export default function Login() {
     const username = useRef();
     const password = useRef();
     const auth = useContext(AuthContext);
     const messageContext = useContext(MessageContext);
-    
+    const restoreTokenDialog = useRef();
+
     const loginHandler = (e) => {
         e.preventDefault();
         auth.onLogin(username.current.value, password.current.value)
         .catch(err => messageContext.showError(err.message));
     };
+
+    const restoreTokenHandler = () => {
+        auth.onRestore(username.current.value, password.current.value)
+        .then(message => messageContext.showSuccess(message))
+        .catch(err => messageContext.showError(err.message));
+    };
     
+    const showRestoreTokenDialog = (e) => {
+        e.preventDefault();
+        restoreTokenDialog.current.show();
+    }
+
     return <>
+        <ConfirmDialog
+            title="Are you sure you want to close all session of your Account?"
+            message="This will close all your session of your account. You will need to login again to use the application."
+            onOk={restoreTokenHandler} ref={restoreTokenDialog}/>
+
         <div className="logo-icon">
             <img src={Logo} alt="server"/>
         </div>
@@ -35,14 +53,13 @@ export default function Login() {
 
                 <div className='mt-3 d-flex justify-content-center rounded'>
                     <button className='btn-login flex-fill' onClick={loginHandler}>Login</button>
-                    <button className='btn-login flex-fill'>Restore Tokens</button>
+                    <button className='btn-login flex-fill' onClick={showRestoreTokenDialog}>Restore Tokens</button>
                 </div>
             </Form>
             
             <div className="link text-center">
                 <Link to="/register">{"Don't have an account yet? Sign up!"}</Link>
             </div>
-
         </div>
     </>
 }

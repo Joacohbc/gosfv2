@@ -8,7 +8,7 @@ const Button = (props) => {
 Button.propTypes = {
     className: PropTypes.string,
     onClick: PropTypes.func,
-    text: PropTypes.string
+    text: PropTypes.any,
 }
 
 export default Button;

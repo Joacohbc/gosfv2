@@ -50,7 +50,7 @@ SimpleModal.propTypes = {
     title: PropTypes.string,
     children: PropTypes.node,
     size: PropTypes.string,
-    buttonText: PropTypes.string,
+    buttonText: PropTypes.any,
     onClick: PropTypes.func,
 };
 
