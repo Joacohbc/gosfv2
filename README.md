@@ -40,7 +40,7 @@ La instalación de tiene 2 opciones para su despliegue:
 - MySQL (Solo instalación 1)
 - Redis (Solo instalación 1)
 
-Como configurar los pre-requisitos [aquí](./Prerequisites.md).
+Como configurar los pre-requisitos [aquí](./readme/Prerequisites.md).
 
 ## Instalación
 
