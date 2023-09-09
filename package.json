@@ -1,9 +1,0 @@
-{
-  "devDependencies": {
-    "jshint": "^2.13.6"
-  },
-  "dependencies": {
-    "react-pdf": "^7.2.0",
-    "react-simple-image-viewer": "^1.2.2"
-  }
-}

@@ -1,6 +1,6 @@
 .vscode/*
-make.sh
-build.sh
+_make.sh
+_build.sh
 
 # Ambiente de Desarrollo
 logs/
@@ -8,3 +8,5 @@ files/
 static/
 node_modules/
 src/config.json
+src/__debug*
+.jshintrc
