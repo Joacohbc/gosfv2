@@ -3,7 +3,7 @@ package routes
 import (
 	"gosfV2/src/auth"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 var Auth authRoutes

@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 // File: Representa un archivo de un usuario
@@ -28,8 +28,8 @@ type File struct {
 	// Shared: Indica que esta compartido con TODOS los usuarios
 	Shared     bool   `json:"shared"`
 	UserID     uint   `json:"owner_id" db:"user_id"`
-	User       User   `json:"owner" bd:"user"`                        // "user" es un prefix para usar sqlx.Get y sqlx.Select con una sola consulta
-	SharedWith []User `json:"shared_with,omitempty" db:"shared_with"` // "shared_with" es un prefix para usar sqlx.Get y sqlx.Select con una sola consulta
+	User       User   `json:"owner" bd:"user"`                      // "user" es un prefix para usar sqlx.Get y sqlx.Select con una sola consulta
+	SharedWith []User `json:"sharedWith,omitempty" db:"sharedWith"` // "sharedWith" es un prefix para usar sqlx.Get y sqlx.Select con una sola consulta
 }
 
 func (f *File) Validate() error {
@@ -54,7 +54,7 @@ type FileInterface interface {
 
 	// Copia el archivo del Reader al sistema de archivos
 	// y guarda la la ruta de archivo en la base de datos
-	Create(filename string, userId uint, src io.Reader) error
+	Create(filename string, userId uint, src io.Reader) (uint, error)
 
 	// Elimina un archivo del sistema de archivos y de la ruta de la base de datos
 	Delete(fileId uint) error
@@ -80,6 +80,8 @@ type FileInterface interface {
 	// Obtiene un archivo por su ID (sin importar el usuario)
 	GetById(fileId uint) (File, error)
 
+	GetByIds(fileIds []uint) ([]File, error)
+
 	// Determina si un usuario tiene acceso a un archivo
 	IsSharedWith(fileId, userId uint) (bool, error)
 
@@ -89,6 +91,7 @@ type FileInterface interface {
 	// Elimina un usuario de un archivo
 	RemoveUserFromFile(userId, fileId uint) error
 
+	// Obtiene todos los archivos compartidos con un usuario
 	GetFilesShared(userId uint) ([]File, error)
 
 	ManageError(err error) error
@@ -174,6 +177,31 @@ func (f fileBD) GetById(fileId uint) (File, error) {
 	return file, nil
 }
 
+func (f fileBD) GetByIds(fileIds []uint) ([]File, error) {
+	var files []File
+
+	query, args, err := sqlx.In(`
+	SELECT 
+		f.*,
+		u.user_id "user.user_id",
+		u.username "user.username",
+		u.update_at "user.update_at",
+		u.created_at "user.created_at"
+	FROM files f
+	JOIN users u ON f.user_id  = u.user_id
+	WHERE f.file_id IN (?)`, fileIds)
+	if err != nil {
+		return nil, f.ManageError(err)
+	}
+
+	err = f.BD.SelectContext(f.Context, &files, query, args...)
+	if err != nil {
+		return nil, f.ManageError(err)
+	}
+
+	return files, nil
+}
+
 func (f fileBD) GetByIdFromUser(fileId, userId uint) (File, error) {
 	var file File
 
@@ -222,24 +250,24 @@ func (f fileBD) GetByFilenameFromUser(filename string, userId uint) (File, error
 // Inserts
 //
 
-func (f fileBD) Create(filename string, userId uint, src io.Reader) error {
+func (f fileBD) Create(filename string, userId uint, src io.Reader) (uint, error) {
 
 	// Inicio una transacción
 	tx, err := f.BD.BeginTxx(f.Context, nil)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	// Creo el archivo
 	if _, err := tx.ExecContext(f.Context, `INSERT INTO files (filename, user_id) VALUES (?,?);`, filename, userId); err != nil {
 		tx.Rollback()
-		return err
+		return 0, err
 	}
 
 	var fileId uint
 	if err := tx.GetContext(f.Context, &fileId, `SELECT LAST_INSERT_ID();`); err != nil {
 		tx.Rollback()
-		return err
+		return 0, err
 	}
 
 	// Creo el archivo (en Local)
@@ -247,25 +275,25 @@ func (f fileBD) Create(filename string, userId uint, src io.Reader) error {
 	fileOpen, err := os.Create(path)
 	if err != nil {
 		tx.Rollback()
-		return err
+		return 0, err
 	}
 
 	// Copio el archivo Remoto en el Local
 	if _, err = io.Copy(fileOpen, src); err != nil {
 		tx.Rollback()
-		return err
+		return 0, err
 	}
 
 	if err := fileOpen.Close(); err != nil {
 		tx.Rollback()
-		return err
+		return 0, err
 	}
 
 	if err := tx.Commit(); err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return fileId, nil
 }
 
 //

@@ -1,0 +1,12 @@
+.button {
+    border-radius: 5px;
+    color: var(--color-text-dark);
+    background-color: transparent;
+    border: none;
+    outline: none;
+}
+
+.button:hover {
+    background-color: var(--color-hover);
+    color: var(--color-text);
+}

@@ -1,9 +1,9 @@
-make.sh
 .vscode/*
-src/config.json
+node_modules/*
+
+# Enviroments files/dir
+make.sh
+build.sh
 logs/
 files/
-node_modules/*
-Ideas.txt
 src/config.json
-__debug_bin

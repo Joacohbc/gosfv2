@@ -1,10 +1,13 @@
 package handlers
 
 import (
+	"gosfV2/src/dtos"
+	"gosfV2/src/models"
 	"net/http"
+	"reflect"
 	"strconv"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 // Obtiene el ID como PathParam y lo convierte en uint
@@ -16,4 +19,24 @@ func getIdFromURL(c echo.Context, param string) (uint, error) {
 	}
 
 	return uint(id), nil
+}
+
+func jsonDTO(c echo.Context, code int, model interface{}) error {
+	if reflect.TypeOf(model) == reflect.TypeOf(models.File{}) {
+		return c.JSON(code, dtos.ToFileDTO(model.(models.File)))
+	}
+
+	if reflect.TypeOf(model) == reflect.TypeOf([]models.File{}) {
+		return c.JSON(code, dtos.ToFileListDTO(model.([]models.File)))
+	}
+
+	if reflect.TypeOf(model) == reflect.TypeOf(models.User{}) {
+		return c.JSON(code, dtos.ToUserDTO(model.(models.User)))
+	}
+
+	if reflect.TypeOf(model) == reflect.TypeOf([]models.User{}) {
+		return c.JSON(code, dtos.ToUserListDTO(model.([]models.User)))
+	}
+
+	return c.JSON(code, model)
 }

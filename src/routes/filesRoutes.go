@@ -3,7 +3,7 @@ package routes
 import (
 	"gosfV2/src/handlers"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 var Files filesRoutes
@@ -15,12 +15,12 @@ func (f *filesRoutes) AddRoutesToGroup(group *echo.Group) {
 	files := group.Group("/files")
 
 	// Consultas
-	files.GET("/", handlers.Files.GetAllFiles)
+	files.GET("", handlers.Files.GetAllFiles)
 	files.GET("/:id", handlers.Files.GetFile)
 	files.GET("/:id/info", handlers.Files.GetInfo)
 
 	// Creación
-	files.POST("/", handlers.Files.UploadFile)
+	files.POST("", handlers.Files.UploadFile)
 
 	// Borrar
 	files.DELETE("/:id", handlers.Files.DeleteFile)
@@ -31,6 +31,7 @@ func (f *filesRoutes) AddRoutesToGroup(group *echo.Group) {
 	// Opciones de Share
 	files.GET("/share", handlers.Files.GetAllShareFiles)
 	files.GET("/share/:id", handlers.Files.GetSharedFile)
+	files.GET("/share/:id/info", handlers.Files.GetSharedFileInfo)
 	files.POST("/share/:idFile/user/:idUser", handlers.Files.AddUserToFile)
 	files.DELETE("/share/:idFile/user/:idUser", handlers.Files.RemoveUserFromFile)
 }

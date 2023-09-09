@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 type UserClaims struct {
