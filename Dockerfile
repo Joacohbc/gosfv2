@@ -17,5 +17,4 @@ RUN chmod +x ./docker-entrypoint.sh
 RUN chmod +x ./gosfv2
 
 LABEL Name=gosfv2 Version=1.0.0
-EXPOSE 80
 ENTRYPOINT [ "/app/docker-entrypoint.sh" ]

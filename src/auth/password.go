@@ -4,7 +4,7 @@ import (
 	"gosfV2/src/models"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
 )
 

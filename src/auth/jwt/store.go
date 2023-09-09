@@ -6,11 +6,10 @@ import (
 	"fmt"
 	"gosfV2/src/models/database"
 	"gosfV2/src/models/env"
-	"log"
 	"net/http"
 
 	"github.com/go-redis/redis/v9"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo"
 )
 
 var (
@@ -60,7 +59,6 @@ func (t *tokenRedis) AddToken(id uint, token string) error {
 }
 
 func (t *tokenRedis) RemoveToken(id uint, token string) error {
-	log.Println("SE ELIMINA UN TOKEN: ", token)
 	err := t.db.SRem(t.ctx, fmt.Sprint(id), token).Err()
 	return t.ManageError(err)
 }

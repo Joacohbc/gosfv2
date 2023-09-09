@@ -12,7 +12,7 @@ import (
 
 	"gosfV2/src/utils"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -136,7 +136,6 @@ func init() {
 	go func() {
 		for {
 			time.Sleep(time.Minute * 1)
-
 			users, err := models.UsersC(context.Background()).GetAllUsers()
 			if err != nil && err != models.ErrUserNotFound {
 				panic(err)

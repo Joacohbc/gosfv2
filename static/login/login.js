@@ -16,11 +16,11 @@ window.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btn-login').addEventListener('click', function(e) {
         e.preventDefault();
 
-        // Defino el URL base de las peticiones
-        axios.defaults.baseURL = window.location.origin;
-        axios.post('/auth/login', {
-            username: username.current.value,
-            password: password.current.value
+        let url = window.location.origin + '/auth/login?cookie=true';
+        
+        axios.post(url,{
+                username: username.value,
+                password: password.value
         })
         .then(req => {
             localStorage.setItem('token', req.data.token);
@@ -29,8 +29,7 @@ window.addEventListener('DOMContentLoaded', function() {
             let expires = new Date(Date.now() + req.data.duration * 1000 * 60);
             localStorage.setItem('expires', expires);
             console.log(req.data.duration);
-
-            axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('token');
+            window.location.href = '/static/main/files.html';
         })
         .catch(err => {
             console.log(err);

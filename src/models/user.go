@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo"
 )
 
 type User struct {

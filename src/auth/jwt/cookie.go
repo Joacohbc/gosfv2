@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo"
 )
 
 const (
@@ -24,13 +24,11 @@ func GetTokenCookie(c echo.Context) (string, error) {
 func SetTokenCookieFromQuery(c echo.Context, token string) {
 	if c.QueryParam(cookieQueryName) != "" {
 		c.SetCookie(&http.Cookie{
-			Name:     cookieName,
-			Value:    token,
-			Expires:  time.Now().Add(tokenDuration),
-			MaxAge:   int(tokenDuration.Seconds()),
-			Path:     "/",
-			HttpOnly: true,
-			SameSite: http.SameSiteStrictMode,
+			Name:    cookieName,
+			Value:   token,
+			Expires: time.Now().Add(tokenDuration),
+			MaxAge:  int(tokenDuration.Seconds()),
+			Path:    "/",
 		})
 	}
 }
