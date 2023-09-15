@@ -31,7 +31,7 @@ Necesita tener instalado [MySQL en el sistema operativo](https://dev.mysql.com/d
 
 Ademas se debe crear (si no existe) un usuario y una base de datos para que el servicio pueda crear las tablas necesarias para su correcto funcionamiento.
 
-Las variables que indican las propiedades de la conexión con el servicio de MySQL con el **binario de GOSF** son: ([config.json](./config.json))
+Las variables que indican las propiedades de la conexión con el servicio de MySQL con el **binario de GOSF** son: ([config.json](./config_example.json))
 
 ```json
 "db_host_sql": "localhost",
@@ -42,7 +42,7 @@ Las variables que indican las propiedades de la conexión con el servicio de MyS
 "db_charset_sql": "utf8",
 ```
 
-Estas variables se pueden modificar en el archivo de configuración ([config.json](./config.json)).
+Estas variables se pueden modificar en el archivo de configuración ([config.json](./config_example.json)).
 
 ### MySQL con Docker
 
@@ -89,7 +89,7 @@ Las variables que indican las propiedades de la conexión con el servicio de Red
 "redis_db": 0,
 ```
 
-Estas variables se pueden modificar en el archivo de configuración ([config.json](./config.json)).
+Estas variables se pueden modificar en el archivo de configuración ([config.json](./config_example.json)).
 
 ### Redis con Docker
 

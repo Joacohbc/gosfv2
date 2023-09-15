@@ -20,12 +20,12 @@ GOSF es un servidor de archivos que permite compartir archivos entre usuario de 
 
 - Go
 - [Echo Framework](https://echo.labstack.com/guide/)
+- HTML/CSS y JavaScript
 - React / React Router
 - Redis
 - MySQL
-- Docker y Docker Compose
 - REST API
-- HTML/CSS y JavaScript
+- Docker y Docker Compose
 
 ## Tipos de Instalación
 
@@ -101,7 +101,7 @@ go build -o ./gosfv2 ./src;
 
 Para iniciar basta con "ejecutar" el [docker-compose.yml](./docker-compose.yml).
 
-Por defecto el servicio corre en el puerto 80 (hace port forwarding del puerto 80 donde ser escucha el servidor), para cambiar esto basta con modificar el puerto que se expone en el [config.env](./config.env). Ademas se puede cambiar otros parámetros de configuración del servicio (como la Volume path, y versiones de Tags, etc) en el mismo archivo.
+Por defecto el servicio corre en el puerto 80, para cambiar esto basta con modificar el puerto que se expone en el [config.env](./config.env). Ademas se puede cambiar otros parámetros de configuración del servicio (como la Volume path, y versiones de Tags, etc) en el mismo archivo.
 
 - Clonar el repositorio
 
@@ -123,21 +123,13 @@ docker compose --env-file config.env up
 
 ## Frontend Implementado
 
-### Login Page 
+### Login & Register Page
 
-![Login Page](/readme/Login%20Page.png)
-
-### Register Page
-
-![Register Page](/readme/Register%20Page.png)
+![Login Page](/readme/Login%20Page.png)![Register Page](/readme/Register%20Page.png)
 
 ### Home Page
 
-![Home Page](/readme/Main%20Page.png)
-
-![Home Page sin archivos](/readme/Main%20Page%20No%20Files.png)
-
-![Shared Overlay](/readme/Shared%20Overlay.png)
+![Home Page](/readme/Main%20Page.png)![Home Page sin archivos](/readme/Main%20Page%20No%20Files.png)![Shared Overlay](/readme/Shared%20Overlay.png)
 
 ### User Profile
 
