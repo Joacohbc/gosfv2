@@ -22,8 +22,9 @@ export default function Header() {
 
         <header>
             <Link to="/me" className="header-btn"><i className="bi bi-person-fill"/> Me</Link>
-            <Link to="/files" className="header-btn"><i className="bi bi-archive-fill"/> My Files</Link>
-            <button className="header-btn" onClick={logoutHandler}><i className='bi bi-door-open-fill'/> Bye!</button>
+            <Link to="/files" className="header-btn"><i className="bi bi-archive-fill"/> Files</Link>
+            <Link to="/notes" className="header-btn"><i className="bi bi-pen-fill"/> Notes</Link>
+            <button className="header-btn" onClick={logoutHandler}><i className='bi bi-door-open-fill'/></button>
         </header>
     </>;
 }

@@ -1,74 +1,52 @@
 package models
 
 import (
-	"context"
-	"database/sql"
-	"time"
+	"errors"
+	"sync"
+)
 
-	"github.com/jmoiron/sqlx"
+var (
+	ErrNoteNotFound = errors.New("note not found")
 )
 
 // Note is a struct that represents a note
 type Note struct {
-	ID          uint         `json:"id" bd:"note_id"`
-	Content     string       `json:"content"`
-	User        User         `json:"user" db:"user"`
-	Attachments []File       `json:"files" db:"files"` // Relación 1:N
-	CreateAt    time.Time    `json:"create_at" db:"created_at"`
-	UpdateAt    sql.NullTime `json:"update_at" db:"update_at"`
+	Content string `json:"content"`
 }
 
+var NoteManager NoteInterface = &noteBD{mapNote: sync.Map{}}
+
 type NoteInterface interface {
-	GetNote(noteId uint) (Note, error)
-	CreateNote(content string, userId uint) (Note, error)
-	UpdateNote(noteIdId uint, content string) (Note, error)
-	DeleteNote(noteIdId int) error
+	GetNote(userId uint) (Note, error)
+	CreateNote(userId uint, content string) (Note, error)
+	UpdateNote(userId uint, content string) (Note, error)
+	DeleteNote(userId uint) error
 }
 
 type noteBD struct {
-	BD      *sqlx.DB
-	Context context.Context
+	mapNote sync.Map
 }
 
-func (c noteBD) GetNote(noteId uint) (Note, error) {
-	var note Note
-	err := c.BD.GetContext(c.Context, &note, `
-	SELECT
-		n.*,
-	FROM notes n 
-	WHERE note_id = ?`, noteId)
-	if err != nil {
-		return Note{}, err
+func (n *noteBD) GetNote(userId uint) (Note, error) {
+	value, ok := n.mapNote.Load(userId)
+	if !ok {
+		return Note{}, ErrNoteNotFound
 	}
 
-	return note, nil
+	return value.(Note), nil
 }
 
-func (c noteBD) CreateNote(content string, userId uint) (Note, error) {
-	var note Note
-	err := c.BD.GetContext(c.Context, &note, "INSERT INTO notes (content, user_id) VALUES (?, ?)", content, userId)
-	if err != nil {
-		return Note{}, err
-	}
-
-	return note, nil
+func (n *noteBD) CreateNote(userId uint, content string) (Note, error) {
+	n.mapNote.Store(userId, Note{Content: content})
+	return Note{}, nil
 }
 
-func (c noteBD) UpdateClipboard(noteId uint, content string) (Note, error) {
-	var note Note
-	err := c.BD.GetContext(c.Context, &note, "UPDATE notes SET content = ? WHERE id = ?", content, noteId)
-	if err != nil {
-		return Note{}, err
-	}
-
-	return note, nil
+func (n *noteBD) UpdateNote(userId uint, content string) (Note, error) {
+	n.mapNote.Store(userId, Note{Content: content})
+	return Note{}, nil
 }
 
-func (c noteBD) DeleteClipboard(noteId int) error {
-	_, err := c.BD.ExecContext(c.Context, "DELETE FROM notes WHERE note_id = ?", noteId)
-	if err != nil {
-		return err
-	}
-
+func (n *noteBD) DeleteNote(userId uint) error {
+	n.mapNote.Delete(userId)
 	return nil
 }

@@ -36,6 +36,8 @@ func main() {
 		Root:  env.Config.StaticFiles,
 		HTML5: true,
 	}))
+
+	// Configuración de los middlewares de seguridad
 	front.Use(middleware.Secure())
 	front.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
 		TokenLookup:    "cookie:_csrf",
@@ -45,19 +47,20 @@ func main() {
 		CookieHTTPOnly: true,
 		CookieSameSite: http.SameSiteStrictMode,
 	}))
-
-	// Configuración de los middlewares
-	e.Use(logger.RequestLoggerConfig())
-	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
+	e.Use(middleware.Recover())
+
+	// Configuración de los middlewares de utilidad
+	e.Use(logger.RequestLoggerConfig())
 
 	// Configuración de las rutas
 	tokens := e.Group("/auth")
 	routes.Auth.AddAuthRoutes(tokens)
 
 	api := e.Group("/api", auth.Middlewares.JWTAuthMiddleware)
-	routes.Files.AddRoutesToGroup(api)
-	routes.User.AddRoutesToGroup(api)
+	routes.Files.AddFilesRoutes(api)
+	routes.User.AddUserRoutes(api)
+	routes.Notes.AddNotesRoutes(api)
 
 	// Configuración del cierre del servidor
 	go func() {

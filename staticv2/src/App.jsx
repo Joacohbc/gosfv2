@@ -9,6 +9,7 @@ import './css/index.css';
 import { AuthContextProvider } from "./context/auth-context";
 import PreviewFile from "./pages/PreviewFile";
 import MessageComponentProvider from "./context/message-context";
+import Notes from "./pages/Notes";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route path="me" element={<User />} />
           <Route path="files" element={< Files/>} />
+          <Route path="notes" element={< Notes/>} />
           <Route path="/shared/:sharedFileId" element={< PreviewFile/>}/>
           <Route path="*" element={<NoPage />} />
         </Route>

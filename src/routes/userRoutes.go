@@ -11,7 +11,7 @@ var User userRoutes
 type userRoutes struct{}
 
 // Agrego los Endpoints de User
-func (a *userRoutes) AddRoutesToGroup(group *echo.Group) {
+func (a *userRoutes) AddUserRoutes(group *echo.Group) {
 	users := group.Group("/users")
 
 	me := users.Group("/me")

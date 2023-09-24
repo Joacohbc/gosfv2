@@ -10,8 +10,8 @@ var Files filesRoutes
 
 type filesRoutes struct{}
 
-// Agrego los Endpoints de Files al grupo de Endpoints
-func (f *filesRoutes) AddRoutesToGroup(group *echo.Group) {
+// Agrego los Endpoints de Files
+func (f *filesRoutes) AddFilesRoutes(group *echo.Group) {
 	files := group.Group("/files")
 
 	// Consultas
