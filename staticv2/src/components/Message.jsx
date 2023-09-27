@@ -14,6 +14,7 @@ const Message = forwardRef((prop, ref) => {
     const [ color, setColor ] = useState('');
 
     function showMessage(message, color) {
+        if(!message || !color) return;
         setColor(color);
         setMessage(message[0].toUpperCase() + message.substring(1));
         setTimeout(() => {

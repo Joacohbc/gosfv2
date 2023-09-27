@@ -43,9 +43,9 @@ export default function Notes() {
         <Form.Control 
             as="textarea" 
             placeholder="Leave your note here"
-            style={{ height: '25em', width: '50em' }} 
+            style={{ height: '25em', maxWidth: '50em'}} 
             onKeyUp={onTextChange}
             defaultValue={text}/>
-        <Button onClick={copyLink} text={"Copy Link"}/>
+        <Button onClick={copyLink} text={<span>{'Copy Link'} <i className='bi bi-clipboard-fill'/></span>} className="p-2 mt-2 rounded border border-white text-white"/>
     </div>
 }
