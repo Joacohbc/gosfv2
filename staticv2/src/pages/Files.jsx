@@ -105,8 +105,8 @@ export default function Files() {
         {showPreview && 
         <Modal show={showPreview} onHide={handleClosePreview} className='d-flex modal-bg' fullscreen centered>
             <Modal.Header closeButton className='bg-modal' closeVariant='white'>{previewFile.filename}</Modal.Header>
-            <div className='flex-fill'>
-                <PreviewFile fileInfo={previewFile} className={"flex-fill"} />
+            <div className='d-flex flex-fill'>
+                <PreviewFile fileInfo={previewFile} className="flex-fill" />
             </div>
         </Modal>}
 
