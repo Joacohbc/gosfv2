@@ -1,7 +1,7 @@
 import Form from 'react-bootstrap/Form';
 import { handleKeyUpWithTimeout } from '../utils/input-text';
 import { useEffect } from 'react';
-import { useNotes } from '../hooks/files';
+import { useNotes } from '../hooks/notes';
 import { useState, useContext } from 'react';
 import { MessageContext } from '../context/message-context';
 import Button from '../components/Button';

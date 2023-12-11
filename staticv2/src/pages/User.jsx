@@ -2,7 +2,7 @@ import './User.css';
 import Form from 'react-bootstrap/Form';
 import Button from '../components/Button';
 import Stack from 'react-bootstrap/Stack';
-import { useUsers } from '../hooks/files';
+import { useUsers } from '../hooks/users';
 import { useEffect, useState, useContext, useRef } from 'react';
 import { MessageContext } from '../context/message-context';
 import AuthContext from '../context/auth-context';
