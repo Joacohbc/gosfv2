@@ -12,10 +12,10 @@ export const useUsers = () => {
     }, [ addTokenParam, baseUrl ]);
 
     const getMyInfo = useCallback(async () => {
-        if(!cAxios) return '';
+        if(!cAxios) return {};
         
         try {
-            const res = await cAxios.get('api/users/me');
+            const res = await cAxios.get('/api/users/me');
             return res.data || {};
         } catch(err) {
             throw new Error(err.response.data.message);
@@ -24,7 +24,7 @@ export const useUsers = () => {
 
     const updateUser = useCallback(async (newUsername) => {
         if(!newUsername) throw new Error('New username is required')
-        if(!cAxios) return '';
+        if(!cAxios) return {};
         
         try {
             const res = await cAxios.put('/api/users/me', { username: newUsername });
@@ -40,7 +40,7 @@ export const useUsers = () => {
     const changePassword = useCallback(async (oldPassword, newPassword) => {
         if(!oldPassword) throw new Error('Old password is required')
         if(!newPassword) throw new Error('New password is required')
-        if(!cAxios) return '';
+        if(!cAxios) return {};
 
         try {
             await cAxios.put('/api/users/me/password', { old_password: oldPassword, new_password: newPassword });
@@ -54,7 +54,7 @@ export const useUsers = () => {
     
     const uploadIcon = useCallback(async (iconFile) => {
         if(!iconFile) throw new Error('Icon file is required')
-        if(!cAxios) return '';
+        if(!cAxios) return {};
 
         try {
             const formData = new FormData();
@@ -73,7 +73,7 @@ export const useUsers = () => {
     }, [ cAxios ]);
 
     const deleteIcon = useCallback(async () => {
-        if(!cAxios) return '';
+        if(!cAxios) return {};
         
         try {
             await cAxios.delete('/api/users/me/icon');
@@ -86,7 +86,7 @@ export const useUsers = () => {
     }, [ cAxios ]);
 
     const deleteAccount = useCallback(async () => {
-        if(!cAxios) return '';
+        if(!cAxios) return {};
 
         try {
             await cAxios.delete('/api/users/me');

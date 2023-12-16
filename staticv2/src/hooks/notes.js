@@ -17,7 +17,7 @@ export const useNotes = () => {
     , [ cAxios ]);
 
     const setNote = useCallback(async (note) => {
-        if(!cAxios) return '';
+        if(!cAxios) return {};
 
         try {
             const res = await cAxios.post('/api/notes', { content: note });

@@ -2,6 +2,12 @@ import { useCallback, useContext } from "react";
 import getContentType from "../utils/content-types";
 import AuthContext from "../context/auth-context";
 
+/**
+ * Custom hook for getting file and user information.
+ * @returns {Object} An object containing the following functions:
+ *   - getFileInfo: A function that retrieves entire file information.
+ *   - getUserInfo: A function that retrieves entire user information.
+ */
 export const useGetInfo = () => {
     const { baseUrl, addTokenParam } = useContext(AuthContext);
 
@@ -36,6 +42,10 @@ export const useGetInfo = () => {
     }
 }
 
+/**
+ * Custom hook for handling file operations.
+ * @returns {Object} An object containing various file-related functions.
+ */
 export const useFiles = () => {
     const { cAxios } = useContext(AuthContext);
 
@@ -92,7 +102,7 @@ export const useFiles = () => {
 
     const deleteFile = useCallback(async (fileId, force) => {
         if(!fileId) throw new Error('File id is required')
-        if(!cAxios) return '';
+        if(!cAxios) return {};
 
         try {
             const res = await cAxios.delete(`/api/files/${fileId}${force ? '?force=yes' : ''}`);
@@ -108,7 +118,7 @@ export const useFiles = () => {
     const addUserToFile = useCallback(async (fileId, userId) => {
         if(!fileId) throw new Error('File id is required')
         if(!userId) throw new Error('User id is required')
-        if(!cAxios) return '';
+        if(!cAxios) return {};
         
         try {
             const res = await cAxios.post(`/api/files/share/${fileId}/user/${userId}`);
@@ -125,7 +135,7 @@ export const useFiles = () => {
     const removeUserFromFile = useCallback(async (fileId, userId) => {
         if(!fileId) throw new Error('File id is required')
         if(!userId) throw new Error('User id is required')
-        if(!cAxios) return '';
+        if(!cAxios) return {};
 
         try {
             const res = await cAxios.delete(`/api/files/share/${fileId}/user/${userId}`);
@@ -140,6 +150,9 @@ export const useFiles = () => {
     }, [ cAxios ]);
 
     const uploadFile = useCallback(async (files) => {
+        if(!files) throw new Error('Files are required')
+        if(!cAxios) return {};
+
         try {
             const res = await cAxios.post('/api/files', files);
             return {
