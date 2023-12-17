@@ -132,7 +132,7 @@ func (fc *fileController) GetSharedFileInfo(c echo.Context) error {
 
 	// Si el usuario es el dueño del archivo, lo envío directamente
 	if file.UserID == idCurrentUser {
-		return c.File(file.GetPath())
+		return jsonDTO(c, http.StatusOK, file)
 	}
 
 	// Si esta compartido lo envió directamente
