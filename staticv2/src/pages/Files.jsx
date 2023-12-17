@@ -6,7 +6,7 @@ import Col from 'react-bootstrap/Col';
 import FileItem from '../components/fileItem/FileItem';
 import AuthContext from '../context/auth-context';
 import Modal from 'react-bootstrap/Modal';
-import { useCallback, useContext, useEffect,  useRef,  useState } from 'react';
+import { useCallback, useContext, useEffect,  useRef,  useState, useReducer } from 'react';
 import { handleKeyUpWithTimeout } from '../utils/input-text';
 import PreviewFile from './PreviewFile';
 import { MessageContext } from '../context/message-context';
@@ -25,27 +25,39 @@ export default function Files() {
     
     const [ files, setFiles ] = useState([]);
     const [ loadFiles, setLoadFiles ] = useState(() => {});
-    const [ previewFile, setPreviewFile ] = useState(emptyFile);
-    const [ showPreview, setShowPreview ] = useState(false); 
     const [ uploading, setUploading ] = useState(false);
     
     const { getFilenameInfo } = useGetInfo();
     const { getFiles, uploadFile } = useFiles();
     const { addJob, undoLastJob, jobsQueue } = useJobsQueue(5000);
-    
-    // Esta funcion genera un closure que se ejecuta cada vez que se llama a fetchDataProgress 
+
+    const reducer = (state, action) => {
+        switch (action.type) {
+            case 'SET_PREVIEW_FILE':
+                return { ...state, previewFile: action.payload };
+            case 'SHOW_PREVIEW':
+                return { ...state, showPreview: true };
+            case 'HIDE_PREVIEW':
+                return { ...state, showPreview: false };
+            default:
+                return state;
+        }
+    };
+
+    const [ state , setPreview ] = useReducer(reducer, { spreviewFile: emptyFile, showPreview: false });
+    const { previewFile, showPreview } = state;
+
+
+    // Genera una funcion custom que realiza una carga progresiva de los archivos mediante un closure
     const fetchDataProgress = useCallback(async (filterCb = (data) => data) => {
         try {
             const files = await getFiles();
             const data = filterCb(files.map(file => getFilenameInfo(file, true)));
             
-            // Cada vez que se llama a esta funcion se carga un numero de archivos
-            // Carga de a 5 archivos, si hay menos de 5 archivos se cargan todos
+            // Carga de 5 en 5 archivos o todos los archivos si son menos de 5
             const numberOfFilesPerLoad = data.length >= 5 ? 5 : data.length;
 
             let progress = 0;
-            
-            // Esta funcion se ejecuta cada vez que se llama a loadFiles
             return () => {
                 searching.current.loading();
                 const newProgress = progress >= data.length ? data.length : progress + numberOfFilesPerLoad;
@@ -61,7 +73,7 @@ export default function Files() {
     
     useEffect(() => {
         if(!cAxios || !isLogged) return;
-        
+    
         searching.current.loading();
         fetchDataProgress().then((loadInfo) => {
             setLoadFiles(() => loadInfo);
@@ -94,13 +106,13 @@ export default function Files() {
     }, [ ]);
 
     const handleOpenPreview = useCallback((file) => {
-        setPreviewFile(file);
-        setShowPreview(true);
+        setPreview({ type: 'SET_PREVIEW_FILE', payload: file });
+        setPreview({ type: 'SHOW_PREVIEW' });
     }, [ ]);
 
     const handleClosePreview = () => {
-        setShowPreview(false);
-        setPreviewFile(emptyFile);
+        setPreview({ type: 'HIDE_PREVIEW' });
+        setPreview({ type: 'SET_PREVIEW_FILE', payload: emptyFile });
     };
     
     const handleFileUpload = (e) => {
