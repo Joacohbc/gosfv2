@@ -81,9 +81,11 @@ export default function Files() {
 
     const handleSearch = handleKeyUpWithTimeout((e) => {
         searching.current.loading();
-        const filterCb = (data) => data.filter(file => file.filename.toLowerCase().includes(e.target.value.toLowerCase()));
+
+        const filterCb = (data) => data.filter(file => file.filename.toLowerCase().includes(e.target.value.toLowerCase()) || file.id == e.target.value);
         createFileLoader(filterCb).then((loadInfo) => {
             setFileLoader(() => loadInfo);
+            loadInfo();
         }).finally(() => searching.current.stopLoading());
     }, 500);
 
