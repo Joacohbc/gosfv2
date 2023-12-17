@@ -41,6 +41,13 @@
     }
 }
 
+.btn-load {
+    color: var(--color-text);
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 2em;
+}
+
 .btn-upload {
     color: var(--color-text);
     border-radius: 5px;

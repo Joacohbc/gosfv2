@@ -24,14 +24,14 @@ export default function Files() {
     const searching = useRef(false);
     
     const [ files, setFiles ] = useState([]);
-    const [ loadFiles, setLoadFiles ] = useState(() => {});
+    const [ filesLoader, setFilesLoader ] = useState(() => {});
     const [ uploading, setUploading ] = useState(false);
     
     const { getFilenameInfo } = useGetInfo();
     const { getFiles, uploadFile } = useFiles();
     const { addJob, undoLastJob, jobsQueue } = useJobsQueue(5000);
 
-    const reducer = (state, action) => {
+    const previewReducer = (state, action) => {
         switch (action.type) {
             case 'SET_PREVIEW_FILE':
                 return { ...state, previewFile: action.payload };
@@ -44,15 +44,14 @@ export default function Files() {
         }
     };
 
-    const [ state , setPreview ] = useReducer(reducer, { spreviewFile: emptyFile, showPreview: false });
+    const [ state , setPreview ] = useReducer(previewReducer, { previewFile: emptyFile, showPreview: false });
     const { previewFile, showPreview } = state;
-
 
     // Genera una funcion custom que realiza una carga progresiva de los archivos mediante un closure
     const fetchDataProgress = useCallback(async (filterCb = (data) => data) => {
         try {
             const files = await getFiles();
-            const data = filterCb(files.map(file => getFilenameInfo(file, true)));
+            let data = filterCb(files.map(file => getFilenameInfo(file, true)));
             
             // Carga de 5 en 5 archivos o todos los archivos si son menos de 5
             const numberOfFilesPerLoad = data.length >= 5 ? 5 : data.length;
@@ -61,8 +60,8 @@ export default function Files() {
             return () => {
                 searching.current.loading();
                 const newProgress = progress >= data.length ? data.length : progress + numberOfFilesPerLoad;
-                setFiles(data.slice(0, newProgress));
                 progress = newProgress;
+                setFiles(data.slice(0, newProgress));
                 searching.current.stopLoading();
             }
         } catch(err) {
@@ -76,18 +75,17 @@ export default function Files() {
     
         searching.current.loading();
         fetchDataProgress().then((loadInfo) => {
-            setLoadFiles(() => loadInfo);
+            setFilesLoader(() => loadInfo);
             loadInfo();
         }).finally(() => searching.current.stopLoading());
     }, [ isLogged, cAxios, fetchDataProgress ]);
 
     const handleSearch = handleKeyUpWithTimeout((e) => {
         searching.current.loading();
-        
         const filterCb = (data) => data.filter(file => file.filename.toLowerCase().includes(e.target.value.toLowerCase()));
         fetchDataProgress(filterCb)
         .then((loadInfo) => {
-            setLoadFiles(() => loadInfo);
+            setFilesLoader(() => loadInfo);
             loadInfo();
         }).finally(() => searching.current.stopLoading());
     }, 500);
@@ -101,19 +99,17 @@ export default function Files() {
         setFiles((files) => files.filter(file => file.id != deletedFile.id));
     }, [ addJob, messageContext ]);
     
-    const handleUpdate = useCallback((openedFile) => {
-        setFiles((files) => files.map(file => file.id == openedFile.id ? openedFile : file));
-    }, [ ]);
+    const handleUpdate = useCallback((openedFile) => setFiles((files) => files.map(file => file.id == openedFile.id ? openedFile : file)) , [ ]);
 
     const handleOpenPreview = useCallback((file) => {
         setPreview({ type: 'SET_PREVIEW_FILE', payload: file });
         setPreview({ type: 'SHOW_PREVIEW' });
     }, [ ]);
 
-    const handleClosePreview = () => {
+    const handleClosePreview = useCallback(() => {
         setPreview({ type: 'HIDE_PREVIEW' });
         setPreview({ type: 'SET_PREVIEW_FILE', payload: emptyFile });
-    };
+    }, [ ]);
     
     const handleFileUpload = (e) => {
         e.preventDefault();
@@ -175,7 +171,11 @@ export default function Files() {
                 </Col>)}
             </Row>
             
-            <Row className='p-3'><button onClick={loadFiles}>Load</button></Row>
+            { files.length != 0 && <Row className='p-3'>
+                <button className="btn btn-load" onClick={filesLoader}>
+                    <i className="bi bi-arrow-down-square-fill" />
+                </button>
+            </Row>}
         </Container>
         </SpinnerDiv>
         
