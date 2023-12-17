@@ -15,7 +15,7 @@ import SpinnerDiv from '../components/SpinnerDiv';
 import useJobsQueue from '../hooks/jobsQueue';
 import '../components/Message.css';
 
-const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extesion: ''});
+const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extesion: '', deleted: false });
 
 export default function Files() {
     const messageContext = useContext(MessageContext);
@@ -24,7 +24,8 @@ export default function Files() {
     const searching = useRef(false);
     
     const [ files, setFiles ] = useState([]);
-    const [ filesLoader, setFilesLoader ] = useState(() => {});
+    const [ progress, setProgress ] = useState(0);
+    const [ fileLoader, setFileLoader ] = useState(() => {});
     const [ uploading, setUploading ] = useState(false);
     
     const { getFilenameInfo } = useGetInfo();
@@ -48,22 +49,20 @@ export default function Files() {
     const { previewFile, showPreview } = state;
 
     // Genera una funcion custom que realiza una carga progresiva de los archivos mediante un closure
-    const fetchDataProgress = useCallback(async (filterCb = (data) => data) => {
+    const createFileLoader = useCallback(async (filterCb = (data) => data) => {
         try {
             const files = await getFiles();
-            let data = filterCb(files.map(file => getFilenameInfo(file, true)));
+            let data = filterCb(files.map(file => {
+                const f = getFilenameInfo(file, true);
+                f.deleted = false;
+                return f;
+            }));
             
             // Carga de 5 en 5 archivos o todos los archivos si son menos de 5
             const numberOfFilesPerLoad = data.length >= 5 ? 5 : data.length;
-
-            let progress = 0;
-            return () => {
-                searching.current.loading();
-                const newProgress = progress >= data.length ? data.length : progress + numberOfFilesPerLoad;
-                progress = newProgress;
-                setFiles(data.slice(0, newProgress));
-                searching.current.stopLoading();
-            }
+            setFiles(data);
+            setProgress(0);
+            return () => setProgress(prevProgress => prevProgress >= data.length ? data.length : prevProgress + numberOfFilesPerLoad);
         } catch(err) {
             messageContext.showError(err.message);
             return [];
@@ -74,29 +73,27 @@ export default function Files() {
         if(!cAxios || !isLogged) return;
     
         searching.current.loading();
-        fetchDataProgress().then((loadInfo) => {
-            setFilesLoader(() => loadInfo);
+        createFileLoader().then((loadInfo) => {
+            setFileLoader(() => loadInfo);
             loadInfo();
         }).finally(() => searching.current.stopLoading());
-    }, [ isLogged, cAxios, fetchDataProgress ]);
+    }, [ isLogged, cAxios, createFileLoader ]);
 
     const handleSearch = handleKeyUpWithTimeout((e) => {
         searching.current.loading();
         const filterCb = (data) => data.filter(file => file.filename.toLowerCase().includes(e.target.value.toLowerCase()));
-        fetchDataProgress(filterCb)
-        .then((loadInfo) => {
-            setFilesLoader(() => loadInfo);
-            loadInfo();
+        createFileLoader(filterCb).then((loadInfo) => {
+            setFileLoader(() => loadInfo);
         }).finally(() => searching.current.stopLoading());
     }, 500);
 
     const handleDelete = useCallback(async(deleteFunc, deletedFile) => {
         const undoDelete = () => {
-            setFiles((files) => [ deletedFile, ...files ]);
+            setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: false } : file));
             messageContext.showSuccess(`File ${deletedFile.filename} (${deletedFile.id}) restored`);
         };
         addJob(deleteFunc, undoDelete);
-        setFiles((files) => files.filter(file => file.id != deletedFile.id));
+        setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: true } : file));
     }, [ addJob, messageContext ]);
     
     const handleUpdate = useCallback((openedFile) => setFiles((files) => files.map(file => file.id == openedFile.id ? openedFile : file)) , [ ]);
@@ -126,7 +123,14 @@ export default function Files() {
 
         setUploading(true);
 
-        uploadFile(form).then(res => messageContext.showSuccess(res.message))
+        uploadFile(form).then(res => {
+            messageContext.showSuccess(res.message);
+            searching.current.loading();
+            createFileLoader().then((loadInfo) => {
+                setFileLoader(() => loadInfo);
+                loadInfo();
+            }).finally(() => searching.current.stopLoading());
+        })
         .catch(err => messageContext.showError(err.message))
         .finally(() => setUploading(false));
     }
@@ -155,8 +159,8 @@ export default function Files() {
             </Col>
             
             <Row xs={1} sm={2}  md={3} lg={4} xl={5} className='row-gap-3 d-flex justify-content-center'>
-            { files.map(file => 
-                <Col key={file.id}>
+            { files.slice(0, progress).map(file => 
+                <Col key={file.id} hidden={file.deleted}>
                     <FileItem 
                         id={file.id}
                         filename={file.filename}
@@ -168,14 +172,14 @@ export default function Files() {
                         onDelete={handleDelete}
                         onUpdate={handleUpdate}
                     />
-                </Col>)}
+                </Col>) }
             </Row>
             
             { files.length != 0 && <Row className='p-3'>
-                <button className="btn btn-load" onClick={filesLoader}>
+                <button className="btn btn-load" onClick={fileLoader}>
                     <i className="bi bi-arrow-down-square-fill" />
                 </button>
-            </Row>}
+            </Row> }
         </Container>
         </SpinnerDiv>
         
