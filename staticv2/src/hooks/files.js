@@ -5,7 +5,7 @@ import AuthContext from "../context/auth-context";
 /**
  * Custom hook for getting file and user information.
  * @returns {Object} An object containing the following functions:
- *   - getFileInfo: A function that retrieves entire file information.
+ *   - getFilenameInfo: A function that retrieves entire filename information (extension, url, content).
  *   - getUserInfo: A function that retrieves entire user information.
  */
 export const useGetInfo = () => {
@@ -15,7 +15,7 @@ export const useGetInfo = () => {
     const defaultAddicionalChanges = (data) => data;
 
     return {
-        getFileInfo: useCallback((fileRawData, withToken = false, addicionalChanges = defaultAddicionalChanges) => {
+        getFilenameInfo: useCallback((fileRawData, withToken = false, addicionalChanges = defaultAddicionalChanges) => {
             const filenameArray = fileRawData.filename.split('.');
             const fileUrl = `${baseUrl}/api/files/${fileRawData.id}`;
             const sharedFileUrl = `${baseUrl}/api/files/share/${fileRawData.id}`;
@@ -49,6 +49,7 @@ export const useGetInfo = () => {
 export const useFiles = () => {
     const { cAxios } = useContext(AuthContext);
 
+    // Get total information about a file (if the user is the owner)
     const getFileInfo = useCallback(async (fileId) => {
         if(!fileId) throw new Error('File id is required')
         if(!cAxios) return {};
@@ -61,6 +62,7 @@ export const useFiles = () => {
         }
     }, [ cAxios ]);
 
+    // Get total information about a file (if is shared with the user)
     const getShareFileInfo = useCallback(async (fileId) => {
         if(!fileId) throw new Error('File id is required')
         if(!cAxios) return {};
@@ -73,6 +75,7 @@ export const useFiles = () => {
         }
     }, [ cAxios ]);
 
+    // Get all files
     const getFiles = useCallback(async () => {
         if(!cAxios) return [];
 
@@ -84,6 +87,7 @@ export const useFiles = () => {
         }
     }, [ cAxios ]);
 
+    // Update a file
     const updateFile = useCallback(async (fileId, fileData) => {
         if(!fileId) throw new Error('File id is required')
         if(!cAxios) return '';
@@ -100,6 +104,7 @@ export const useFiles = () => {
         }
     }, [ cAxios ]);
 
+    // Delete a file
     const deleteFile = useCallback(async (fileId, force) => {
         if(!fileId) throw new Error('File id is required')
         if(!cAxios) return {};
@@ -115,6 +120,7 @@ export const useFiles = () => {
         }
     }, [ cAxios ]);
 
+    // Share a file with a user
     const addUserToFile = useCallback(async (fileId, userId) => {
         if(!fileId) throw new Error('File id is required')
         if(!userId) throw new Error('User id is required')
@@ -132,6 +138,7 @@ export const useFiles = () => {
         }
     }, [ cAxios ]);
 
+    // Remove a user from a file
     const removeUserFromFile = useCallback(async (fileId, userId) => {
         if(!fileId) throw new Error('File id is required')
         if(!userId) throw new Error('User id is required')
@@ -149,6 +156,7 @@ export const useFiles = () => {
         }
     }, [ cAxios ]);
 
+    // Upload a file
     const uploadFile = useCallback(async (files) => {
         if(!files) throw new Error('Files are required')
         if(!cAxios) return {};

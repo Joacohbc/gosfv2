@@ -19,38 +19,64 @@ const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url
 
 export default function Files() {
     const messageContext = useContext(MessageContext);
+    const { isLogged, cAxios } = useContext(AuthContext);
+
     const searching = useRef(false);
+    
     const [ files, setFiles ] = useState([]);
+    const [ loadFiles, setLoadFiles ] = useState(() => {});
     const [ previewFile, setPreviewFile ] = useState(emptyFile);
     const [ showPreview, setShowPreview ] = useState(false); 
     const [ uploading, setUploading ] = useState(false);
-    const { isLogged, cAxios } = useContext(AuthContext);
-    const { getFileInfo } = useGetInfo();
+    
+    const { getFilenameInfo } = useGetInfo();
     const { getFiles, uploadFile } = useFiles();
     const { addJob, undoLastJob, jobsQueue } = useJobsQueue(5000);
-
-    const fetchDataFiles = useCallback(async (cb) => {
+    
+    // Esta funcion genera un closure que se ejecuta cada vez que se llama a fetchDataProgress 
+    const fetchDataProgress = useCallback(async (filterCb = (data) => data) => {
         try {
             const files = await getFiles();
-            cb(files.map(file => getFileInfo(file, true)));
+            const data = filterCb(files.map(file => getFilenameInfo(file, true)));
+            
+            // Cada vez que se llama a esta funcion se carga un numero de archivos
+            // Carga de a 5 archivos, si hay menos de 5 archivos se cargan todos
+            const numberOfFilesPerLoad = data.length >= 5 ? 5 : data.length;
+
+            let progress = 0;
+            
+            // Esta funcion se ejecuta cada vez que se llama a loadFiles
+            return () => {
+                searching.current.loading();
+                const newProgress = progress >= data.length ? data.length : progress + numberOfFilesPerLoad;
+                setFiles(data.slice(0, newProgress));
+                progress = newProgress;
+                searching.current.stopLoading();
+            }
         } catch(err) {
             messageContext.showError(err.message);
             return [];
         }
-    }, [ messageContext, getFileInfo, getFiles ]);
+    }, [ messageContext, getFilenameInfo, getFiles ]);
     
     useEffect(() => {
         if(!cAxios || !isLogged) return;
+        
         searching.current.loading();
-        fetchDataFiles((data) => setFiles(data))
-            .finally(() => searching.current.stopLoading());
-    }, [ isLogged, cAxios, fetchDataFiles ]);
+        fetchDataProgress().then((loadInfo) => {
+            setLoadFiles(() => loadInfo);
+            loadInfo();
+        }).finally(() => searching.current.stopLoading());
+    }, [ isLogged, cAxios, fetchDataProgress ]);
 
     const handleSearch = handleKeyUpWithTimeout((e) => {
         searching.current.loading();
-        fetchDataFiles(async (data) => {
-            const value = e.target.value.toLowerCase();
-            setFiles(data.filter(file => file.filename.toLowerCase().includes(value) || file.id == value));
+        
+        const filterCb = (data) => data.filter(file => file.filename.toLowerCase().includes(e.target.value.toLowerCase()));
+        fetchDataProgress(filterCb)
+        .then((loadInfo) => {
+            setLoadFiles(() => loadInfo);
+            loadInfo();
         }).finally(() => searching.current.stopLoading());
     }, 500);
 
@@ -92,10 +118,8 @@ export default function Files() {
 
         setUploading(true);
 
-        uploadFile(form).then(res => {
-            fetchDataFiles((data) => setFiles(data));
-            messageContext.showSuccess(res.message);
-        }).catch(err => messageContext.showError(err.message))
+        uploadFile(form).then(res => messageContext.showSuccess(res.message))
+        .catch(err => messageContext.showError(err.message))
         .finally(() => setUploading(false));
     }
 
@@ -138,10 +162,12 @@ export default function Files() {
                     />
                 </Col>)}
             </Row>
+            
+            <Row className='p-3'><button onClick={loadFiles}>Load</button></Row>
         </Container>
         </SpinnerDiv>
-                
-        <div className='fixed-bottom d-flex justify-content-end mb-1'>
+        
+        <div className='d-flex justify-content-end mb-1'>
             { jobsQueue.length > 0 && <label className='undo-button' onClick={undoLastJob}><i className="bi bi-arrow-clockwise"/></label> }
             <label htmlFor="input-upload" className="btn-upload"><i className='bi bi-plus-square-dotted'/></label>
             <input id="input-upload" type="file" style={ {display: 'none'} } onChange={handleFileUpload} multiple/>

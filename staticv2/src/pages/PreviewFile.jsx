@@ -8,7 +8,7 @@ const PreviewFile = (props) => {
     const { sharedFileId } = useParams();
     const [ previewFile, setPreviewFile ] = useState(props.fileInfo);
     const { cAxios } = useContext(AuthContext);
-    const { getFileInfo } = useGetInfo();
+    const { getFilenameInfo } = useGetInfo();
 
     useEffect(() => {
         if(!sharedFileId) return;
@@ -17,14 +17,14 @@ const PreviewFile = (props) => {
         const fetchDataFile = async () => {
             try {
                 const res = await cAxios.get(`/api/files/share/${sharedFileId}/info`);
-                setPreviewFile(getFileInfo(res.data, true));
+                setPreviewFile(getFilenameInfo(res.data, true));
             } catch(err) {
                 console.log(err);
             }
         }
         
         fetchDataFile();
-    }, [ sharedFileId, cAxios, getFileInfo ]);
+    }, [ sharedFileId, cAxios, getFilenameInfo ]);
 
     const previewComponent = () => {
         if(!previewFile) return <h1>404</h1>;
