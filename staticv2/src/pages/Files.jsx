@@ -54,15 +54,20 @@ export default function Files() {
     const createFileLoader = useCallback(async (filterCb = (data) => data) => {
         try {
             const files = await getFiles();
-            await Promise.all(files.map(async (file) => {
+
+            // Filtra los archivos
+            let data = filterCb(files.map(file => {
                 const f = getFilenameInfo(file, true);
                 f.deleted = false;
+                return f;
+            }))
 
+            // Verifica si los archivos estan guardados localmente
+            await Promise.allSettled(data.map(async (file) => {
                 const localFile = await getFileFromLocal(file.id);
                 file.savedLocal = localFile != null;
             }));
-            const data = filterCb(files);
-            
+
             // Carga de 5 en 5 archivos o todos los archivos si son menos de 5
             const numberOfFilesPerLoad = data.length >= 5 ? 5 : data.length;
             setFiles(data);
@@ -154,8 +159,6 @@ export default function Files() {
         setPreview({ type: 'HIDE_PREVIEW' });
         setPreview({ type: 'SET_PREVIEW_FILE', payload: emptyFile });
     }, [ ]);  
-    
- 
 
     return <>
         <div className="loader file-loading" hidden={!uploading}> Uploading files </div> 
