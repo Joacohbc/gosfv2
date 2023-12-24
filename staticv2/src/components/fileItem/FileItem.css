@@ -29,6 +29,16 @@
     width: 2em;
 }
 
+.file-actions-item-no-hover {
+    border-radius: 5px;
+    color: var(--color-text-dark);
+    background-color: transparent;
+    border: none;
+    outline: none;
+    padding: 7px;
+    width: 2em;
+}
+
 .file-actions-item:hover {
     background-color: var(--color-hover);
     color: var(--color-text);

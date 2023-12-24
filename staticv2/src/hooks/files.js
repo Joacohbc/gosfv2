@@ -86,7 +86,7 @@ export const useFiles = () => {
             return data;
         } catch(err) {
 
-            // Si no hay conexion al servidor (o es 500 (Internal Server Error))y hay archivos en el localStorage
+            // Si no hay conexion al servidor y hay archivos en el localStorage
             // se retornan los archivos del localStorage
             if(err.response === undefined) {
                 const files = localStorage.getItem('files');
@@ -99,7 +99,7 @@ export const useFiles = () => {
                 return [];
             }
 
-            throw new Error(err.response.data.message);
+            throw new Error(err.response ? err.response.data.message : err);
         }
     }, [ cAxios ]);
 

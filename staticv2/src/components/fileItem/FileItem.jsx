@@ -38,6 +38,7 @@ const FileItem = memo((props) => {
         name: props.name,
         shared: null,
         sharedWith: [],
+        savedLocal: props.savedLocal ?? false,
     });
 
     const handleDownload = () => {
@@ -49,17 +50,20 @@ const FileItem = memo((props) => {
         try {
             const localFile = await getFileFromLocal(file.id);
             if (localFile != null) {
-                messageContext.showError('File already saved');
+                messageContext.showWarning(`File ${file.filename} already saved locally`);
                 return;
             }
 
             const response = await fetch(file.url);
             const blob = await response.blob();
             await addFileToLocal(file.id, file.filename, new Blob([blob], { type: file.contentType }));
-            messageContext.showSuccess('File saved locally');
+            messageContext.showSuccess(`File ${file.filename} saved locally successfully`);
+            props.onUpdate({
+                ...file,
+                savedLocal: true,
+            });
         } catch (err) {
             messageContext.showError(err.message);
-            console.log(err);
         }
     }
 
@@ -176,9 +180,9 @@ const FileItem = memo((props) => {
 
         <Card className='file'>
             <Card.Body>
-                <Card.Title className='text-center'>File #{file.id}</Card.Title>
-                <ToolTip toolTipMessage={file.filename} placement={'bottom'}>
-                    <p className="text-center file-filename" onClick={handleOpen}>{file.filename}</p>
+                <Card.Title className='text-center file-filename' onClick={handleOpen}>{file.filename}</Card.Title>
+                <ToolTip toolTipMessage={file.filename} placement='bottom'>
+                    <p className="text-center" onClick={handleOpen}>#{file.id}</p>
                 </ToolTip>
 
                 <div className='text-center'>
@@ -187,7 +191,8 @@ const FileItem = memo((props) => {
                     <button className='file-actions-item' onClick={handleDelete}><i className='bi bi-trash3-fill'/></button>
                     <button className='file-actions-item' onClick={openUpdateNameModel}><i className='bi bi-pencil-square'/></button>
                     <button className='file-actions-item' onClick={openShareModel}><i className='bi bi-share-fill'/></button>
-                    <button className='file-actions-item' onClick={saveLocal}><i className='bi bi-folder2-open'/></button>
+                    { !file.savedLocal && <button className='file-actions-item' onClick={saveLocal}><i className='bi bi-folder2-open'/></button> }
+                    { file.savedLocal && <i className='bi bi-folder-check file-actions-item-no-hover'/> }
                 </div>
             </Card.Body>
         </Card>
@@ -201,6 +206,7 @@ FileItem.propTypes = {
     url: PropTypes.string.isRequired,
     extesion: PropTypes.string.isRequired,
     name: PropTypes.string,
+    savedLocal: PropTypes.bool,
     onOpen: PropTypes.func,
     onDelete: PropTypes.func,
     onShare: PropTypes.func,

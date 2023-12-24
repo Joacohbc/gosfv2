@@ -54,11 +54,14 @@ export default function Files() {
     const createFileLoader = useCallback(async (filterCb = (data) => data) => {
         try {
             const files = await getFiles();
-            let data = filterCb(files.map(file => {
+            await Promise.all(files.map(async (file) => {
                 const f = getFilenameInfo(file, true);
                 f.deleted = false;
-                return f;
+
+                const localFile = await getFileFromLocal(file.id);
+                file.savedLocal = localFile != null;
             }));
+            const data = filterCb(files);
             
             // Carga de 5 en 5 archivos o todos los archivos si son menos de 5
             const numberOfFilesPerLoad = data.length >= 5 ? 5 : data.length;
@@ -69,7 +72,7 @@ export default function Files() {
             messageContext.showError(err.message);
             return [];
         }
-    }, [ messageContext, getFilenameInfo, getFiles ]);
+    }, [ messageContext, getFilenameInfo, getFiles, getFileFromLocal ]);
     
     useEffect(() => {
         if(!cAxios || !isLogged) return;
@@ -81,6 +84,11 @@ export default function Files() {
         }).finally(() => searching.current.stopLoading());
     }, [ isLogged, cAxios, createFileLoader ]);
 
+    const handleDeleteAllInQueue = () => {
+        executeAllJobs();
+        messageContext.showSuccess('All files deleted');
+    }
+
     const handleSearch = handleKeyUpWithTimeout((e) => {
         searching.current.loading();
 
@@ -91,33 +99,6 @@ export default function Files() {
         }).finally(() => searching.current.stopLoading());
     }, 500);
 
-    const handleDelete = useCallback(async(deleteFunc, deletedFile) => {
-        const undoDelete = () => {
-            setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: false } : file));
-            messageContext.showSuccess(`File ${deletedFile.filename} (${deletedFile.id}) restored`);
-        };
-
-        addJob(deleteFunc, undoDelete);
-        setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: true } : file));
-    }, [ addJob, messageContext ]);
-    
-    const handleUpdate = useCallback((openedFile) => setFiles((files) => files.map(file => file.id == openedFile.id ? openedFile : file)) , [ ]);
-
-    const handleOpenPreview = useCallback(async (file) => {
-        const localFile = await getFileFromLocal(file.id);
-        if (localFile != null) {
-            file.url = window.URL.createObjectURL(localFile.blob);
-        }
-        
-        setPreview({ type: 'SET_PREVIEW_FILE', payload: file });
-        setPreview({ type: 'SHOW_PREVIEW' });
-    }, [ getFileFromLocal ]);
-
-    const handleClosePreview = useCallback(() => {
-        setPreview({ type: 'HIDE_PREVIEW' });
-        setPreview({ type: 'SET_PREVIEW_FILE', payload: emptyFile });
-    }, [ ]);  
-    
     const handleFileUpload = (e) => {
         e.preventDefault();
 
@@ -145,10 +126,36 @@ export default function Files() {
         .finally(() => setUploading(false));
     }
 
-    const deleteAllInQueue = () => {
-        executeAllJobs();
-        messageContext.showSuccess('All files deleted');
-    }
+    const handleFilesDelete = useCallback(async(deleteFunc, deletedFile) => {
+        const undoDelete = () => {
+            setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: false } : file));
+            messageContext.showSuccess(`File ${deletedFile.filename} (${deletedFile.id}) restored`);
+        };
+
+        addJob(deleteFunc, undoDelete);
+        setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: true } : file));
+    }, [ addJob, messageContext ]);
+    
+    const handleFilesUpdate = useCallback((updatedFile) => setFiles((files) => files.map(file => file.id == updatedFile.id ? updatedFile : file)) , [ ]);
+
+    const handleOpenPreview = useCallback(async (file) => {
+
+        // Si el archivo esta en la base de datos local, se obtiene la URL del archivo
+        const localFile = await getFileFromLocal(file.id);
+        if (localFile != null) {
+            file.url = window.URL.createObjectURL(localFile.blob);
+        }
+        
+        setPreview({ type: 'SET_PREVIEW_FILE', payload: file });
+        setPreview({ type: 'SHOW_PREVIEW' });
+    }, [ getFileFromLocal ]);
+
+    const handleClosePreview = useCallback(() => {
+        setPreview({ type: 'HIDE_PREVIEW' });
+        setPreview({ type: 'SET_PREVIEW_FILE', payload: emptyFile });
+    }, [ ]);  
+    
+ 
 
     return <>
         <div className="loader file-loading" hidden={!uploading}> Uploading files </div> 
@@ -183,9 +190,10 @@ export default function Files() {
                         contentType={file.contentType}
                         extesion={file.extesion}
                         url={file.url}
+                        savedLocal={file.savedLocal}
                         onOpen={handleOpenPreview}
-                        onDelete={handleDelete}
-                        onUpdate={handleUpdate}
+                        onDelete={handleFilesDelete}
+                        onUpdate={handleFilesUpdate}
                     />
                 </Col>) }
             </Row>
@@ -207,7 +215,7 @@ export default function Files() {
                     <label onClick={undoLastJob}><i className="bi bi-arrow-clockwise fs-2"/></label>
                     <span>{jobsQueue.length}</span>
                 </div> }
-            { jobsQueue.length > 0 && <label className='undo-button' onClick={deleteAllInQueue}><i className="bi bi-tornado fs-2"/></label> }
+            { jobsQueue.length > 0 && <label className='undo-button' onClick={handleDeleteAllInQueue}><i className="bi bi-tornado fs-2"/></label> }
         </div>
     </>
 }
