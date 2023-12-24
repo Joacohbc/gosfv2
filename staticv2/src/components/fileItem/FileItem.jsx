@@ -12,6 +12,7 @@ import { MessageContext } from '../../context/message-context';
 import { useGetInfo, useFiles } from '../../hooks/files';
 import ConfirmDialog from '../ConfirmDialog';
 import SharedWithModal from './ShareModal';
+import useIndexedDB from '../../hooks/useIndexedDB';
 import 'bootstrap-icons/font/bootstrap-icons.css'
 
 const filesModal = document.getElementById('files-modals');
@@ -26,6 +27,7 @@ const FileItem = memo((props) => {
     const { getFileInfo, deleteFile, updateFile } = useFiles();
     const messageContext = useContext(MessageContext);
     const { getUserInfo } = useGetInfo();
+    const { getFileFromLocal, addFileToLocal, deleteFileFromLocal } = useIndexedDB();
 
     const file = Object.preventExtensions({
         id: props.id,
@@ -42,6 +44,24 @@ const FileItem = memo((props) => {
         download.current.click();
         props.onDownload(file);
     };
+
+    const saveLocal = async () => {
+        try {
+            const localFile = await getFileFromLocal(file.id);
+            if (localFile != null) {
+                messageContext.showError('File already saved');
+                return;
+            }
+
+            const response = await fetch(file.url);
+            const blob = await response.blob();
+            await addFileToLocal(file.id, file.filename, new Blob([blob], { type: file.contentType }));
+            messageContext.showSuccess('File saved locally');
+        } catch (err) {
+            messageContext.showError(err.message);
+            console.log(err);
+        }
+    }
 
     const handleOpen = () => {
         props.onOpen(file);
@@ -62,6 +82,7 @@ const FileItem = memo((props) => {
             props.onDelete(async () => {
                 try {
                     const res = await deleteFile(file.id);
+                    await deleteFileFromLocal(file.id);
                     messageContext.showSuccess(res.message);
                 } catch(err) {
                     messageContext.showError(err.message);
@@ -166,6 +187,7 @@ const FileItem = memo((props) => {
                     <button className='file-actions-item' onClick={handleDelete}><i className='bi bi-trash3-fill'/></button>
                     <button className='file-actions-item' onClick={openUpdateNameModel}><i className='bi bi-pencil-square'/></button>
                     <button className='file-actions-item' onClick={openShareModel}><i className='bi bi-share-fill'/></button>
+                    <button className='file-actions-item' onClick={saveLocal}><i className='bi bi-folder2-open'/></button>
                 </div>
             </Card.Body>
         </Card>

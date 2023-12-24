@@ -14,6 +14,7 @@ import { useGetInfo, useFiles } from '../hooks/files';
 import SpinnerDiv from '../components/SpinnerDiv';
 import useJobsQueue from '../hooks/jobsQueue';
 import '../components/Message.css';
+import useIndexedDB from '../hooks/useIndexedDB';
 
 const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extesion: '', deleted: false });
 
@@ -31,6 +32,7 @@ export default function Files() {
     const { getFilenameInfo } = useGetInfo();
     const { getFiles, uploadFile } = useFiles();
     const { addJob, undoLastJob, jobsQueue, executeAllJobs } = useJobsQueue(3000);
+    const { getFileFromLocal } = useIndexedDB();
 
     const previewReducer = (state, action) => {
         switch (action.type) {
@@ -101,10 +103,15 @@ export default function Files() {
     
     const handleUpdate = useCallback((openedFile) => setFiles((files) => files.map(file => file.id == openedFile.id ? openedFile : file)) , [ ]);
 
-    const handleOpenPreview = useCallback((file) => {
+    const handleOpenPreview = useCallback(async (file) => {
+        const localFile = await getFileFromLocal(file.id);
+        if (localFile != null) {
+            file.url = window.URL.createObjectURL(localFile.blob);
+        }
+        
         setPreview({ type: 'SET_PREVIEW_FILE', payload: file });
         setPreview({ type: 'SHOW_PREVIEW' });
-    }, [ ]);
+    }, [ getFileFromLocal ]);
 
     const handleClosePreview = useCallback(() => {
         setPreview({ type: 'HIDE_PREVIEW' });

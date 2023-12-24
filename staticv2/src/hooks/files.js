@@ -81,11 +81,39 @@ export const useFiles = () => {
 
         try {
             const res = await cAxios.get('/api/files');
-            return res.data || [];
+            const data = res.data || [];
+            localStorage.setItem('files', JSON.stringify(data));
+            return data;
         } catch(err) {
+
+            // Si no hay conexion al servidor (o es 500 (Internal Server Error))y hay archivos en el localStorage
+            // se retornan los archivos del localStorage
+            if(err.response === undefined) {
+                const files = localStorage.getItem('files');
+                return files ? JSON.parse(files) : [];
+            }
+
+            // Si el error es 401 (Unauthorized), 403 (Forbidden) o 400 (Bad Request)
+            if(err.response.status === 401 || err.response.status === 403 || err.response.status === 400) {
+                localStorage.removeItem('files');
+                return [];
+            }
+
             throw new Error(err.response.data.message);
         }
     }, [ cAxios ]);
+
+    // const getBlob = useCallback(async (fileId) => {
+    //     if(!fileId) throw new Error('File id is required')
+    //     if(!cAxios) return '';
+
+    //     try {
+    //         const res = await cAxios.get(`/api/files/${fileId}`);
+    //         return res.data || '';
+    //     } catch(err) {
+    //         throw new Error(err.response.data.message);
+    //     }
+    // }, [ cAxios ]);
 
     // Update a file
     const updateFile = useCallback(async (fileId, fileData) => {

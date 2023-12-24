@@ -3,12 +3,14 @@ import { useParams } from "react-router-dom";
 import { useGetInfo } from "../hooks/files";
 import AuthContext from "../context/auth-context";
 import PropTypes from 'prop-types';
+import useIndexedDB from "../hooks/useIndexedDB";
 
 const PreviewFile = (props) => {
     const { sharedFileId } = useParams();
     const [ previewFile, setPreviewFile ] = useState(props.fileInfo);
     const { cAxios } = useContext(AuthContext);
     const { getFilenameInfo } = useGetInfo();
+    const { getFileFromLocal } = useIndexedDB();
 
     useEffect(() => {
         if(!sharedFileId) return;
@@ -30,7 +32,8 @@ const PreviewFile = (props) => {
         if(!previewFile) return <h1>404</h1>;
 
         const url = !sharedFileId ? previewFile?.url : previewFile?.sharedUrl;
-        
+
+        console.log(url);
         if(previewFile?.contentType?.includes('video'))
             return <video className={props.className} controls><source src={url} type={previewFile?.contentType}/></video>;
         
