@@ -64,7 +64,6 @@
     color: var(--color-text);
     border-radius: 5px;
     padding: 10px;
-    font-size: 2em;
 }
 
 .undo-button:hover {

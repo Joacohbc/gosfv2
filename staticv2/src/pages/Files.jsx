@@ -30,7 +30,7 @@ export default function Files() {
     
     const { getFilenameInfo } = useGetInfo();
     const { getFiles, uploadFile } = useFiles();
-    const { addJob, undoLastJob, jobsQueue } = useJobsQueue(5000);
+    const { addJob, undoLastJob, jobsQueue, executeAllJobs } = useJobsQueue(3000);
 
     const previewReducer = (state, action) => {
         switch (action.type) {
@@ -94,6 +94,7 @@ export default function Files() {
             setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: false } : file));
             messageContext.showSuccess(`File ${deletedFile.filename} (${deletedFile.id}) restored`);
         };
+
         addJob(deleteFunc, undoDelete);
         setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: true } : file));
     }, [ addJob, messageContext ]);
@@ -108,7 +109,7 @@ export default function Files() {
     const handleClosePreview = useCallback(() => {
         setPreview({ type: 'HIDE_PREVIEW' });
         setPreview({ type: 'SET_PREVIEW_FILE', payload: emptyFile });
-    }, [ ]);
+    }, [ ]);  
     
     const handleFileUpload = (e) => {
         e.preventDefault();
@@ -135,6 +136,11 @@ export default function Files() {
         })
         .catch(err => messageContext.showError(err.message))
         .finally(() => setUploading(false));
+    }
+
+    const deleteAllInQueue = () => {
+        executeAllJobs();
+        messageContext.showSuccess('All files deleted');
     }
 
     return <>
@@ -177,18 +183,24 @@ export default function Files() {
                 </Col>) }
             </Row>
             
-            { files.length != 0 && <Row className='p-3'>
+            { files.length != 0 && files.length != progress && 
+            <Row className='p-3'>
                 <button className="btn btn-load" onClick={fileLoader}>
                     <i className="bi bi-arrow-down-square-fill" />
                 </button>
             </Row> }
         </Container>
         </SpinnerDiv>
-        
-        <div className='d-flex justify-content-end mb-1'>
-            { jobsQueue.length > 0 && <label className='undo-button' onClick={undoLastJob}><i className="bi bi-arrow-clockwise"/></label> }
+            
+        <div className='d-flex flex-column fixed-top align-items-end mr-1'>
             <label htmlFor="input-upload" className="btn-upload"><i className='bi bi-plus-square-dotted'/></label>
-            <input id="input-upload" type="file" style={ {display: 'none'} } onChange={handleFileUpload} multiple/>
+            <input id="input-upload" type="file" style={{display: 'none'}} onChange={handleFileUpload} multiple/>
+            { jobsQueue.length > 0 && 
+                <div className='undo-button'>
+                    <label onClick={undoLastJob}><i className="bi bi-arrow-clockwise fs-2"/></label>
+                    <span>{jobsQueue.length}</span>
+                </div> }
+            { jobsQueue.length > 0 && <label className='undo-button' onClick={deleteAllInQueue}><i className="bi bi-tornado fs-2"/></label> }
         </div>
     </>
 }
