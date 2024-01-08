@@ -29,8 +29,8 @@ const resetAuthData = () => {
 }
 
 export const AuthContextProvider = (props) => { 
-    const BASE_URL = 'http://localhost:3000';
-    // const BASE_URL = window.location.origin;
+    // const BASE_URL = 'http://localhost:3000';
+    const BASE_URL = window.location.origin;
     
     const navigate = useNavigate();
     const location = useLocation();
