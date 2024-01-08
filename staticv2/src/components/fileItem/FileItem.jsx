@@ -12,7 +12,7 @@ import { MessageContext } from '../../context/message-context';
 import { useGetInfo, useFiles } from '../../hooks/files';
 import ConfirmDialog from '../ConfirmDialog';
 import SharedWithModal from './ShareModal';
-import useIndexedDB from '../../hooks/useIndexedDB';
+import useFilesIDB from '../../hooks/useFilesIDB';
 import 'bootstrap-icons/font/bootstrap-icons.css'
 
 const filesModal = document.getElementById('files-modals');
@@ -27,14 +27,14 @@ const FileItem = memo((props) => {
     const { getFileInfo, deleteFile, updateFile } = useFiles();
     const messageContext = useContext(MessageContext);
     const { getUserInfo } = useGetInfo();
-    const { getFileFromLocal, addFileToLocal, deleteFileFromLocal } = useIndexedDB();
+    const { getFileFromLocal, addFileToLocal, deleteFileFromLocal } = useFilesIDB();
 
     const file = Object.preventExtensions({
         id: props.id,
         filename: props.filename,
         contentType: props.contentType,
         url: props.url,
-        extesion: props.extesion,
+        extension: props.extension,
         name: props.name,
         shared: null,
         sharedWith: [],
@@ -77,7 +77,7 @@ const FileItem = memo((props) => {
             file.shared = res.shared;
             file.sharedWith = res.sharedWith?.map(user => getUserInfo(user, true)) ?? [];
 
-            // Si el archivo esta compartido, se muestra el dialogo de confirmacion
+            // Si el archivo esta compartido, se muestra el dialogo de confirmación
             if(file.shared || file.sharedWith.length > 0) {
                 forceDeleteDialog.current.show();
                 return;
@@ -120,7 +120,7 @@ const FileItem = memo((props) => {
         }
 
         try {
-            const newFilename = inputUpdate.current.value.trim() + '.' + file.extesion;
+            const newFilename = inputUpdate.current.value.trim() + '.' + file.extension;
             const res = await updateFile(file.id, {
                 filename: newFilename,
             })
@@ -174,7 +174,7 @@ const FileItem = memo((props) => {
                     ref={inputUpdate}
                     onKeyDown={(e) => { if(e.key == 'Enter') handleUpdate() }}
                 />
-                <InputGroup.Text>.{file.extesion}</InputGroup.Text>
+                <InputGroup.Text>.{file.extension}</InputGroup.Text>
             </InputGroup>
         </SimpleModal>, filesModal) }
 
@@ -203,7 +203,7 @@ FileItem.propTypes = {
     filename: PropTypes.string.isRequired,
     contentType: PropTypes.string.isRequired,
     url: PropTypes.string.isRequired,
-    extesion: PropTypes.string.isRequired,
+    extension: PropTypes.string.isRequired,
     name: PropTypes.string,
     savedLocal: PropTypes.bool,
     onOpen: PropTypes.func,

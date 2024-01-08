@@ -127,7 +127,6 @@ const SharedWithModal = forwardRef((props, ref) => {
                 <InputGroup.Text className='cursor-pointer'>
                     <Button text={<i className='bi bi-clipboard'/>} onClick={handleCopyLink}/>
                 </InputGroup.Text>
-                {/* <InputGroup.Checkbox onChange={handleMarkAsPublic} defaultChecked={fil<e?.shared}/> */}
                 <InputGroup.Text className='cursor-pointer'>
                     { file?.shared ? 
                         <Button text={<i className='bi bi-unlock-fill'/>} onClick={handleMarkAsPublic(false)}/> 

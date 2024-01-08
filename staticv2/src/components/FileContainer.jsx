@@ -9,17 +9,17 @@ import { memo } from 'react';
 import PropTypes from 'prop-types';
 
 /**
- * Renders a container for displaying files.
+ * Renderiza un contenedor para mostrar archivos.
  *
  * @component
- * @param {Object[]} files - The array of files to be displayed.
- * @param {number} progress - The number of files that have been loaded.
- * @param {function} fileLoader - The function to load more files.
- * @param {React.Ref} loading - Indicates if the files are loading.
- * @param {function} handleOpenPreview - The function to handle opening a file preview.
- * @param {function} handleFilesDelete - The function to handle deleting files.
- * @param {function} handleFilesUpdate - The function to handle updating files.
- * @returns {JSX.Element} The FileContainer component.
+ * @param {Object[]} files - El array de archivos que se mostrarán.
+ * @param {number} progress - El número de archivos que se han cargado.
+ * @param {function} fileLoader - La función para cargar más archivos.
+ * @param {React.Ref} loading - Indica si los archivos se están cargando.
+ * @param {function} handleOpenPreview - La función para manejar la apertura de una vista previa de archivo.
+ * @param {function} handleFilesDelete - La función para manejar la eliminación de archivos.
+ * @param {function} handleFilesUpdate - La función para manejar la actualización de archivos.
+ * @returns {JSX.Element} El componente FileContainer.
  */
 const FileContainer = memo(({ files, progress = files.length, fileLoader = () => {}, loading, handleOpenPreview, handleFilesDelete, handleFilesUpdate }) => {
 
@@ -40,7 +40,7 @@ const FileContainer = memo(({ files, progress = files.length, fileLoader = () =>
                         filename={file.filename}
                         name={file.name} 
                         contentType={file.contentType}
-                        extesion={file.extesion}
+                        extension={file.extension}
                         url={file.url}
                         savedLocal={file.savedLocal}
                         onOpen={handleOpenPreview}

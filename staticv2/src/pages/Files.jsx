@@ -9,10 +9,10 @@ import { MessageContext } from '../context/message-context';
 import { useGetInfo, useFiles } from '../hooks/files';
 import useJobsQueue from '../hooks/jobsQueue';
 import '../components/Message.css';
-import useIndexedDB from '../hooks/useIndexedDB';
+import useFilesIDB from '../hooks/useFilesIDB';
 import FileContainer from '../components/FileContainer';
 
-const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extesion: '', deleted: false });
+const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extension: '', deleted: false });
 
 const previewReducer = (state, action) => {
     switch (action.type) {
@@ -31,21 +31,21 @@ export default function Files() {
     const messageContext = useContext(MessageContext);
     const { isLogged, cAxios } = useContext(AuthContext);
 
-    const [ searching, setSearching ]= useState(false);
-
     const uploadButton = useRef(null);
     
     const [ files, setFiles ] = useState([]);
     const [ progress, setProgress ] = useState(0);
     const [ fileLoader, setFileLoader ] = useState(() => {});
     const [ uploading, setUploading ] = useState(false);
+    const [ searching, setSearching ]= useState(false);
+
     const [ state , setPreview ] = useReducer(previewReducer, { previewFile: emptyFile, showPreview: false });
     const { previewFile, showPreview } = state;
 
     const { getFilenameInfo } = useGetInfo();
     const { getFiles, uploadFile } = useFiles();
     const { addJob, undoLastJob, jobsQueue, executeAllJobs } = useJobsQueue(3000);
-    const { getFileFromLocal } = useIndexedDB();
+    const { getFileFromLocal } = useFilesIDB();
 
     const createFileLoader = useCallback(async (filterCb = (data) => data) => {
         try {

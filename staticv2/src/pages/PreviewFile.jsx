@@ -3,14 +3,12 @@ import { useParams } from "react-router-dom";
 import { useGetInfo } from "../hooks/files";
 import AuthContext from "../context/auth-context";
 import PropTypes from 'prop-types';
-import useIndexedDB from "../hooks/useIndexedDB";
 
 const PreviewFile = (props) => {
     const { sharedFileId } = useParams();
     const [ previewFile, setPreviewFile ] = useState(props.fileInfo);
     const { cAxios } = useContext(AuthContext);
     const { getFilenameInfo } = useGetInfo();
-    const { getFileFromLocal } = useIndexedDB();
 
     useEffect(() => {
         if(!sharedFileId) return;

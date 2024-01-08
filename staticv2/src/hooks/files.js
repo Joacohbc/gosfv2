@@ -3,37 +3,48 @@ import getContentType from "../utils/content-types";
 import AuthContext from "../context/auth-context";
 
 /**
- * Custom hook for getting file and user information.
- * @returns {Object} An object containing the following functions:
- *   - getFilenameInfo: A function that retrieves entire filename information (extension, url, content).
- *   - getUserInfo: A function that retrieves entire user information.
+ * Un Custom Hook para poder obtener extraer de un archivo (que viene del backend) la información que se necesita.
  */
 export const useGetInfo = () => {
     const { baseUrl, addTokenParam } = useContext(AuthContext);
 
-    // Do nothing with data by default
-    const defaultAddicionalChanges = (data) => data;
+    // Función por defecto para realizar cambios adicionales a los datos
+    const defaultAdditionalChanges = (data) => data;
 
     return {
-        getFilenameInfo: useCallback((fileRawData, withToken = false, addicionalChanges = defaultAddicionalChanges) => {
+        /**
+        * Función que extrae información de un archivo (que viene del backend).
+        * @param {Object} fileRawData - Los datos del archivo (que vienen del backend).
+        * @param {Boolean} withToken - Si se debe agregar el token a la url del archivo.
+        * @param {Function} additionalChanges - Una función que realiza cambios adicionales a los datos.
+        * @returns {Object} Un objeto con la información del archivo (id, filename, name, extension, contentType, url, sharedUrl).
+        */
+        getFilenameInfo: useCallback((fileRawData, withToken = false, additionalChanges = defaultAdditionalChanges) => {
             const filenameArray = fileRawData.filename.split('.');
             const fileUrl = `${baseUrl}/api/files/${fileRawData.id}`;
             const sharedFileUrl = `${baseUrl}/api/files/share/${fileRawData.id}`;
             
-            return addicionalChanges({
+            return additionalChanges({
                 id: fileRawData.id,
                 filename: fileRawData?.filename,
                 name: filenameArray.slice(0, -1).join('.'),
-                extesion: filenameArray.length > 1 ? filenameArray.pop() : '',
+                extension: filenameArray.length > 1 ? filenameArray.pop() : '',
                 contentType: getContentType(fileRawData?.filename),
                 url: withToken ? addTokenParam(fileUrl) : fileUrl,
                 sharedUrl: withToken ? addTokenParam(sharedFileUrl) : sharedFileUrl,
             });
         }, [ baseUrl, addTokenParam ]),
-        
-        getUserInfo: useCallback((userRawData, withToken = false, addicionalChanges = defaultAddicionalChanges) => { 
+
+        /**
+         * Función que extrae información de un usuario (que viene del backend).
+         * @param {Object} userRawData - Los datos del usuario (que vienen del backend).
+         * @param {Boolean} withToken - Si se debe agregar el token a la url del icono del usuario.
+         * @param {Function} additionalChanges - Una función que realiza cambios adicionales a los datos.
+         * @returns {Object} Un objeto con la información del usuario (id, icon, username).
+        */
+        getUserInfo: useCallback((userRawData, withToken = false, additionalChanges = defaultAdditionalChanges) => { 
             const iconUrl = `${baseUrl}/api/users/icon/${userRawData.id}`;
-            return addicionalChanges({
+            return additionalChanges({
                 id: userRawData.id,
                 icon: withToken ? addTokenParam(iconUrl) : iconUrl,
                 username: userRawData.username,
@@ -43,13 +54,16 @@ export const useGetInfo = () => {
 }
 
 /**
- * Custom hook for handling file operations.
- * @returns {Object} An object containing various file-related functions.
+ * Un Custom Hook para consumir la API del Backend relacionada con los archivos.
  */
 export const useFiles = () => {
     const { cAxios } = useContext(AuthContext);
 
-    // Get total information about a file (if the user is the owner)
+    /**
+     * Función que obtiene información de un archivo.
+     * @param {String} fileId - El id del archivo.
+     * @returns {Object} Un objeto con la información del archivo.
+     */
     const getFileInfo = useCallback(async (fileId) => {
         if(!fileId) throw new Error('File id is required')
         if(!cAxios) return {};
@@ -62,7 +76,11 @@ export const useFiles = () => {
         }
     }, [ cAxios ]);
 
-    // Get total information about a file (if is shared with the user)
+    /**
+     * Función que obtiene información de un archivo compartido con el usuario actual.
+     * @param {String} fileId - El id del archivo.
+     * @returns {Object} Un objeto con la información del archivo.
+     */
     const getShareFileInfo = useCallback(async (fileId) => {
         if(!fileId) throw new Error('File id is required')
         if(!cAxios) return {};
@@ -75,7 +93,10 @@ export const useFiles = () => {
         }
     }, [ cAxios ]);
 
-    // Get all files
+    /**
+     * Función que obtiene los archivos del usuario actual.
+     * @returns {Array} Un arreglo con los archivos del usuario actual.
+     */
     const getFiles = useCallback(async () => {
         if(!cAxios) return [];
 
@@ -86,7 +107,7 @@ export const useFiles = () => {
             return data;
         } catch(err) {
 
-            // Si no hay conexion al servidor y hay archivos en el localStorage
+            // Si no hay conexión al servidor y hay archivos en el localStorage
             // se retornan los archivos del localStorage
             if(err.response === undefined) {
                 const files = localStorage.getItem('files');
@@ -103,19 +124,11 @@ export const useFiles = () => {
         }
     }, [ cAxios ]);
 
-    // const getBlob = useCallback(async (fileId) => {
-    //     if(!fileId) throw new Error('File id is required')
-    //     if(!cAxios) return '';
-
-    //     try {
-    //         const res = await cAxios.get(`/api/files/${fileId}`);
-    //         return res.data || '';
-    //     } catch(err) {
-    //         throw new Error(err.response.data.message);
-    //     }
-    // }, [ cAxios ]);
-
-    // Update a file
+    /**
+     * Función que actualiza un archivo.
+     * @param {String} fileId - El id del archivo.
+     * @param {Object} fileData - Los datos del archivo a actualizar.
+     */
     const updateFile = useCallback(async (fileId, fileData) => {
         if(!fileId) throw new Error('File id is required')
         if(!cAxios) return '';
@@ -132,7 +145,12 @@ export const useFiles = () => {
         }
     }, [ cAxios ]);
 
-    // Delete a file
+    /**
+     * Función que elimina un archivo.
+     * @param {String} fileId - El id del archivo.
+     * @param {Boolean} force - Si se debe eliminar el archivo de la base de datos.
+     * @returns {Object} Un objeto con la información del archivo eliminado.
+     */
     const deleteFile = useCallback(async (fileId, force) => {
         if(!fileId) throw new Error('File id is required')
         if(!cAxios) return {};
@@ -148,7 +166,12 @@ export const useFiles = () => {
         }
     }, [ cAxios ]);
 
-    // Share a file with a user
+    /**
+     * Función que agrega un usuario a un archivo.
+     * @param {String} fileId - El id del archivo.
+     * @param {String} userId - El id del usuario.
+     * @returns {Object} Un objeto con la información del archivo.
+     */
     const addUserToFile = useCallback(async (fileId, userId) => {
         if(!fileId) throw new Error('File id is required')
         if(!userId) throw new Error('User id is required')
@@ -166,7 +189,12 @@ export const useFiles = () => {
         }
     }, [ cAxios ]);
 
-    // Remove a user from a file
+    /**
+     * Función que elimina un usuario de un archivo.
+     * @param {String} fileId - El id del archivo.
+     * @param {String} userId - El id del usuario.
+     * @returns {Object} Un objeto con la información del archivo.
+     */
     const removeUserFromFile = useCallback(async (fileId, userId) => {
         if(!fileId) throw new Error('File id is required')
         if(!userId) throw new Error('User id is required')
@@ -184,7 +212,11 @@ export const useFiles = () => {
         }
     }, [ cAxios ]);
 
-    // Upload a file
+    /**
+     * Función que sube un archivo.
+     * @param {Object} files - Los archivos a subir.
+     * @returns {Object} Un objeto con la información del archivo.
+     */
     const uploadFile = useCallback(async (files) => {
         if(!files) throw new Error('Files are required')
         if(!cAxios) return {};

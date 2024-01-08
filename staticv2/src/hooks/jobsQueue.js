@@ -1,14 +1,19 @@
 import { useCallback, useState } from 'react';
+
 /**
- * Custom hook for managing a jobs queue with a specified delay.
- *
- * @param {number} ms - The delay in milliseconds for executing each job.
- * @returns {Object} - An object containing the addJob function, undoLastJob function, and jobsQueue array.
+ * Un Custom Hook para poder agregar jobs a una cola y ejecutarlos en orden.
+ * @param {Number} ms - El tiempo en milisegundos que se debe esperar entre cada job.
+ * @returns {Object} Un objeto con las funciones para agregar, deshacer y ejecutar jobs.
  */
 const useJobsQueue = (ms) => {
     const [ jobsQueue, setJobsQueue ] = useState([]);
         
-    // Add a job to the queue. (returns the new job)
+    /**
+     * Agrega un job a la cola.
+     * @param {Function} actionCb - La función que se debe ejecutar.
+     * @param {Function} undoCb - La función que se debe ejecutar para deshacer el job.
+     * @param {Object} actionInfo - La información del job.
+     */
     const addJob = useCallback((actionCb, undoCb, actionInfo) => {
         const timeoutId = setTimeout(() => {
             actionCb();
@@ -26,13 +31,18 @@ const useJobsQueue = (ms) => {
         return job;
     }, [ ms, jobsQueue ]);
     
-    // Undo a specific job.
+    /**
+     * Deshace un job.
+     * @param {Object} job - El job que se debe deshacer.
+     */
     const undoJob = useCallback((job) => {
         clearTimeout(job.id);
         if(job.undoJobFunc) job.undoJobFunc();
     }, []);
 
-    // Undo the last job in the queue.
+    /**
+     * Deshace el último job en la cola.
+     */
     const undoLastJob = useCallback(() => {
         if(jobsQueue.length === 0) return;
         const job = jobsQueue.shift();
@@ -42,20 +52,25 @@ const useJobsQueue = (ms) => {
         if(job.undoJobFunc) job.undoJobFunc();
     }, [ jobsQueue ]);
 
-    // Undo all jobs in the queue.
+    /**
+     * Deshace todos los jobs en la cola.
+     */
     const clearAllJobs = useCallback(() => {
         if(jobsQueue.length === 0) return;
 
-        // First clear all timeouts, then undo all jobs.
+        // Borra todos los timeouts, luego deshace todos los jobs.
         jobsQueue.forEach(job => clearTimeout(job.id));
         jobsQueue.forEach(job => job.undoJobFunc && job.undoJobFunc());
         setJobsQueue([]);
     }, [ jobsQueue ]);
 
+    /**
+     * Ejecuta todos los jobs en la cola.
+     */
     const executeAllJobs = useCallback(() => {
         if(jobsQueue.length === 0) return;
         
-        // First clear all timeouts, then execute all jobs.
+        // Borra todos los timeouts, luego deshace todos los jobs.
         jobsQueue.forEach(job => clearTimeout(job.id));
         jobsQueue.forEach(job => job.action());
         setJobsQueue([]);

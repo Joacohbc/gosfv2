@@ -1,7 +1,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 
-const useIndexedDB = () => {
+const useFilesIDB = () => {
 
     const [ db, setDb ] = useState(null)
 
@@ -27,7 +27,6 @@ const useIndexedDB = () => {
 
     }, [ ]);
 
-    // Add a file to the indexedDB
     const addFileToLocal = useCallback((id, filename, blob) => {
         return new Promise((resolve, reject) => {
             if(!db) reject('No indexedDB')
@@ -103,6 +102,7 @@ const useIndexedDB = () => {
             }
         });
     }, [ db ]);
+    
     return {
         addFileToLocal,
         getFileFromLocal,
@@ -111,4 +111,4 @@ const useIndexedDB = () => {
     }
 }   
 
-export default useIndexedDB
+export default useFilesIDB

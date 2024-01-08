@@ -1,4 +1,4 @@
-import { createContext, useCallback, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PropTypes from 'prop-types';
 import axios from "axios";
@@ -29,8 +29,8 @@ const resetAuthData = () => {
 }
 
 export const AuthContextProvider = (props) => { 
-    // const BASE_URL = 'http://localhost:3000';
-    const BASE_URL = window.location.origin;
+    const BASE_URL = 'http://localhost:3000';
+    // const BASE_URL = window.location.origin;
     
     const navigate = useNavigate();
     const location = useLocation();
