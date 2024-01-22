@@ -7,7 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"gosfV2/src/models/database"
-	"image/jpeg"
+	"image"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
 	"io"
 	"os"
 	"path/filepath"
@@ -54,7 +57,7 @@ func (u User) Validate() error {
 var (
 	ErrUserNotFound           = errors.New("user/s not found")
 	ErrIconTooLarge           = errors.New("icon too large (max 512 x 512)")
-	ErrIconFormatNotSupported = errors.New("invalid image format, only jpeg is supported")
+	ErrIconFormatNotSupported = errors.New("invalid image format, only jpeg/png/gif and png is supported")
 )
 
 type UserInterface interface {
@@ -173,8 +176,7 @@ func (u usersBD) UploadIcon(id uint, src io.Reader) error {
 		return err
 	}
 
-	// Verifico que sea un png y que no sea muy grande
-	img, err := jpeg.DecodeConfig(bytes.NewReader(blob))
+	img, _, err := image.DecodeConfig(bytes.NewReader(blob))
 	if err != nil {
 		return ErrIconFormatNotSupported
 	}
@@ -202,7 +204,7 @@ func (u usersBD) UploadIcon(id uint, src io.Reader) error {
 }
 
 func (u usersBD) GetIcon(id uint) string {
-	return filepath.Join(UserIconDir, fmt.Sprint(id)+"icon.jpeg")
+	return filepath.Join(UserIconDir, fmt.Sprint(id)+"icon")
 }
 
 func (u usersBD) DeleteIcon(id uint) error {
