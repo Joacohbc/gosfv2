@@ -35,12 +35,12 @@ func (fc *fileController) GetFile(c echo.Context) error {
 		return err
 	}
 
-	file, err := models.Files(c).GetByIdFromUser(idFile, auth.Middlewares.GetUserId(c))
+	file, err := models.Files().GetByIdFromUser(idFile, auth.Middlewares.GetUserId(c))
 	if err != nil {
 		return HandleFileError(err)
 	}
 
-	return c.Inline(file.GetPath(), file.Filename)
+	return c.Inline(models.Files().GetPath(file.ID, file.Filename), file.Filename)
 }
 
 // Obtiene el Id del URL para retornar la información del archivo
@@ -54,7 +54,7 @@ func (fc *fileController) GetInfo(c echo.Context) error {
 		return err
 	}
 
-	file, err := models.Files(c).GetByIdFromUser(idNum, auth.Middlewares.GetUserId(c))
+	file, err := models.Files().GetByIdFromUser(idNum, auth.Middlewares.GetUserId(c))
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -64,7 +64,7 @@ func (fc *fileController) GetInfo(c echo.Context) error {
 
 // Obtiene todos los archivos del usuario (Su información)
 func (fc *fileController) GetAllFiles(c echo.Context) error {
-	files, err := models.Files(c).GetFilesFromUser(auth.Middlewares.GetUserId(c))
+	files, err := models.Files().GetFilesFromUser(auth.Middlewares.GetUserId(c))
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -83,7 +83,7 @@ func (fc *fileController) GetSharedFile(c echo.Context) error {
 		return err
 	}
 
-	file, err := models.Files(c).GetById(idFile)
+	file, err := models.Files().GetById(idFile)
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -91,16 +91,16 @@ func (fc *fileController) GetSharedFile(c echo.Context) error {
 	idCurrentUser := auth.Middlewares.GetUserId(c)
 
 	// Si el usuario es el dueño del archivo, lo envío directamente
-	if file.UserID == idCurrentUser {
-		return c.File(file.GetPath())
+	if file.Edges.Owner.ID == idCurrentUser {
+		return c.File(models.Files().GetPath(file.ID, file.Filename))
 	}
 
 	// Si esta compartido lo envió directamente
-	if file.Shared {
-		return c.File(file.GetPath())
+	if file.IsShared {
+		return c.File(models.Files().GetPath(file.ID, file.Filename))
 	}
 
-	sharedWithMe, err := models.Files(c).IsSharedWith(file.ID, idCurrentUser)
+	sharedWithMe, err := models.Files().IsSharedWith(file.ID, idCurrentUser)
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -109,7 +109,7 @@ func (fc *fileController) GetSharedFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, "The file is not shared with you, request access to the owner")
 	}
 
-	return c.File(file.GetPath())
+	return c.File(models.Files().GetPath(file.ID, file.Filename))
 }
 
 // Obtiene el Id del URL para retornar la informacion del archivo
@@ -123,7 +123,7 @@ func (fc *fileController) GetSharedFileInfo(c echo.Context) error {
 		return err
 	}
 
-	file, err := models.Files(c).GetById(idFile)
+	file, err := models.Files().GetById(idFile)
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -131,16 +131,16 @@ func (fc *fileController) GetSharedFileInfo(c echo.Context) error {
 	idCurrentUser := auth.Middlewares.GetUserId(c)
 
 	// Si el usuario es el dueño del archivo, lo envío directamente
-	if file.UserID == idCurrentUser {
+	if file.Edges.Owner.ID == idCurrentUser {
 		return jsonDTO(c, http.StatusOK, file)
 	}
 
 	// Si esta compartido lo envió directamente
-	if file.Shared {
+	if file.IsShared {
 		return jsonDTO(c, http.StatusOK, file)
 	}
 
-	sharedWithMe, err := models.Files(c).IsSharedWith(file.ID, idCurrentUser)
+	sharedWithMe, err := models.Files().IsSharedWith(file.ID, idCurrentUser)
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -156,7 +156,7 @@ func (fc *fileController) GetSharedFileInfo(c echo.Context) error {
 
 // Obtiene todos los archivos compartidos con el usuario logueado
 func (fc *fileController) GetAllShareFiles(c echo.Context) error {
-	files, err := models.Files(c).GetFilesShared(auth.Middlewares.GetUserId(c))
+	files, err := models.Files().GetFilesShared(auth.Middlewares.GetUserId(c))
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -180,7 +180,7 @@ func (fc *fileController) UploadFile(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
-		fileId, err := models.Files(c).Create(file.Filename, auth.Middlewares.GetUserId(c), src)
+		file, err := models.Files().Create(file.Filename, auth.Middlewares.GetUserId(c), src)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -189,10 +189,10 @@ func (fc *fileController) UploadFile(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		filesIds = append(filesIds, fileId)
+		filesIds = append(filesIds, file.ID)
 	}
 
-	filesCreated, err := models.Files(c).GetByIds(filesIds)
+	filesCreated, err := models.Files().GetByIds(filesIds)
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -217,7 +217,7 @@ func (fc *fileController) UpdateFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid file data")
 	}
 
-	actual, err := models.Files(c).GetByIdFromUser(idFile, auth.Middlewares.GetUserId(c))
+	actual, err := models.Files().GetByIdFromUser(idFile, auth.Middlewares.GetUserId(c))
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -228,18 +228,18 @@ func (fc *fileController) UpdateFile(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, "The extension of the file cannot be changed")
 		}
 
-		if err := models.Files(c).Rename(idFile, *file.Filename); err != nil {
+		if _, err := models.Files().Rename(idFile, *file.Filename); err != nil {
 			return HandleFileError(err)
 		}
 	}
 
-	if file.Shared != nil && actual.Shared != *file.Shared {
-		if err := models.Files(c).SetShared(idFile, *file.Shared); err != nil {
+	if file.Shared != nil && actual.IsShared != *file.Shared {
+		if _, err := models.Files().SetShared(idFile, *file.Shared); err != nil {
 			return HandleFileError(err)
 		}
 	}
 
-	fileUpdated, err := models.Files(c).GetById(idFile)
+	fileUpdated, err := models.Files().GetById(idFile)
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -261,7 +261,7 @@ func (fc *fileController) DeleteFile(c echo.Context) error {
 		return err
 	}
 
-	fileDeleted, err := models.Files(c).GetByIdFromUser(idNum, auth.Middlewares.GetUserId(c))
+	fileDeleted, err := models.Files().GetByIdFromUser(idNum, auth.Middlewares.GetUserId(c))
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -270,12 +270,12 @@ func (fc *fileController) DeleteFile(c echo.Context) error {
 	force := c.QueryParam("force")
 
 	// Verifico si el archivo esta compartido con otros usuarios
-	if len(fileDeleted.SharedWith) != 0 {
+	if len(fileDeleted.Edges.SharedWith) != 0 {
 
 		// Si viene el QueryParam "force" y es true, elimino el archivo (aunque este compartido)
 		if force == "yes" {
-			for _, user := range fileDeleted.SharedWith {
-				if err := models.Files(c).RemoveUserFromFile(user.ID, fileDeleted.ID); err != nil {
+			for _, user := range fileDeleted.Edges.SharedWith {
+				if err := models.Files().RemoveUserFromFile(user.ID, fileDeleted.ID); err != nil {
 					return HandleFileError(err)
 				}
 			}
@@ -284,7 +284,7 @@ func (fc *fileController) DeleteFile(c echo.Context) error {
 		}
 	}
 
-	if err := models.Files(c).Delete(uint(idNum)); err != nil {
+	if _, err := models.Files().Delete(uint(idNum)); err != nil {
 		return HandleFileError(err)
 	}
 
@@ -308,21 +308,21 @@ func (fc *fileController) AddUserToFile(c echo.Context) error {
 		return err
 	}
 
-	file, err := models.Files(c).GetByIdFromUser(fileId, auth.Middlewares.GetUserId(c))
+	file, err := models.Files().GetByIdFromUser(fileId, auth.Middlewares.GetUserId(c))
 	if err != nil {
 		return HandleFileError(err)
 	}
 
-	if file.UserID == userId {
+	if file.Edges.Owner.ID == userId {
 		return echo.NewHTTPError(http.StatusBadRequest, "The user is the owner of the file")
 	}
 
 	// Verifico que exista el usuario con el userId
-	if _, err := models.Users(c).FindUserById(userId); err != nil {
+	if _, err := models.Users().FindUserById(userId); err != nil {
 		return auth.HandleUserError(err)
 	}
 
-	ok, err := models.Files(c).IsSharedWith(fileId, userId)
+	ok, err := models.Files().IsSharedWith(fileId, userId)
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -331,11 +331,11 @@ func (fc *fileController) AddUserToFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "The File is already shared with that user")
 	}
 
-	if err := models.Files(c).AddUserToFile(userId, fileId); err != nil {
+	if err := models.Files().AddUserToFile(userId, fileId); err != nil {
 		return HandleFileError(err)
 	}
 
-	fileUpdated, err := models.Files(c).GetById(fileId)
+	fileUpdated, err := models.Files().GetById(fileId)
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -360,17 +360,17 @@ func (fc *fileController) RemoveUserFromFile(c echo.Context) error {
 	}
 
 	// Verifico que exista el archivo con el fileId
-	file, err := models.Files(c).GetByIdFromUser(fileId, auth.Middlewares.GetUserId(c))
+	file, err := models.Files().GetByIdFromUser(fileId, auth.Middlewares.GetUserId(c))
 	if err != nil {
 		return HandleFileError(err)
 	}
 
 	// Verifico que exista el usuario con el userId
-	if _, err := models.Users(c).FindUserById(userId); err != nil {
+	if _, err := models.Users().FindUserById(userId); err != nil {
 		return auth.HandleUserError(err)
 	}
 
-	ok, err := models.Files(c).IsSharedWith(fileId, userId)
+	ok, err := models.Files().IsSharedWith(fileId, userId)
 	if err != nil {
 		return HandleFileError(err)
 	}
@@ -381,15 +381,15 @@ func (fc *fileController) RemoveUserFromFile(c echo.Context) error {
 
 	// Si el el usuario no es el dueño del archivo, por seguridad
 	// le digo que el archivo no existe
-	if file.UserID != auth.Middlewares.GetUserId(c) {
+	if file.Edges.Owner.ID != auth.Middlewares.GetUserId(c) {
 		return echo.NewHTTPError(http.StatusNotFound, models.ErrFileNotFound.Error())
 	}
 
-	if err := models.Files(c).RemoveUserFromFile(userId, fileId); err != nil {
+	if err := models.Files().RemoveUserFromFile(userId, fileId); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	fileUpdated, err := models.Files(c).GetByIdFromUser(fileId, auth.Middlewares.GetUserId(c))
+	fileUpdated, err := models.Files().GetByIdFromUser(fileId, auth.Middlewares.GetUserId(c))
 	if err != nil {
 		return HandleFileError(err)
 	}

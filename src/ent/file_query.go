@@ -26,8 +26,8 @@ type FileQuery struct {
 	predicates     []predicate.File
 	withOwner      *UserQuery
 	withSharedWith *UserQuery
-	withChildren   *FileQuery
 	withParent     *FileQuery
+	withChildren   *FileQuery
 	withNotes      *NoteQuery
 	withFKs        bool
 	// intermediate query (i.e. traversal path).
@@ -110,28 +110,6 @@ func (fq *FileQuery) QuerySharedWith() *UserQuery {
 	return query
 }
 
-// QueryChildren chains the current query on the "children" edge.
-func (fq *FileQuery) QueryChildren() *FileQuery {
-	query := (&FileClient{config: fq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := fq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := fq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(file.Table, file.FieldID, selector),
-			sqlgraph.To(file.Table, file.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, file.ChildrenTable, file.ChildrenColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // QueryParent chains the current query on the "parent" edge.
 func (fq *FileQuery) QueryParent() *FileQuery {
 	query := (&FileClient{config: fq.config}).Query()
@@ -146,7 +124,29 @@ func (fq *FileQuery) QueryParent() *FileQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(file.Table, file.FieldID, selector),
 			sqlgraph.To(file.Table, file.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, file.ParentTable, file.ParentColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, file.ParentTable, file.ParentColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryChildren chains the current query on the "children" edge.
+func (fq *FileQuery) QueryChildren() *FileQuery {
+	query := (&FileClient{config: fq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := fq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := fq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, selector),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, file.ChildrenTable, file.ChildrenColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
 		return fromU, nil
@@ -370,8 +370,8 @@ func (fq *FileQuery) Clone() *FileQuery {
 		predicates:     append([]predicate.File{}, fq.predicates...),
 		withOwner:      fq.withOwner.Clone(),
 		withSharedWith: fq.withSharedWith.Clone(),
-		withChildren:   fq.withChildren.Clone(),
 		withParent:     fq.withParent.Clone(),
+		withChildren:   fq.withChildren.Clone(),
 		withNotes:      fq.withNotes.Clone(),
 		// clone intermediate query.
 		sql:  fq.sql.Clone(),
@@ -401,17 +401,6 @@ func (fq *FileQuery) WithSharedWith(opts ...func(*UserQuery)) *FileQuery {
 	return fq
 }
 
-// WithChildren tells the query-builder to eager-load the nodes that are connected to
-// the "children" edge. The optional arguments are used to configure the query builder of the edge.
-func (fq *FileQuery) WithChildren(opts ...func(*FileQuery)) *FileQuery {
-	query := (&FileClient{config: fq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	fq.withChildren = query
-	return fq
-}
-
 // WithParent tells the query-builder to eager-load the nodes that are connected to
 // the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (fq *FileQuery) WithParent(opts ...func(*FileQuery)) *FileQuery {
@@ -420,6 +409,17 @@ func (fq *FileQuery) WithParent(opts ...func(*FileQuery)) *FileQuery {
 		opt(query)
 	}
 	fq.withParent = query
+	return fq
+}
+
+// WithChildren tells the query-builder to eager-load the nodes that are connected to
+// the "children" edge. The optional arguments are used to configure the query builder of the edge.
+func (fq *FileQuery) WithChildren(opts ...func(*FileQuery)) *FileQuery {
+	query := (&FileClient{config: fq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	fq.withChildren = query
 	return fq
 }
 
@@ -516,12 +516,12 @@ func (fq *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 		loadedTypes = [5]bool{
 			fq.withOwner != nil,
 			fq.withSharedWith != nil,
-			fq.withChildren != nil,
 			fq.withParent != nil,
+			fq.withChildren != nil,
 			fq.withNotes != nil,
 		}
 	)
-	if fq.withOwner != nil || fq.withChildren != nil || fq.withNotes != nil {
+	if fq.withOwner != nil || fq.withParent != nil || fq.withNotes != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -558,16 +558,16 @@ func (fq *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 			return nil, err
 		}
 	}
-	if query := fq.withChildren; query != nil {
-		if err := fq.loadChildren(ctx, query, nodes, nil,
-			func(n *File, e *File) { n.Edges.Children = e }); err != nil {
+	if query := fq.withParent; query != nil {
+		if err := fq.loadParent(ctx, query, nodes, nil,
+			func(n *File, e *File) { n.Edges.Parent = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := fq.withParent; query != nil {
-		if err := fq.loadParent(ctx, query, nodes,
-			func(n *File) { n.Edges.Parent = []*File{} },
-			func(n *File, e *File) { n.Edges.Parent = append(n.Edges.Parent, e) }); err != nil {
+	if query := fq.withChildren; query != nil {
+		if err := fq.loadChildren(ctx, query, nodes,
+			func(n *File) { n.Edges.Children = []*File{} },
+			func(n *File, e *File) { n.Edges.Children = append(n.Edges.Children, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -673,14 +673,14 @@ func (fq *FileQuery) loadSharedWith(ctx context.Context, query *UserQuery, nodes
 	}
 	return nil
 }
-func (fq *FileQuery) loadChildren(ctx context.Context, query *FileQuery, nodes []*File, init func(*File), assign func(*File, *File)) error {
+func (fq *FileQuery) loadParent(ctx context.Context, query *FileQuery, nodes []*File, init func(*File), assign func(*File, *File)) error {
 	ids := make([]uint, 0, len(nodes))
 	nodeids := make(map[uint][]*File)
 	for i := range nodes {
-		if nodes[i].file_parent == nil {
+		if nodes[i].file_children == nil {
 			continue
 		}
-		fk := *nodes[i].file_parent
+		fk := *nodes[i].file_children
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -697,7 +697,7 @@ func (fq *FileQuery) loadChildren(ctx context.Context, query *FileQuery, nodes [
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "file_parent" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "file_children" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -705,7 +705,7 @@ func (fq *FileQuery) loadChildren(ctx context.Context, query *FileQuery, nodes [
 	}
 	return nil
 }
-func (fq *FileQuery) loadParent(ctx context.Context, query *FileQuery, nodes []*File, init func(*File), assign func(*File, *File)) error {
+func (fq *FileQuery) loadChildren(ctx context.Context, query *FileQuery, nodes []*File, init func(*File), assign func(*File, *File)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uint]*File)
 	for i := range nodes {
@@ -717,20 +717,20 @@ func (fq *FileQuery) loadParent(ctx context.Context, query *FileQuery, nodes []*
 	}
 	query.withFKs = true
 	query.Where(predicate.File(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(file.ParentColumn), fks...))
+		s.Where(sql.InValues(s.C(file.ChildrenColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.file_parent
+		fk := n.file_children
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "file_parent" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "file_children" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "file_parent" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "file_children" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

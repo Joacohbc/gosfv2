@@ -28,10 +28,10 @@ const (
 	EdgeOwner = "owner"
 	// EdgeSharedWith holds the string denoting the shared_with edge name in mutations.
 	EdgeSharedWith = "shared_with"
-	// EdgeChildren holds the string denoting the children edge name in mutations.
-	EdgeChildren = "children"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
+	// EdgeChildren holds the string denoting the children edge name in mutations.
+	EdgeChildren = "children"
 	// EdgeNotes holds the string denoting the notes edge name in mutations.
 	EdgeNotes = "notes"
 	// Table holds the table name of the file in the database.
@@ -48,14 +48,14 @@ const (
 	// SharedWithInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	SharedWithInverseTable = "users"
-	// ChildrenTable is the table that holds the children relation/edge.
-	ChildrenTable = "files"
-	// ChildrenColumn is the table column denoting the children relation/edge.
-	ChildrenColumn = "file_parent"
 	// ParentTable is the table that holds the parent relation/edge.
 	ParentTable = "files"
 	// ParentColumn is the table column denoting the parent relation/edge.
-	ParentColumn = "file_parent"
+	ParentColumn = "file_children"
+	// ChildrenTable is the table that holds the children relation/edge.
+	ChildrenTable = "files"
+	// ChildrenColumn is the table column denoting the children relation/edge.
+	ChildrenColumn = "file_children"
 	// NotesTable is the table that holds the notes relation/edge.
 	NotesTable = "files"
 	// NotesInverseTable is the table name for the Note entity.
@@ -78,7 +78,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "files"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"file_parent",
+	"file_children",
 	"note_files",
 	"user_files",
 }
@@ -171,24 +171,24 @@ func BySharedWith(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByChildrenField orders the results by children field.
-func ByChildrenField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByParentField orders the results by parent field.
+func ByParentField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newChildrenStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newParentStep(), sql.OrderByField(field, opts...))
 	}
 }
 
-// ByParentCount orders the results by parent count.
-func ByParentCount(opts ...sql.OrderTermOption) OrderOption {
+// ByChildrenCount orders the results by children count.
+func ByChildrenCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newParentStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newChildrenStep(), opts...)
 	}
 }
 
-// ByParent orders the results by parent terms.
-func ByParent(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByChildren orders the results by children terms.
+func ByChildren(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newParentStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newChildrenStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -212,18 +212,18 @@ func newSharedWithStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2M, false, SharedWithTable, SharedWithPrimaryKey...),
 	)
 }
-func newChildrenStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(Table, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, ChildrenTable, ChildrenColumn),
-	)
-}
 func newParentStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(Table, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, ParentTable, ParentColumn),
+		sqlgraph.Edge(sqlgraph.M2O, true, ParentTable, ParentColumn),
+	)
+}
+func newChildrenStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(Table, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ChildrenTable, ChildrenColumn),
 	)
 }
 func newNotesStep() *sqlgraph.Step {

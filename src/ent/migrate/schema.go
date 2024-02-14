@@ -16,7 +16,7 @@ var (
 		{Name: "filename", Type: field.TypeString, Size: 255},
 		{Name: "is_dir", Type: field.TypeBool, Default: false},
 		{Name: "is_shared", Type: field.TypeBool, Default: false},
-		{Name: "file_parent", Type: field.TypeUint, Nullable: true},
+		{Name: "file_children", Type: field.TypeUint, Nullable: true},
 		{Name: "note_files", Type: field.TypeUint, Nullable: true},
 		{Name: "user_files", Type: field.TypeUint},
 	}
@@ -27,7 +27,7 @@ var (
 		PrimaryKey: []*schema.Column{FilesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "files_files_parent",
+				Symbol:     "files_files_children",
 				Columns:    []*schema.Column{FilesColumns[6]},
 				RefColumns: []*schema.Column{FilesColumns[0]},
 				OnDelete:   schema.SetNull,

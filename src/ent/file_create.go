@@ -116,38 +116,38 @@ func (fc *FileCreate) AddSharedWith(u ...*User) *FileCreate {
 	return fc.AddSharedWithIDs(ids...)
 }
 
-// SetChildrenID sets the "children" edge to the File entity by ID.
-func (fc *FileCreate) SetChildrenID(id uint) *FileCreate {
-	fc.mutation.SetChildrenID(id)
+// SetParentID sets the "parent" edge to the File entity by ID.
+func (fc *FileCreate) SetParentID(id uint) *FileCreate {
+	fc.mutation.SetParentID(id)
 	return fc
 }
 
-// SetNillableChildrenID sets the "children" edge to the File entity by ID if the given value is not nil.
-func (fc *FileCreate) SetNillableChildrenID(id *uint) *FileCreate {
+// SetNillableParentID sets the "parent" edge to the File entity by ID if the given value is not nil.
+func (fc *FileCreate) SetNillableParentID(id *uint) *FileCreate {
 	if id != nil {
-		fc = fc.SetChildrenID(*id)
+		fc = fc.SetParentID(*id)
 	}
 	return fc
 }
 
-// SetChildren sets the "children" edge to the File entity.
-func (fc *FileCreate) SetChildren(f *File) *FileCreate {
-	return fc.SetChildrenID(f.ID)
+// SetParent sets the "parent" edge to the File entity.
+func (fc *FileCreate) SetParent(f *File) *FileCreate {
+	return fc.SetParentID(f.ID)
 }
 
-// AddParentIDs adds the "parent" edge to the File entity by IDs.
-func (fc *FileCreate) AddParentIDs(ids ...uint) *FileCreate {
-	fc.mutation.AddParentIDs(ids...)
+// AddChildIDs adds the "children" edge to the File entity by IDs.
+func (fc *FileCreate) AddChildIDs(ids ...uint) *FileCreate {
+	fc.mutation.AddChildIDs(ids...)
 	return fc
 }
 
-// AddParent adds the "parent" edges to the File entity.
-func (fc *FileCreate) AddParent(f ...*File) *FileCreate {
+// AddChildren adds the "children" edges to the File entity.
+func (fc *FileCreate) AddChildren(f ...*File) *FileCreate {
 	ids := make([]uint, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return fc.AddParentIDs(ids...)
+	return fc.AddChildIDs(ids...)
 }
 
 // SetNotesID sets the "notes" edge to the Note entity by ID.
@@ -325,12 +325,12 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := fc.mutation.ChildrenIDs(); len(nodes) > 0 {
+	if nodes := fc.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   file.ChildrenTable,
-			Columns: []string{file.ChildrenColumn},
+			Table:   file.ParentTable,
+			Columns: []string{file.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeUint),
@@ -339,15 +339,15 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.file_parent = &nodes[0]
+		_node.file_children = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := fc.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := fc.mutation.ChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   file.ParentTable,
-			Columns: []string{file.ParentColumn},
+			Table:   file.ChildrenTable,
+			Columns: []string{file.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeUint),

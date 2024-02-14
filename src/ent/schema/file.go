@@ -46,8 +46,8 @@ func (File) Edges() []ent.Edge {
 			Required().
 			Unique(),
 		edge.To("shared_with", User.Type),
-		edge.To("parent", File.Type).
-			From("children").
+		edge.To("children", File.Type).
+			From("parent").
 			Unique(),
 		edge.From("notes", Note.Type).
 			Ref("files").

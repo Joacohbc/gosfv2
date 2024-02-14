@@ -48,11 +48,11 @@ type FileMutation struct {
 	shared_with        map[uint]struct{}
 	removedshared_with map[uint]struct{}
 	clearedshared_with bool
-	children           *uint
-	clearedchildren    bool
-	parent             map[uint]struct{}
-	removedparent      map[uint]struct{}
+	parent             *uint
 	clearedparent      bool
+	children           map[uint]struct{}
+	removedchildren    map[uint]struct{}
+	clearedchildren    bool
 	notes              *uint
 	clearednotes       bool
 	done               bool
@@ -450,53 +450,9 @@ func (m *FileMutation) ResetSharedWith() {
 	m.removedshared_with = nil
 }
 
-// SetChildrenID sets the "children" edge to the File entity by id.
-func (m *FileMutation) SetChildrenID(id uint) {
-	m.children = &id
-}
-
-// ClearChildren clears the "children" edge to the File entity.
-func (m *FileMutation) ClearChildren() {
-	m.clearedchildren = true
-}
-
-// ChildrenCleared reports if the "children" edge to the File entity was cleared.
-func (m *FileMutation) ChildrenCleared() bool {
-	return m.clearedchildren
-}
-
-// ChildrenID returns the "children" edge ID in the mutation.
-func (m *FileMutation) ChildrenID() (id uint, exists bool) {
-	if m.children != nil {
-		return *m.children, true
-	}
-	return
-}
-
-// ChildrenIDs returns the "children" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// ChildrenID instead. It exists only for internal usage by the builders.
-func (m *FileMutation) ChildrenIDs() (ids []uint) {
-	if id := m.children; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetChildren resets all changes to the "children" edge.
-func (m *FileMutation) ResetChildren() {
-	m.children = nil
-	m.clearedchildren = false
-}
-
-// AddParentIDs adds the "parent" edge to the File entity by ids.
-func (m *FileMutation) AddParentIDs(ids ...uint) {
-	if m.parent == nil {
-		m.parent = make(map[uint]struct{})
-	}
-	for i := range ids {
-		m.parent[ids[i]] = struct{}{}
-	}
+// SetParentID sets the "parent" edge to the File entity by id.
+func (m *FileMutation) SetParentID(id uint) {
+	m.parent = &id
 }
 
 // ClearParent clears the "parent" edge to the File entity.
@@ -509,29 +465,20 @@ func (m *FileMutation) ParentCleared() bool {
 	return m.clearedparent
 }
 
-// RemoveParentIDs removes the "parent" edge to the File entity by IDs.
-func (m *FileMutation) RemoveParentIDs(ids ...uint) {
-	if m.removedparent == nil {
-		m.removedparent = make(map[uint]struct{})
-	}
-	for i := range ids {
-		delete(m.parent, ids[i])
-		m.removedparent[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedParent returns the removed IDs of the "parent" edge to the File entity.
-func (m *FileMutation) RemovedParentIDs() (ids []uint) {
-	for id := range m.removedparent {
-		ids = append(ids, id)
+// ParentID returns the "parent" edge ID in the mutation.
+func (m *FileMutation) ParentID() (id uint, exists bool) {
+	if m.parent != nil {
+		return *m.parent, true
 	}
 	return
 }
 
 // ParentIDs returns the "parent" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ParentID instead. It exists only for internal usage by the builders.
 func (m *FileMutation) ParentIDs() (ids []uint) {
-	for id := range m.parent {
-		ids = append(ids, id)
+	if id := m.parent; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -540,7 +487,60 @@ func (m *FileMutation) ParentIDs() (ids []uint) {
 func (m *FileMutation) ResetParent() {
 	m.parent = nil
 	m.clearedparent = false
-	m.removedparent = nil
+}
+
+// AddChildIDs adds the "children" edge to the File entity by ids.
+func (m *FileMutation) AddChildIDs(ids ...uint) {
+	if m.children == nil {
+		m.children = make(map[uint]struct{})
+	}
+	for i := range ids {
+		m.children[ids[i]] = struct{}{}
+	}
+}
+
+// ClearChildren clears the "children" edge to the File entity.
+func (m *FileMutation) ClearChildren() {
+	m.clearedchildren = true
+}
+
+// ChildrenCleared reports if the "children" edge to the File entity was cleared.
+func (m *FileMutation) ChildrenCleared() bool {
+	return m.clearedchildren
+}
+
+// RemoveChildIDs removes the "children" edge to the File entity by IDs.
+func (m *FileMutation) RemoveChildIDs(ids ...uint) {
+	if m.removedchildren == nil {
+		m.removedchildren = make(map[uint]struct{})
+	}
+	for i := range ids {
+		delete(m.children, ids[i])
+		m.removedchildren[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedChildren returns the removed IDs of the "children" edge to the File entity.
+func (m *FileMutation) RemovedChildrenIDs() (ids []uint) {
+	for id := range m.removedchildren {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ChildrenIDs returns the "children" edge IDs in the mutation.
+func (m *FileMutation) ChildrenIDs() (ids []uint) {
+	for id := range m.children {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetChildren resets all changes to the "children" edge.
+func (m *FileMutation) ResetChildren() {
+	m.children = nil
+	m.clearedchildren = false
+	m.removedchildren = nil
 }
 
 // SetNotesID sets the "notes" edge to the Note entity by id.
@@ -799,11 +799,11 @@ func (m *FileMutation) AddedEdges() []string {
 	if m.shared_with != nil {
 		edges = append(edges, file.EdgeSharedWith)
 	}
-	if m.children != nil {
-		edges = append(edges, file.EdgeChildren)
-	}
 	if m.parent != nil {
 		edges = append(edges, file.EdgeParent)
+	}
+	if m.children != nil {
+		edges = append(edges, file.EdgeChildren)
 	}
 	if m.notes != nil {
 		edges = append(edges, file.EdgeNotes)
@@ -825,13 +825,13 @@ func (m *FileMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case file.EdgeChildren:
-		if id := m.children; id != nil {
+	case file.EdgeParent:
+		if id := m.parent; id != nil {
 			return []ent.Value{*id}
 		}
-	case file.EdgeParent:
-		ids := make([]ent.Value, 0, len(m.parent))
-		for id := range m.parent {
+	case file.EdgeChildren:
+		ids := make([]ent.Value, 0, len(m.children))
+		for id := range m.children {
 			ids = append(ids, id)
 		}
 		return ids
@@ -849,8 +849,8 @@ func (m *FileMutation) RemovedEdges() []string {
 	if m.removedshared_with != nil {
 		edges = append(edges, file.EdgeSharedWith)
 	}
-	if m.removedparent != nil {
-		edges = append(edges, file.EdgeParent)
+	if m.removedchildren != nil {
+		edges = append(edges, file.EdgeChildren)
 	}
 	return edges
 }
@@ -865,9 +865,9 @@ func (m *FileMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case file.EdgeParent:
-		ids := make([]ent.Value, 0, len(m.removedparent))
-		for id := range m.removedparent {
+	case file.EdgeChildren:
+		ids := make([]ent.Value, 0, len(m.removedchildren))
+		for id := range m.removedchildren {
 			ids = append(ids, id)
 		}
 		return ids
@@ -884,11 +884,11 @@ func (m *FileMutation) ClearedEdges() []string {
 	if m.clearedshared_with {
 		edges = append(edges, file.EdgeSharedWith)
 	}
-	if m.clearedchildren {
-		edges = append(edges, file.EdgeChildren)
-	}
 	if m.clearedparent {
 		edges = append(edges, file.EdgeParent)
+	}
+	if m.clearedchildren {
+		edges = append(edges, file.EdgeChildren)
 	}
 	if m.clearednotes {
 		edges = append(edges, file.EdgeNotes)
@@ -904,10 +904,10 @@ func (m *FileMutation) EdgeCleared(name string) bool {
 		return m.clearedowner
 	case file.EdgeSharedWith:
 		return m.clearedshared_with
-	case file.EdgeChildren:
-		return m.clearedchildren
 	case file.EdgeParent:
 		return m.clearedparent
+	case file.EdgeChildren:
+		return m.clearedchildren
 	case file.EdgeNotes:
 		return m.clearednotes
 	}
@@ -921,8 +921,8 @@ func (m *FileMutation) ClearEdge(name string) error {
 	case file.EdgeOwner:
 		m.ClearOwner()
 		return nil
-	case file.EdgeChildren:
-		m.ClearChildren()
+	case file.EdgeParent:
+		m.ClearParent()
 		return nil
 	case file.EdgeNotes:
 		m.ClearNotes()
@@ -941,11 +941,11 @@ func (m *FileMutation) ResetEdge(name string) error {
 	case file.EdgeSharedWith:
 		m.ResetSharedWith()
 		return nil
-	case file.EdgeChildren:
-		m.ResetChildren()
-		return nil
 	case file.EdgeParent:
 		m.ResetParent()
+		return nil
+	case file.EdgeChildren:
+		m.ResetChildren()
 		return nil
 	case file.EdgeNotes:
 		m.ResetNotes()

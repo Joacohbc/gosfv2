@@ -17,7 +17,7 @@ type userController struct{}
 
 // Obtiene el usuario actual
 func (u userController) GetUser(c echo.Context) error {
-	user, err := models.Users(c).FindUserById(auth.Middlewares.GetUserId(c))
+	user, err := models.Users().FindUserById(auth.Middlewares.GetUserId(c))
 	if err != nil {
 		return auth.HandleUserError(err)
 	}
@@ -27,7 +27,7 @@ func (u userController) GetUser(c echo.Context) error {
 
 // Obtiene el icono del usuario actual
 func (u userController) GetIcon(c echo.Context) error {
-	path := models.Users(c).GetIcon(auth.Middlewares.GetUserId(c))
+	path := models.Users().GetIcon(auth.Middlewares.GetUserId(c))
 	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
 			return c.File(models.DefaultIcon)
@@ -49,7 +49,7 @@ func (u userController) GetIconFromUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid user id")
 	}
 
-	path := models.Users(c).GetIcon(id)
+	path := models.Users().GetIcon(id)
 	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
 			return c.File(models.DefaultIcon)
@@ -75,7 +75,7 @@ func (u userController) RenameUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Username must not be empty")
 	}
 
-	exist, err := models.Users(c).ExistUserByName(*user.Username)
+	exist, err := models.Users().ExistUserByName(*user.Username)
 	if err != nil {
 		return auth.HandleUserError(err)
 	}
@@ -84,11 +84,11 @@ func (u userController) RenameUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Username already exists")
 	}
 
-	if err := models.Users(c).Rename(auth.Middlewares.GetUserId(c), *user.Username); err != nil {
+	if err := models.Users().Rename(auth.Middlewares.GetUserId(c), *user.Username); err != nil {
 		return auth.HandleUserError(err)
 	}
 
-	userUpdated, err := models.Users(c).FindUserById(auth.Middlewares.GetUserId(c))
+	userUpdated, err := models.Users().FindUserById(auth.Middlewares.GetUserId(c))
 	if err != nil {
 		return auth.HandleUserError(err)
 	}
@@ -112,7 +112,7 @@ func (u userController) ChangePassword(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid user data")
 	}
 
-	user, err := models.Users(c).FindUserById(auth.Middlewares.GetUserId(c))
+	user, err := models.Users().FindUserById(auth.Middlewares.GetUserId(c))
 	if err != nil {
 		return auth.HandleUserError(err)
 	}
@@ -133,7 +133,7 @@ func (u userController) ChangePassword(c echo.Context) error {
 	}
 
 	// Actualizo la contraseña
-	if err := models.Users(c).ChangePassword(auth.Middlewares.GetUserId(c), password.NewPassword); err != nil {
+	if err := models.Users().ChangePassword(auth.Middlewares.GetUserId(c), password.NewPassword); err != nil {
 		return auth.HandleUserError(err)
 	}
 
@@ -143,7 +143,7 @@ func (u userController) ChangePassword(c echo.Context) error {
 // Elimina el usuario actual
 func (u userController) DeleteUser(c echo.Context) error {
 
-	files, err := models.Files(c).GetFilesFromUser(auth.Middlewares.GetUserId(c))
+	files, err := models.Files().GetFilesFromUser(auth.Middlewares.GetUserId(c))
 	if err != nil {
 		return auth.HandleUserError(err)
 	}
@@ -152,7 +152,7 @@ func (u userController) DeleteUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "You can't delete your account because you have files")
 	}
 
-	if err := models.Users(c).Delete(auth.Middlewares.GetUserId(c)); err != nil {
+	if err := models.Users().Delete(auth.Middlewares.GetUserId(c)); err != nil {
 		return auth.HandleUserError(err)
 	}
 
@@ -179,7 +179,7 @@ func (u userController) UploadIcon(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	if err := models.Users(c).UploadIcon(auth.Middlewares.GetUserId(c), blob); err != nil {
+	if err := models.Users().UploadIcon(auth.Middlewares.GetUserId(c), blob); err != nil {
 
 		if err == models.ErrIconFormatNotSupported || err == models.ErrIconTooLarge {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -195,14 +195,14 @@ func (u userController) UploadIcon(c echo.Context) error {
 func (u userController) DeleteIcon(c echo.Context) error {
 
 	id := auth.Middlewares.GetUserId(c)
-	path := models.Users(c).GetIcon(id)
+	path := models.Users().GetIcon(id)
 	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
 			return echo.NewHTTPError(http.StatusNotFound, "The user doesn't have an icon")
 		}
 	}
 
-	err := models.Users(c).DeleteIcon(id)
+	err := models.Users().DeleteIcon(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

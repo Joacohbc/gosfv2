@@ -358,22 +358,6 @@ func (c *FileClient) QuerySharedWith(f *File) *UserQuery {
 	return query
 }
 
-// QueryChildren queries the children edge of a File.
-func (c *FileClient) QueryChildren(f *File) *FileQuery {
-	query := (&FileClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := f.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(file.Table, file.FieldID, id),
-			sqlgraph.To(file.Table, file.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, file.ChildrenTable, file.ChildrenColumn),
-		)
-		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryParent queries the parent edge of a File.
 func (c *FileClient) QueryParent(f *File) *FileQuery {
 	query := (&FileClient{config: c.config}).Query()
@@ -382,7 +366,23 @@ func (c *FileClient) QueryParent(f *File) *FileQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(file.Table, file.FieldID, id),
 			sqlgraph.To(file.Table, file.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, file.ParentTable, file.ParentColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, file.ParentTable, file.ParentColumn),
+		)
+		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryChildren queries the children edge of a File.
+func (c *FileClient) QueryChildren(f *File) *FileQuery {
+	query := (&FileClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := f.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, id),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, file.ChildrenTable, file.ChildrenColumn),
 		)
 		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
 		return fromV, nil

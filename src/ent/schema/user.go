@@ -29,8 +29,7 @@ func (User) Fields() []ent.Field {
 			Unique().
 			StructTag(`json:"username"`),
 		field.String("password").
-			NotEmpty().
-			Sensitive(),
+			NotEmpty(),
 	}
 }
 

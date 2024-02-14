@@ -110,38 +110,38 @@ func (fu *FileUpdate) AddSharedWith(u ...*User) *FileUpdate {
 	return fu.AddSharedWithIDs(ids...)
 }
 
-// SetChildrenID sets the "children" edge to the File entity by ID.
-func (fu *FileUpdate) SetChildrenID(id uint) *FileUpdate {
-	fu.mutation.SetChildrenID(id)
+// SetParentID sets the "parent" edge to the File entity by ID.
+func (fu *FileUpdate) SetParentID(id uint) *FileUpdate {
+	fu.mutation.SetParentID(id)
 	return fu
 }
 
-// SetNillableChildrenID sets the "children" edge to the File entity by ID if the given value is not nil.
-func (fu *FileUpdate) SetNillableChildrenID(id *uint) *FileUpdate {
+// SetNillableParentID sets the "parent" edge to the File entity by ID if the given value is not nil.
+func (fu *FileUpdate) SetNillableParentID(id *uint) *FileUpdate {
 	if id != nil {
-		fu = fu.SetChildrenID(*id)
+		fu = fu.SetParentID(*id)
 	}
 	return fu
 }
 
-// SetChildren sets the "children" edge to the File entity.
-func (fu *FileUpdate) SetChildren(f *File) *FileUpdate {
-	return fu.SetChildrenID(f.ID)
+// SetParent sets the "parent" edge to the File entity.
+func (fu *FileUpdate) SetParent(f *File) *FileUpdate {
+	return fu.SetParentID(f.ID)
 }
 
-// AddParentIDs adds the "parent" edge to the File entity by IDs.
-func (fu *FileUpdate) AddParentIDs(ids ...uint) *FileUpdate {
-	fu.mutation.AddParentIDs(ids...)
+// AddChildIDs adds the "children" edge to the File entity by IDs.
+func (fu *FileUpdate) AddChildIDs(ids ...uint) *FileUpdate {
+	fu.mutation.AddChildIDs(ids...)
 	return fu
 }
 
-// AddParent adds the "parent" edges to the File entity.
-func (fu *FileUpdate) AddParent(f ...*File) *FileUpdate {
+// AddChildren adds the "children" edges to the File entity.
+func (fu *FileUpdate) AddChildren(f ...*File) *FileUpdate {
 	ids := make([]uint, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return fu.AddParentIDs(ids...)
+	return fu.AddChildIDs(ids...)
 }
 
 // SetNotesID sets the "notes" edge to the Note entity by ID.
@@ -195,31 +195,31 @@ func (fu *FileUpdate) RemoveSharedWith(u ...*User) *FileUpdate {
 	return fu.RemoveSharedWithIDs(ids...)
 }
 
-// ClearChildren clears the "children" edge to the File entity.
-func (fu *FileUpdate) ClearChildren() *FileUpdate {
-	fu.mutation.ClearChildren()
-	return fu
-}
-
-// ClearParent clears all "parent" edges to the File entity.
+// ClearParent clears the "parent" edge to the File entity.
 func (fu *FileUpdate) ClearParent() *FileUpdate {
 	fu.mutation.ClearParent()
 	return fu
 }
 
-// RemoveParentIDs removes the "parent" edge to File entities by IDs.
-func (fu *FileUpdate) RemoveParentIDs(ids ...uint) *FileUpdate {
-	fu.mutation.RemoveParentIDs(ids...)
+// ClearChildren clears all "children" edges to the File entity.
+func (fu *FileUpdate) ClearChildren() *FileUpdate {
+	fu.mutation.ClearChildren()
 	return fu
 }
 
-// RemoveParent removes "parent" edges to File entities.
-func (fu *FileUpdate) RemoveParent(f ...*File) *FileUpdate {
+// RemoveChildIDs removes the "children" edge to File entities by IDs.
+func (fu *FileUpdate) RemoveChildIDs(ids ...uint) *FileUpdate {
+	fu.mutation.RemoveChildIDs(ids...)
+	return fu
+}
+
+// RemoveChildren removes "children" edges to File entities.
+func (fu *FileUpdate) RemoveChildren(f ...*File) *FileUpdate {
 	ids := make([]uint, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return fu.RemoveParentIDs(ids...)
+	return fu.RemoveChildIDs(ids...)
 }
 
 // ClearNotes clears the "notes" edge to the Note entity.
@@ -378,12 +378,12 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if fu.mutation.ChildrenCleared() {
+	if fu.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   file.ChildrenTable,
-			Columns: []string{file.ChildrenColumn},
+			Table:   file.ParentTable,
+			Columns: []string{file.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeUint),
@@ -391,12 +391,12 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := fu.mutation.ChildrenIDs(); len(nodes) > 0 {
+	if nodes := fu.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   file.ChildrenTable,
-			Columns: []string{file.ChildrenColumn},
+			Table:   file.ParentTable,
+			Columns: []string{file.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeUint),
@@ -407,12 +407,12 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if fu.mutation.ParentCleared() {
+	if fu.mutation.ChildrenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   file.ParentTable,
-			Columns: []string{file.ParentColumn},
+			Table:   file.ChildrenTable,
+			Columns: []string{file.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeUint),
@@ -420,12 +420,12 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := fu.mutation.RemovedParentIDs(); len(nodes) > 0 && !fu.mutation.ParentCleared() {
+	if nodes := fu.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !fu.mutation.ChildrenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   file.ParentTable,
-			Columns: []string{file.ParentColumn},
+			Table:   file.ChildrenTable,
+			Columns: []string{file.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeUint),
@@ -436,12 +436,12 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := fu.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := fu.mutation.ChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   file.ParentTable,
-			Columns: []string{file.ParentColumn},
+			Table:   file.ChildrenTable,
+			Columns: []string{file.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeUint),
@@ -581,38 +581,38 @@ func (fuo *FileUpdateOne) AddSharedWith(u ...*User) *FileUpdateOne {
 	return fuo.AddSharedWithIDs(ids...)
 }
 
-// SetChildrenID sets the "children" edge to the File entity by ID.
-func (fuo *FileUpdateOne) SetChildrenID(id uint) *FileUpdateOne {
-	fuo.mutation.SetChildrenID(id)
+// SetParentID sets the "parent" edge to the File entity by ID.
+func (fuo *FileUpdateOne) SetParentID(id uint) *FileUpdateOne {
+	fuo.mutation.SetParentID(id)
 	return fuo
 }
 
-// SetNillableChildrenID sets the "children" edge to the File entity by ID if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableChildrenID(id *uint) *FileUpdateOne {
+// SetNillableParentID sets the "parent" edge to the File entity by ID if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableParentID(id *uint) *FileUpdateOne {
 	if id != nil {
-		fuo = fuo.SetChildrenID(*id)
+		fuo = fuo.SetParentID(*id)
 	}
 	return fuo
 }
 
-// SetChildren sets the "children" edge to the File entity.
-func (fuo *FileUpdateOne) SetChildren(f *File) *FileUpdateOne {
-	return fuo.SetChildrenID(f.ID)
+// SetParent sets the "parent" edge to the File entity.
+func (fuo *FileUpdateOne) SetParent(f *File) *FileUpdateOne {
+	return fuo.SetParentID(f.ID)
 }
 
-// AddParentIDs adds the "parent" edge to the File entity by IDs.
-func (fuo *FileUpdateOne) AddParentIDs(ids ...uint) *FileUpdateOne {
-	fuo.mutation.AddParentIDs(ids...)
+// AddChildIDs adds the "children" edge to the File entity by IDs.
+func (fuo *FileUpdateOne) AddChildIDs(ids ...uint) *FileUpdateOne {
+	fuo.mutation.AddChildIDs(ids...)
 	return fuo
 }
 
-// AddParent adds the "parent" edges to the File entity.
-func (fuo *FileUpdateOne) AddParent(f ...*File) *FileUpdateOne {
+// AddChildren adds the "children" edges to the File entity.
+func (fuo *FileUpdateOne) AddChildren(f ...*File) *FileUpdateOne {
 	ids := make([]uint, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return fuo.AddParentIDs(ids...)
+	return fuo.AddChildIDs(ids...)
 }
 
 // SetNotesID sets the "notes" edge to the Note entity by ID.
@@ -666,31 +666,31 @@ func (fuo *FileUpdateOne) RemoveSharedWith(u ...*User) *FileUpdateOne {
 	return fuo.RemoveSharedWithIDs(ids...)
 }
 
-// ClearChildren clears the "children" edge to the File entity.
-func (fuo *FileUpdateOne) ClearChildren() *FileUpdateOne {
-	fuo.mutation.ClearChildren()
-	return fuo
-}
-
-// ClearParent clears all "parent" edges to the File entity.
+// ClearParent clears the "parent" edge to the File entity.
 func (fuo *FileUpdateOne) ClearParent() *FileUpdateOne {
 	fuo.mutation.ClearParent()
 	return fuo
 }
 
-// RemoveParentIDs removes the "parent" edge to File entities by IDs.
-func (fuo *FileUpdateOne) RemoveParentIDs(ids ...uint) *FileUpdateOne {
-	fuo.mutation.RemoveParentIDs(ids...)
+// ClearChildren clears all "children" edges to the File entity.
+func (fuo *FileUpdateOne) ClearChildren() *FileUpdateOne {
+	fuo.mutation.ClearChildren()
 	return fuo
 }
 
-// RemoveParent removes "parent" edges to File entities.
-func (fuo *FileUpdateOne) RemoveParent(f ...*File) *FileUpdateOne {
+// RemoveChildIDs removes the "children" edge to File entities by IDs.
+func (fuo *FileUpdateOne) RemoveChildIDs(ids ...uint) *FileUpdateOne {
+	fuo.mutation.RemoveChildIDs(ids...)
+	return fuo
+}
+
+// RemoveChildren removes "children" edges to File entities.
+func (fuo *FileUpdateOne) RemoveChildren(f ...*File) *FileUpdateOne {
 	ids := make([]uint, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return fuo.RemoveParentIDs(ids...)
+	return fuo.RemoveChildIDs(ids...)
 }
 
 // ClearNotes clears the "notes" edge to the Note entity.
@@ -879,12 +879,12 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if fuo.mutation.ChildrenCleared() {
+	if fuo.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   file.ChildrenTable,
-			Columns: []string{file.ChildrenColumn},
+			Table:   file.ParentTable,
+			Columns: []string{file.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeUint),
@@ -892,12 +892,12 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := fuo.mutation.ChildrenIDs(); len(nodes) > 0 {
+	if nodes := fuo.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   file.ChildrenTable,
-			Columns: []string{file.ChildrenColumn},
+			Table:   file.ParentTable,
+			Columns: []string{file.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeUint),
@@ -908,12 +908,12 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if fuo.mutation.ParentCleared() {
+	if fuo.mutation.ChildrenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   file.ParentTable,
-			Columns: []string{file.ParentColumn},
+			Table:   file.ChildrenTable,
+			Columns: []string{file.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeUint),
@@ -921,12 +921,12 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := fuo.mutation.RemovedParentIDs(); len(nodes) > 0 && !fuo.mutation.ParentCleared() {
+	if nodes := fuo.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !fuo.mutation.ChildrenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   file.ParentTable,
-			Columns: []string{file.ParentColumn},
+			Table:   file.ChildrenTable,
+			Columns: []string{file.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeUint),
@@ -937,12 +937,12 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := fuo.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := fuo.mutation.ChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   file.ParentTable,
-			Columns: []string{file.ParentColumn},
+			Table:   file.ChildrenTable,
+			Columns: []string{file.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeUint),

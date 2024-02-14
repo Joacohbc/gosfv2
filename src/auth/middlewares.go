@@ -2,6 +2,7 @@ package auth
 
 import (
 	"gosfV2/src/auth/jwt"
+	"gosfV2/src/ent"
 	"gosfV2/src/models"
 	"net/http"
 
@@ -36,8 +37,8 @@ func (a authMiddleware) GetUserClaims(c echo.Context) *jwt.UserClaims {
 }
 
 // Obtiene el usuario logueado del contexto
-func (a authMiddleware) GetUser(c echo.Context) models.User {
-	return c.Get(userContextKey).(models.User)
+func (a authMiddleware) GetUser(c echo.Context) *ent.User {
+	return c.Get(userContextKey).(*ent.User)
 }
 
 // Verifica que el usuario tenga un token válido
@@ -70,7 +71,7 @@ func (a authMiddleware) JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFun
 // Y si todo es correcto, se agrega el usuario al contexto
 func (a authMiddleware) UserCredencialMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		user := new(models.User)
+		user := new(ent.User)
 
 		if err := c.Bind(user); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -84,7 +85,7 @@ func (a authMiddleware) UserCredencialMiddleware(next echo.HandlerFunc) echo.Han
 			return echo.NewHTTPError(http.StatusBadRequest, "Password must not be empty")
 		}
 
-		dbUser, err := models.Users(c).FindUserByName(user.Username)
+		dbUser, err := models.Users().FindUserByName(user.Username)
 		if err != nil {
 			if err == models.ErrUserNotFound {
 				return echo.NewHTTPError(http.StatusNotFound, "Invalid username or password")

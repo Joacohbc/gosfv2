@@ -1,9 +1,9 @@
 package auth
 
 import (
-	"context"
 	"errors"
 	"gosfV2/src/auth/jwt"
+	"gosfV2/src/ent"
 	"gosfV2/src/models"
 	"gosfV2/src/models/env"
 	"net/http"
@@ -30,7 +30,7 @@ func CheckPassword(password, bdHash string) (bool, error) {
 
 // Registra un nuevo usuario
 func RegisterUser(c echo.Context) error {
-	user := new(models.User)
+	user := new(ent.User)
 
 	if err := c.Bind(user); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -40,7 +40,7 @@ func RegisterUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Username or password is empty")
 	}
 
-	exist, err := models.Users(c).ExistUserByName(user.Username)
+	exist, err := models.Users().ExistUserByName(user.Username)
 	if err != nil {
 		return HandleUserError(err)
 	}
@@ -53,7 +53,7 @@ func RegisterUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	err = models.Users(c).NewUser(*user)
+	err = models.Users().NewUser(user)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -136,7 +136,7 @@ func init() {
 	go func() {
 		for {
 			time.Sleep(time.Minute * 1)
-			users, err := models.UsersC(context.Background()).GetAllUsers()
+			users, err := models.Users().GetAllUsers()
 			if err != nil && err != models.ErrUserNotFound {
 				panic(err)
 			}

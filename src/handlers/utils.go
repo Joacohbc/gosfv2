@@ -1,8 +1,9 @@
 package handlers
 
 import (
+	"fmt"
 	"gosfV2/src/dtos"
-	"gosfV2/src/models"
+	"gosfV2/src/ent"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -22,20 +23,21 @@ func getIdFromURL(c echo.Context, param string) (uint, error) {
 }
 
 func jsonDTO(c echo.Context, code int, model interface{}) error {
-	if reflect.TypeOf(model) == reflect.TypeOf(models.File{}) {
-		return c.JSON(code, dtos.ToFileDTO(model.(models.File)))
+	fmt.Println(reflect.TypeOf(model))
+	if reflect.TypeOf(model) == reflect.TypeOf(&ent.File{}) {
+		return c.JSON(code, dtos.ToFileDTO(model.(*ent.File)))
 	}
 
-	if reflect.TypeOf(model) == reflect.TypeOf([]models.File{}) {
-		return c.JSON(code, dtos.ToFileListDTO(model.([]models.File)))
+	if reflect.TypeOf(model) == reflect.TypeOf([]*ent.File{}) {
+		return c.JSON(code, dtos.ToFileListDTO(model.([]*ent.File)))
 	}
 
-	if reflect.TypeOf(model) == reflect.TypeOf(models.User{}) {
-		return c.JSON(code, dtos.ToUserDTO(model.(models.User)))
+	if reflect.TypeOf(model) == reflect.TypeOf(&ent.User{}) {
+		return c.JSON(code, dtos.ToUserDTO(model.(*ent.User)))
 	}
 
-	if reflect.TypeOf(model) == reflect.TypeOf([]models.User{}) {
-		return c.JSON(code, dtos.ToUserListDTO(model.([]models.User)))
+	if reflect.TypeOf(model) == reflect.TypeOf([]ent.User{}) {
+		return c.JSON(code, dtos.ToUserListDTO(model.([]*ent.User)))
 	}
 
 	return c.JSON(code, model)
