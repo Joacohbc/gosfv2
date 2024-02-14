@@ -12,4 +12,7 @@ type FileDTO struct {
 	Filename   *string   `json:"filename"`
 	Shared     *bool     `json:"shared,omitempty"`
 	SharedWith []UserDTO `json:"sharedWith,omitempty"`
+	IsDir      *bool     `json:"isDir,omitempty"`
+	ParentId   *uint     `json:"parentId,omitempty"`
+	Children   []FileDTO `json:"children,omitempty"`
 }

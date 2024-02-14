@@ -19,12 +19,22 @@ func ToUserListDTO(users []*ent.User) []UserDTO {
 	return usersDTO
 }
 
+func getParentId(file *ent.File) *uint {
+	if file.Edges.Parent != nil {
+		return &file.Edges.Parent.ID
+	}
+	return nil
+}
+
 func ToFileDTO(file *ent.File) FileDTO {
 	return FileDTO{
 		ID:         file.ID,
 		Filename:   &file.Filename,
 		Shared:     &file.IsShared,
 		SharedWith: ToUserListDTO(file.Edges.SharedWith),
+		IsDir:      &file.IsDir,
+		ParentId:   getParentId(file),
+		Children:   ToFileListDTO(file.Edges.Children),
 	}
 }
 
