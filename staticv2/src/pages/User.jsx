@@ -21,10 +21,7 @@ export default function User() {
     const deleteAccountDialog = useRef(null);
     
     useEffect(() => {
-        getMyInfo().then(data => {
-            setUserInfo(data);
-        })
-        .catch(err => messageContext.showError(err.message));
+        getMyInfo().then(data => setUserInfo(data))
         setIconURL(getMyIconURL());
     }, [ getMyInfo, messageContext, getMyIconURL ])
 
