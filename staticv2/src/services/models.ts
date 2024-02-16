@@ -19,6 +19,16 @@ export type User = {
     username: string;
 }
 
+export type Note = {
+    id: number;
+    title: string;
+    content: string;
+    createdAt: string;
+    updatedAt: string;
+    parentId: number;
+    savedLocal: boolean;
+}
+
 const emptyUser: User = {
     id: 0,
     icon: '',
@@ -40,6 +50,17 @@ const emptyFile: cFile = {
     savedLocal: false,
 };
 
+const emptyNote: Note = {
+    id: 0,
+    title: '',
+    content: '',
+    createdAt: '',
+    updatedAt: '',
+    parentId: 0,
+    savedLocal: false,
+};
+
 const emptyFileList = [ emptyFile ];
 const emptyUserList = [ emptyUser ];
-export { emptyFile, emptyUser, emptyFileList, emptyUserList }
+const emptyNoteList = [ emptyNote ];
+export { emptyFile, emptyUser, emptyFileList, emptyUserList, emptyNote, emptyNoteList }
