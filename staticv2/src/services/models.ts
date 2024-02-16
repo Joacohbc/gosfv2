@@ -18,3 +18,28 @@ export type User = {
     icon: string;
     username: string;
 }
+
+const emptyUser: User = {
+    id: 0,
+    icon: '',
+    username: '',
+};
+
+const emptyFile: cFile = {
+    id: 0,
+    filename: '',
+    name: '',
+    extension: '',
+    contentType: '',
+    url: '',
+    sharedUrl: '',
+    createdAt: '',
+    updatedAt: '',
+    parentId: 0,
+    children: [],
+    savedLocal: false,
+};
+
+const emptyFileList = [ emptyFile ];
+const emptyUserList = [ emptyUser ];
+export { emptyFile, emptyUser, emptyFileList, emptyUserList }

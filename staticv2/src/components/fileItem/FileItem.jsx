@@ -14,6 +14,7 @@ import ConfirmDialog from '../ConfirmDialog';
 import SharedWithModal from './ShareModal';
 import useFilesIDB from '../../hooks/useFilesIDB';
 import 'bootstrap-icons/font/bootstrap-icons.css'
+import { emptyFile } from '../../services/models';
 
 const filesModal = document.getElementById('files-modals');
 
@@ -29,17 +30,7 @@ const FileItem = memo((props) => {
     const { getUserInfo } = useGetInfo();
     const { getFileFromLocal, addFileToLocal, deleteFileFromLocal } = useFilesIDB();
 
-    const file = Object.preventExtensions({
-        id: props.id,
-        filename: props.filename,
-        contentType: props.contentType,
-        url: props.url,
-        extension: props.extension,
-        name: props.name,
-        shared: null,
-        sharedWith: [],
-        savedLocal: props.savedLocal ?? false,
-    });
+    const file = emptyFile;
 
     const handleDownload = () => {
         download.current.click();

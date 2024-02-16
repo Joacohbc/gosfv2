@@ -7,13 +7,14 @@ import { useEffect, useState, useContext, useRef } from 'react';
 import { MessageContext } from '../context/message-context';
 import AuthContext from '../context/auth-context';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { emptyUser } from '../services/models';
 
 export default function User() {
     const messageContext = useContext(MessageContext);
     const { onLogOut } = useContext(AuthContext);
     const { getMyIconURL, getMyInfo, uploadIcon, updateUser, changePassword, deleteIcon, deleteAccount } = useUsers();
     const [ iconURL, setIconURL ] = useState('');
-    const [ userInfo, setUserInfo ] = useState({});
+    const [ userInfo, setUserInfo ] = useState(emptyUser);
     const newUsername = useRef(null);
     const currentPassword = useRef(null);
     const newPassword = useRef(null);
