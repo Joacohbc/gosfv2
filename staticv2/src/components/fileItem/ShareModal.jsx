@@ -12,13 +12,12 @@ import { useImperativeHandle } from 'react';
 import Col from 'react-bootstrap/esm/Col';
 import { MessageContext } from '../../context/message-context';
 import { useFiles, useGetInfo } from '../../hooks/files';
-import { emptyFile } from '../../services/models';
 
 const SharedWithModal = forwardRef((props, ref) => {
     const shareModal = useRef(null);
     const userIdAdded = useRef(null);
     const messageContext = useContext(MessageContext);
-    const [ file, setFile ] = useState(emptyFile);
+    const [ file, setFile ] = useState(null);
     const { getUserInfo } = useGetInfo();
     const { updateFile, removeUserFromFile, addUserToFile } = useFiles();
 

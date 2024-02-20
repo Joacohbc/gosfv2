@@ -11,7 +11,6 @@ import useJobsQueue from '../hooks/jobsQueue';
 import '../components/Message.css';
 import useFilesIDB from '../hooks/useFilesIDB';
 import FileContainer from '../components/FileContainer';
-import { emptyFileList } from '../services/models';
 
 const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extension: '', deleted: false });
 
@@ -34,7 +33,7 @@ export default function Files() {
 
     const uploadButton = useRef(null);
     
-    const [ files, setFiles ] = useState(emptyFileList);
+    const [ files, setFiles ] = useState([]);
     const [ progress, setProgress ] = useState(0);
     const [ fileLoader, setFileLoader ] = useState(() => {});
     const [ uploading, setUploading ] = useState(false);
