@@ -18,3 +18,13 @@ export type User = {
     icon: string;
     username: string;
 }
+
+export type Note = {
+    id: number;
+    title: string;
+    content: string;
+    createdAt: string;
+    updatedAt: string;
+    parentId: number;
+    savedLocal: boolean;
+}

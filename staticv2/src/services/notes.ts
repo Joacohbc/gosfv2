@@ -1,4 +1,4 @@
-import { Note, emptyNote } from "./models";
+import { Note } from "./models";
 import getAuthBasic from "./utils.ts";
 
 interface NoteAPI {
@@ -13,7 +13,7 @@ const getNoteService = (baseUrlInput: string, tokenInput: string) : NoteAPI => {
         getNote: async () => {
             try {
                 const res = await cAxios.get('/api/notes');
-                return res.data || emptyNote;
+                return res.data;
             } catch(err) {
                 throw new Error(err.response.data.message);
             }
