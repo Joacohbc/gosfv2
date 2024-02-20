@@ -16,8 +16,6 @@ interface FilesAPI {
     addTokenParam: (url: string) => string;
 };
 
-
-
 const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => {
     const { addTokenParam, cAxios, baseUrl, token } = getAuthBasic(baseUrlInput, tokenInput);
 
@@ -41,19 +39,10 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
             }
         },        
         async getFiles(): Promise<cFile[]> {
-            const cache = await caches.open('v1');
             try {                
                 const res = await cAxios.get('/api/files');
-                cache.put('/api/files', new Response(JSON.stringify(res.data)));
                 return res.data ?? [];
             } catch (err : any) {
-                if (err.response.status === 404) {
-                    const cachedResponse = await cache.match('/api/files');
-                    if(cachedResponse) {
-                        const res = await cachedResponse.json();
-                        return res;
-                    }
-    }
                 throw new Error(err.response.data.message);
             }
         },        
