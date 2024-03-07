@@ -39,7 +39,7 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
             }
         },        
         async getFiles(): Promise<cFile[]> {
-            try {
+            try {                
                 const res = await cAxios.get('/api/files');
                 return res.data ?? [];
             } catch (err : any) {
