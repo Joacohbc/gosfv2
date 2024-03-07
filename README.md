@@ -121,14 +121,8 @@ docker compose --env-file config.env up
 
 ## Frontend Implementado
 
-### Login & Register Page
+![Login and Register Page](/readme/Login%20and%20Register.png)
 
-![Login Page](/readme/Login%20Page.png) ![Register Page](/readme/Register%20Page.png)
+![User, Home, Notes](/readme//Main%20Pages.png)
 
-### Home Page
-
-![Home Page](/readme/Main%20Page.png) ![Home Page sin archivos](/readme/Main%20Page%20No%20Files.png) ![Shared Overlay](/readme/Shared%20Overlay.png)
-
-### User Profile
-
-![User Profile Page](/readme/User%20Page%20Options.png)
+![Share Overlay](/readme/Share%20Overlay.png)
