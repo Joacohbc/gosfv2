@@ -10,7 +10,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 
 export default function User() {
     const messageContext = useContext(MessageContext);
-    const { onLogOut } = useContext(AuthContext);
+    const { onLogOut, isLogged } = useContext(AuthContext);
     const { getMyIconURL, getMyInfo, uploadIcon, updateUser, changePassword, deleteIcon, deleteAccount } = useUsers();
     const [ iconURL, setIconURL ] = useState('');
     const [ userInfo, setUserInfo ] = useState({});
@@ -21,9 +21,11 @@ export default function User() {
     const deleteAccountDialog = useRef(null);
     
     useEffect(() => {
+        if(!isLogged) return;
+        
         getMyInfo().then(data => setUserInfo(data))
         setIconURL(getMyIconURL());
-    }, [ getMyInfo, messageContext, getMyIconURL ])
+    }, [ getMyInfo, messageContext, getMyIconURL, isLogged ])
 
     const handleCopyUserId = async (e) => {
         e.preventDefault();
