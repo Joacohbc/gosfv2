@@ -11,7 +11,7 @@ import useJobsQueue from '../hooks/jobsQueue';
 import '../components/Message.css';
 import useFilesIDB from '../hooks/useFilesIDB';
 import FileContainer from '../components/FileContainer';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extension: '', deleted: false });
 
@@ -32,6 +32,7 @@ export default function Files() {
     const messageContext = useContext(MessageContext);
     const { isLogged } = useContext(AuthContext);
     const { sharedFileId } = useParams();
+    const navigate = useNavigate();
 
     const uploadButton = useRef(null);
     
@@ -162,7 +163,8 @@ export default function Files() {
     const handleClosePreview = useCallback(() => {
         setPreview({ type: 'HIDE_PREVIEW' });
         setPreview({ type: 'SET_PREVIEW_FILE', payload: emptyFile });
-    }, [ ]);  
+        navigate('/files');
+    }, [ navigate ]);  
 
     const handleFileDropEnd = (e) => {
         e.preventDefault();
