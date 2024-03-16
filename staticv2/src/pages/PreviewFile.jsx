@@ -3,7 +3,7 @@ import { memo } from 'react';
 
 const PreviewFile = memo(({ url, contentType, className }) => {
     return <>
-        { !url && <h1>404</h1> }
+        { !url && <h1 className={className}>404</h1> }
         { contentType.includes('video') ? <video className={className} controls><source src={url} type={contentType}/></video> 
         : <iframe src={url} className={className}/> }
     </>;
