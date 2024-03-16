@@ -5,6 +5,7 @@ import getContentTypeByFileName from "../utils/content-types";
 interface FilesAPI {
     getFileInfo: (fileId: string) => Promise<cFile>;
     getShareFile: (fileId: string) => Promise<cFile>;
+    getShareFileInfo(fileId: string): Promise<cFile>;
     getFiles: () => Promise<Array<cFile>>;
     updateFile: (fileId: string, fileData: any) => Promise<{ data: cFile, message: string }>;
     deleteFile: (fileId: string, force: boolean) => Promise<{ data: cFile, message: string }>;
@@ -17,7 +18,7 @@ interface FilesAPI {
 };
 
 const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => {
-    const { addTokenParam, cAxios, baseUrl, token } = getAuthBasic(baseUrlInput, tokenInput);
+    const { addTokenParam, cAxios, baseUrl } = getAuthBasic(baseUrlInput, tokenInput);
 
     return {
         addTokenParam,
@@ -33,6 +34,14 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
         async getShareFile(fileId: string): Promise<cFile> {
             try {
                 const res = await cAxios.get(`/api/files/share/${fileId}`);
+                return res.data ?? {};
+            } catch (err : any) {
+                throw new Error(err.response.data.message);
+            }
+        },
+        async getShareFileInfo(fileId: string): Promise<cFile> {
+            try {
+                const res = await cAxios.get(`/api/files/share/${fileId}/info`);
                 return res.data ?? {};
             } catch (err : any) {
                 throw new Error(err.response.data.message);

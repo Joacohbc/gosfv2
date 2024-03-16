@@ -5,11 +5,10 @@ import { useNotes } from '../hooks/notes';
 import { useState, useContext } from 'react';
 import { MessageContext } from '../context/message-context';
 import Button from '../components/Button';
-import { emptyNote } from '../services/models';
 
 export default function Notes() {
     const [ text, setText ] = useState('');
-    const { getNote, setNote } = useNotes(emptyNote);
+    const { getNote, setNote } = useNotes({});
     const messageContext = useContext(MessageContext);
 
     useEffect(() => {

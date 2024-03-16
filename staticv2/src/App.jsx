@@ -23,7 +23,11 @@ function App() {
           <Route path="me" element={<User />} />
           <Route path="files" element={< Files/>} />
           <Route path="notes" element={< Notes/>} />
-          <Route path="/shared/:sharedFileId" element={< PreviewFile/>}/>
+          <Route path="/shared/:sharedFileId" element={<div>
+            <div className='d-flex flex-fill w-100 vh-100'>
+                <PreviewFile className="flex-fill" />
+            </div>
+          </div>}/>
           <Route path="*" element={<NoPage />} />
         </Route>
       </Routes>

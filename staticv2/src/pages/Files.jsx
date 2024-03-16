@@ -29,7 +29,7 @@ const previewReducer = (state, action) => {
 
 export default function Files() {
     const messageContext = useContext(MessageContext);
-    const { isLogged, cAxios } = useContext(AuthContext);
+    const { isLogged } = useContext(AuthContext);
 
     const uploadButton = useRef(null);
     
@@ -76,14 +76,14 @@ export default function Files() {
     }, [ messageContext, getFilenameInfo, getFiles, getFileFromLocal ]);
     
     useEffect(() => {
-        if(!cAxios || !isLogged) return;
+        if(!isLogged) return;
     
         setSearching(true);
         createFileLoader().then((loadInfo) => {
             setFileLoader(() => loadInfo);
             loadInfo();
         }).finally(() => setSearching(false));
-    }, [ isLogged, cAxios, createFileLoader ]);
+    }, [ isLogged, createFileLoader ]);
 
     const handleDeleteAllInQueue = () => {
         executeAllJobs();
@@ -179,8 +179,6 @@ export default function Files() {
         for(let i = 0; i < files.length; i++) {
             form.append('files', files[i]);
         }
-
-        console.log(form);
 
         setUploading(true);
 
