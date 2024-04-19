@@ -7,7 +7,6 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import './css/index.css';
 import { AuthContextProvider } from "./context/auth-context";
-import PreviewFile from "./pages/PreviewFile";
 import MessageComponentProvider from "./context/message-context";
 import Notes from "./pages/Notes";
 
@@ -23,7 +22,7 @@ function App() {
           <Route path="me" element={<User />} />
           <Route path="files" element={< Files/>} />
           <Route path="notes" element={< Notes/>} />
-          <Route path="/shared/:sharedFileId" element={< PreviewFile/>}/>
+          <Route path="/shared/:sharedFileId" element={ <Files/>}/>
           <Route path="*" element={<NoPage />} />
         </Route>
       </Routes>

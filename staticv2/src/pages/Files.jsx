@@ -11,6 +11,7 @@ import useJobsQueue from '../hooks/jobsQueue';
 import '../components/Message.css';
 import useFilesIDB from '../hooks/useFilesIDB';
 import FileContainer from '../components/FileContainer';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extension: '', deleted: false });
 
@@ -29,7 +30,9 @@ const previewReducer = (state, action) => {
 
 export default function Files() {
     const messageContext = useContext(MessageContext);
-    const { isLogged, cAxios } = useContext(AuthContext);
+    const { isLogged } = useContext(AuthContext);
+    const { sharedFileId } = useParams();
+    const navigate = useNavigate();
 
     const uploadButton = useRef(null);
     
@@ -43,7 +46,7 @@ export default function Files() {
     const { previewFile, showPreview } = state;
 
     const { getFilenameInfo } = useGetInfo();
-    const { getFiles, uploadFile } = useFiles();
+    const { getFiles, uploadFile, getShareFileInfo } = useFiles();
     const { addJob, undoLastJob, jobsQueue, executeAllJobs } = useJobsQueue(3000);
     const { getFileFromLocal } = useFilesIDB();
 
@@ -76,14 +79,21 @@ export default function Files() {
     }, [ messageContext, getFilenameInfo, getFiles, getFileFromLocal ]);
     
     useEffect(() => {
-        if(!cAxios || !isLogged) return;
+        if(!isLogged) return;
     
+        if(sharedFileId) {
+            getShareFileInfo(sharedFileId).then((file) => {
+                setPreview({ type: 'SET_PREVIEW_FILE', payload: getFilenameInfo(file, true) });
+                setPreview({ type: 'SHOW_PREVIEW' });
+            }).catch(err => messageContext.showError(err.message));
+        }
+
         setSearching(true);
         createFileLoader().then((loadInfo) => {
             setFileLoader(() => loadInfo);
             loadInfo();
         }).finally(() => setSearching(false));
-    }, [ isLogged, cAxios, createFileLoader ]);
+    }, [ isLogged, createFileLoader, getShareFileInfo, sharedFileId, messageContext, getFilenameInfo]);
 
     const handleDeleteAllInQueue = () => {
         executeAllJobs();
@@ -140,7 +150,6 @@ export default function Files() {
     const handleFilesUpdate = useCallback((updatedFile) => setFiles((files) => files.map(file => file.id == updatedFile.id ? updatedFile : file)) , [ ]);
 
     const handleOpenPreview = useCallback(async (file) => {
-
         // Si el archivo esta en la base de datos local, se obtiene la URL del archivo
         const localFile = await getFileFromLocal(file.id);
         if (localFile != null) {
@@ -154,7 +163,8 @@ export default function Files() {
     const handleClosePreview = useCallback(() => {
         setPreview({ type: 'HIDE_PREVIEW' });
         setPreview({ type: 'SET_PREVIEW_FILE', payload: emptyFile });
-    }, [ ]);  
+        navigate('/files');
+    }, [ navigate ]);  
 
     const handleFileDropEnd = (e) => {
         e.preventDefault();
@@ -180,8 +190,6 @@ export default function Files() {
             form.append('files', files[i]);
         }
 
-        console.log(form);
-
         setUploading(true);
 
         uploadFile(form).then(res => {
@@ -203,7 +211,7 @@ export default function Files() {
         <Modal show={showPreview} onHide={handleClosePreview} className='d-flex modal-bg' fullscreen centered>
             <Modal.Header closeButton className='bg-modal' closeVariant='white'>{previewFile.filename}</Modal.Header>
             <div className='d-flex flex-fill'>
-                <PreviewFile fileInfo={previewFile} className="flex-fill" />
+                <PreviewFile contentType={previewFile.contentType} url={sharedFileId ? previewFile.sharedUrl : previewFile.url} className="flex-fill" />
             </div>
         </Modal>}
 

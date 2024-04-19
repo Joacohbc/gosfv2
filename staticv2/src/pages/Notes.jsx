@@ -4,22 +4,25 @@ import { useEffect } from 'react';
 import { useNotes } from '../hooks/notes';
 import { useState, useContext } from 'react';
 import { MessageContext } from '../context/message-context';
+import AuthContext from '../context/auth-context';
 import Button from '../components/Button';
-import { emptyNote } from '../services/models';
 
 export default function Notes() {
     const [ text, setText ] = useState('');
-    const { getNote, setNote } = useNotes(emptyNote);
+    const { getNote, setNote } = useNotes({});
+    const { isLogged } = useContext(AuthContext);
     const messageContext = useContext(MessageContext);
 
     useEffect(() => {
+        if(!isLogged) return;
+
         getNote().then((note) => {
             setText(note.content);
             messageContext.showSuccess(note.message);
         }).catch((err) => {
             messageContext.showError(err.message)
         });
-    }, [ getNote, messageContext ]);
+    }, [ getNote, messageContext, isLogged ]);
 
     const copyLink = async (e) => {
         e.preventDefault();

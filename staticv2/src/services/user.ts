@@ -13,7 +13,7 @@ interface UsersAPI {
 };
 
 const getUserService = (baseUrlInput: string, tokenInput: string) : UsersAPI => {
-    const { addTokenParam, cAxios, baseUrl, token } = getAuthBasic(baseUrlInput, tokenInput);
+    const { addTokenParam, cAxios, baseUrl } = getAuthBasic(baseUrlInput, tokenInput);
 
     return {
         getMyIconURL: () => {

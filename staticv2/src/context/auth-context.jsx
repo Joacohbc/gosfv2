@@ -6,7 +6,6 @@ import axios from "axios";
 const AuthContext = createContext({
     token: '',
     isLogged: false,
-    cAxios: null,
     baseUrl: '',
     onLogOut: async () => {},
     onLogin: async (username, password) => {},
@@ -29,15 +28,14 @@ const resetAuthData = () => {
 }
 
 export const AuthContextProvider = (props) => { 
-    // const BASE_URL = 'http://localhost:3000';
-    const BASE_URL = window.location.origin;
+    const BASE_URL = 'http://localhost:3000';
+    // const BASE_URL = window.location.origin;
     
     const navigate = useNavigate();
     const location = useLocation();
 
     const [ isLogged, setIsLogged ] = useState(false);
     const [ token, setToken ] = useState('');
-    const [ cAxios, setCAxios ] = useState(null);
 
     const { pathname: currentRoute } = location;
 
@@ -48,12 +46,6 @@ export const AuthContextProvider = (props) => {
         if (token) {
             setIsLogged(true);
             setToken(token);
-            setCAxios(() => axios.create({
-                baseURL: BASE_URL,
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            }));
             
             if(currentRoute == '/login' || currentRoute == '/register') {
                 navigate("/files");
@@ -142,7 +134,6 @@ export const AuthContextProvider = (props) => {
     return <AuthContext.Provider value={{
         token: token,
         isLogged: isLogged,
-        cAxios: cAxios,
         baseUrl: BASE_URL,
         onLogin: loginHandler,
         onLogOut: logOutHandler,

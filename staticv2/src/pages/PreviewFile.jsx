@@ -1,48 +1,20 @@
-import { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { useGetInfo } from "../hooks/files";
-import AuthContext from "../context/auth-context";
 import PropTypes from 'prop-types';
+import { memo } from 'react';
 
-const PreviewFile = (props) => {
-    const { sharedFileId } = useParams();
-    const [ previewFile, setPreviewFile ] = useState(props.fileInfo);
-    const { cAxios } = useContext(AuthContext);
-    const { getFilenameInfo } = useGetInfo();
+const PreviewFile = memo(({ url, contentType, className }) => {
+    return <>
+        { !url && <h1 className={className}>404</h1> }
+        { contentType.includes('video') ? <video className={className} controls><source src={url} type={contentType}/></video> 
+        : <iframe src={url} className={className}/> }
+    </>;
+});
 
-    useEffect(() => {
-        if(!sharedFileId) return;
-        if(!cAxios) return;
-
-        const fetchDataFile = async () => {
-            try {
-                const res = await cAxios.get(`/api/files/share/${sharedFileId}/info`);
-                setPreviewFile(getFilenameInfo(res.data, true));
-            } catch(err) {
-                console.log(err);
-            }
-        }
-        
-        fetchDataFile();
-    }, [ sharedFileId, cAxios, getFilenameInfo ]);
-
-    const previewComponent = () => {
-        if(!previewFile) return <h1>404</h1>;
-
-        const url = !sharedFileId ? previewFile?.url : previewFile?.sharedUrl;
-
-        console.log(url);
-        if(previewFile?.contentType?.includes('video'))
-            return <video className={props.className} controls><source src={url} type={previewFile?.contentType}/></video>;
-        
-        return <iframe src={url} className={props.className}/>;
-    }
-
-    return previewComponent();
-};
+PreviewFile.displayName = 'PreviewFile';
 
 PreviewFile.propTypes = {
-    file: PropTypes.object,
+    url: PropTypes.string,
+    contentType: PropTypes.string,
+    className: PropTypes.string
 }
 
 export default PreviewFile;
