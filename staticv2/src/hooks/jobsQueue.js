@@ -38,6 +38,7 @@ const useJobsQueue = (ms) => {
     const undoJob = useCallback((job) => {
         clearTimeout(job.id);
         if(job.undoJobFunc) job.undoJobFunc();
+        setJobsQueue((jobsQueue) => jobsQueue.filter(j => j.id !== job.id));
     }, []);
 
     /**
