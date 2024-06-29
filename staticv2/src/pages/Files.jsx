@@ -71,7 +71,12 @@ export default function Files() {
             const numberOfFilesPerLoad = data.length >= 5 ? 5 : data.length;
             setFiles(data);
             setProgress(0);
-            return () => setProgress(prevProgress => prevProgress >= data.length ? data.length : prevProgress + numberOfFilesPerLoad);
+            return () => {
+                setProgress(prevProgress => {
+                    const nextProgress = prevProgress + numberOfFilesPerLoad;
+                    return nextProgress >= data.length ? data.length : nextProgress;
+                });
+}
         } catch(err) {
             messageContext.showError(err.message);
             return [];
