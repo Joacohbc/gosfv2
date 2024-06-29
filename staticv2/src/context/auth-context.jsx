@@ -10,8 +10,7 @@ const AuthContext = createContext({
     onLogOut: async () => {},
     onLogin: async (username, password) => {},
     onRegister: async (username, password) => {},
-    onRestore: async (username, password) => {},
-    addTokenParam: (url) => {},
+    onRestore: async (username, password) => {}
 });
 
 const setAuthData = (token, duration) => {
@@ -70,7 +69,7 @@ export const AuthContextProvider = (props) => {
 
     const loginHandler = async (username, password) => {
         try {
-            const req = await axios.post(BASE_URL + '/auth/login', {
+            const req = await axios.post(BASE_URL + '/auth/login?cookie=yes', {
                 username: username,
                 password: password
             });
@@ -86,7 +85,7 @@ export const AuthContextProvider = (props) => {
 
     const restoreTokenHandler = async (username, password) => {
         try {
-            await axios.post(BASE_URL + '/auth/restore', {
+            await axios.post(BASE_URL + '/auth/restore?cookie=yes', {
                 username: username,
                 password: password
             });
@@ -99,7 +98,7 @@ export const AuthContextProvider = (props) => {
 
     const logOutHandler = async () => {
         try {
-            await axios.delete(BASE_URL + '/auth/logout', {
+            await axios.delete(BASE_URL + '/auth/logout?cookie=yes', {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -125,12 +124,6 @@ export const AuthContextProvider = (props) => {
         }
     };
     
-    const addTokenParam = (url) => {
-        const urlObj = new URL(url);
-        urlObj.searchParams.append('api-token', token);
-        return urlObj.toString();
-    };
-
     return <AuthContext.Provider value={{
         token: token,
         isLogged: isLogged,
@@ -138,8 +131,7 @@ export const AuthContextProvider = (props) => {
         onLogin: loginHandler,
         onLogOut: logOutHandler,
         onRegister: registerHandler,
-        onRestore: restoreTokenHandler,    
-        addTokenParam: addTokenParam
+        onRestore: restoreTokenHandler
     }}>{props.children}</AuthContext.Provider>
 };
 

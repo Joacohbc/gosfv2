@@ -56,7 +56,7 @@ export default function Files() {
 
             // Filtra los archivos
             let data = filterCb(files.map(file => {
-                const f = getFilenameInfo(file, true);
+                const f = getFilenameInfo(file, false);
                 f.deleted = false;
                 return f;
             }))
@@ -89,7 +89,7 @@ export default function Files() {
     
         if(sharedFileId) {
             getShareFileInfo(sharedFileId).then((file) => {
-                setPreview({ type: 'SET_PREVIEW_FILE', payload: getFilenameInfo(file, true) });
+                setPreview({ type: 'SET_PREVIEW_FILE', payload: getFilenameInfo(file, false) });
                 setPreview({ type: 'SHOW_PREVIEW' });
             }).catch(err => messageContext.showError(err.message));
         }

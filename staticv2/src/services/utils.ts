@@ -11,6 +11,7 @@ type AuthBasic = {
 const getAuthBasic = (baseUrlInput : string, tokenInput : string) : AuthBasic => {
     const baseUrl = baseUrlInput;
     const token = tokenInput;
+    
     const cAxios = axios.create({
         baseURL: baseUrl,
         headers: {
