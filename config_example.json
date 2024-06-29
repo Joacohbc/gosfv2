@@ -15,5 +15,6 @@
 	"redis_db": 0,
     "files_directory": "./files",
     "static_files": "./static",
-    "max_token_per_user": 5
+    "max_token_per_user": 5,
+    "dev_mode": true
 }

@@ -17,6 +17,7 @@ type config struct {
 	FilesDirectory  string `json:"files_directory"`
 	StaticFiles     string `json:"static_files"`
 	MaxTokenPerUser int    `json:"max_token_per_user"`
+	DevMode         bool   `json:"dev_mode"`
 }
 
 type sql struct {
