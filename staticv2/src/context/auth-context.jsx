@@ -34,7 +34,7 @@ export const AuthContextProvider = (props) => {
                 duration: req.data.duration
             };
         } catch(err) {
-            return new Error(err.response.data.message);
+            throw new Error(err.response.data.message);
         }
     }, [ BASE_URL ]);
 
@@ -43,7 +43,7 @@ export const AuthContextProvider = (props) => {
             await axios.delete(BASE_URL + '/auth/logout?cookie=yes');
             return 'User logged out successfully';
         } catch(err) {
-            return new Error(err.response.data.message);
+            throw new Error(err.response.data.message);
         }
     }, [ BASE_URL]);
 
@@ -107,7 +107,8 @@ export const AuthContextProvider = (props) => {
             navigate('/files');
             return 'User logged in successfully';
         } catch(err) {
-            return new Error(err.response.data.message);
+            console.log(err.response.data.message);
+            throw new Error(err.response.data.message);
         }
     };
 
@@ -119,7 +120,7 @@ export const AuthContextProvider = (props) => {
             });
             return 'All Tokens are restore successfully';
         } catch(err) {
-            return new Error(err.response.data.message);
+            throw new Error(err.response.data.message);
         }
     };
 
@@ -131,7 +132,7 @@ export const AuthContextProvider = (props) => {
             });
             return 'User created successfully';
         } catch(err) {
-            return new Error(err.response.data.message);
+            throw new Error(err.response.data.message);
         }
     };
     
