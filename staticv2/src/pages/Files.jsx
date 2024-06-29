@@ -2,7 +2,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './Files.css';
 import AuthContext from '../context/auth-context';
 import Modal from 'react-bootstrap/Modal';
-import { useCallback, useContext, useEffect, useState, useReducer, useRef } from 'react';
+import { useCallback, useContext, useEffect, useState, useReducer, useRef, lazy } from 'react';
 import { handleKeyUpWithTimeout } from '../utils/input-text';
 import PreviewFile from './PreviewFile';
 import { MessageContext } from '../context/message-context';
@@ -56,22 +56,28 @@ export default function Files() {
 
             // Filtra los archivos
             let data = filterCb(files.map(file => {
-                const f = getFilenameInfo(file, true);
+                const f = getFilenameInfo(file, false);
                 f.deleted = false;
                 return f;
             }))
 
-            // Verifica si los archivos estan guardados localmente
+            // Verifica si los archivos están guardados localmente
             await Promise.allSettled(data.map(async (file) => {
                 const localFile = await getFileFromLocal(file.id);
                 file.savedLocal = localFile != null;
             }));
 
-            // Carga de 5 en 5 archivos o todos los archivos si son menos de 5
-            const numberOfFilesPerLoad = data.length >= 5 ? 5 : data.length;
+            const x = 35;
+            // Carga de X en X archivos o todos los archivos si son menos de X
+            const numberOfFilesPerLoad = data.length >= x ? x : data.length;
             setFiles(data);
             setProgress(0);
-            return () => setProgress(prevProgress => prevProgress >= data.length ? data.length : prevProgress + numberOfFilesPerLoad);
+            return () => {
+                setProgress(prevProgress => {
+                    const nextProgress = prevProgress + numberOfFilesPerLoad;
+                    return nextProgress >= data.length ? data.length : nextProgress;
+                });
+            }
         } catch(err) {
             messageContext.showError(err.message);
             return [];
@@ -83,12 +89,13 @@ export default function Files() {
     
         if(sharedFileId) {
             getShareFileInfo(sharedFileId).then((file) => {
-                setPreview({ type: 'SET_PREVIEW_FILE', payload: getFilenameInfo(file, true) });
+                setPreview({ type: 'SET_PREVIEW_FILE', payload: getFilenameInfo(file, false) });
                 setPreview({ type: 'SHOW_PREVIEW' });
             }).catch(err => messageContext.showError(err.message));
         }
 
         setSearching(true);
+        
         createFileLoader().then((loadInfo) => {
             setFileLoader(() => loadInfo);
             loadInfo();
@@ -163,7 +170,7 @@ export default function Files() {
     const handleClosePreview = useCallback(() => {
         setPreview({ type: 'HIDE_PREVIEW' });
         setPreview({ type: 'SET_PREVIEW_FILE', payload: emptyFile });
-        navigate('/files');
+        navigate('/files'); // To avoid that in the next re-load the file is opened again
     }, [ navigate ]);  
 
     const handleFileDropEnd = (e) => {
@@ -207,13 +214,13 @@ export default function Files() {
     return <>
         <div className="loader file-loading" hidden={!uploading}> Uploading files </div> 
 
-        {showPreview && 
+        { showPreview && 
         <Modal show={showPreview} onHide={handleClosePreview} className='d-flex modal-bg' fullscreen centered>
             <Modal.Header closeButton className='bg-modal' closeVariant='white'>{previewFile.filename}</Modal.Header>
             <div className='d-flex flex-fill'>
                 <PreviewFile contentType={previewFile.contentType} url={sharedFileId ? previewFile.sharedUrl : previewFile.url} className="flex-fill" />
             </div>
-        </Modal>}
+        </Modal> }
 
         <div className="d-flex justify-content-center align-items-center mb-4">
             <input type="text" placeholder="Enter Search" className='search-input' onKeyUp={handleSearch}/>
@@ -237,14 +244,17 @@ export default function Files() {
                 ref={uploadButton} >
                 <i className='bi bi-plus-square-dotted'/>
             </label>
+
             <input id="input-upload" type="file" style={{display: 'none'}} onChange={handleFileUpload} multiple/>
 
             { jobsQueue.length > 0 && 
-                <div className='undo-button'>
-                    <label onClick={undoLastJob}><i className="bi bi-arrow-clockwise fs-2"/></label>
-                    <span>{jobsQueue.length}</span>
-                </div> }
-            { jobsQueue.length > 0 && <label className='undo-button' onClick={handleDeleteAllInQueue}><i className="bi bi-tornado fs-2"/></label> }
+            <div className='undo-button'>
+                <label onClick={undoLastJob}><i className="bi bi-arrow-clockwise fs-2"/></label>
+                <span>{jobsQueue.length}</span>
+            </div> }
+            
+            { jobsQueue.length > 0 && 
+            <label className='undo-button' onClick={handleDeleteAllInQueue}><i className="bi bi-tornado fs-2"/></label> }
         </div>
     </>
 }

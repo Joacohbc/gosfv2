@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PropTypes from 'prop-types';
 import axios from "axios";
@@ -10,22 +10,8 @@ const AuthContext = createContext({
     onLogOut: async () => {},
     onLogin: async (username, password) => {},
     onRegister: async (username, password) => {},
-    onRestore: async (username, password) => {},
-    addTokenParam: (url) => {},
+    onRestore: async (username, password) => {}
 });
-
-const setAuthData = (token, duration) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('duration', duration);
-    let expires = new Date(Date.now() + duration * 1000 * 60);
-    localStorage.setItem('expires', expires);
-}
-
-const resetAuthData = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('duration');
-    localStorage.removeItem('expires');
-}
 
 export const AuthContextProvider = (props) => { 
     const BASE_URL = 'http://localhost:3000';
@@ -39,77 +25,101 @@ export const AuthContextProvider = (props) => {
 
     const { pathname: currentRoute } = location;
 
-    useEffect(() => {
-        const token = localStorage.getItem('token');
+    const refreshTokenHandler = useCallback(async () => {
+        try {
+            const req = await axios.get(BASE_URL + '/auth/refresh?cookie=yes');
 
-        // Si el token esta seteado y la ruta actual es login o register redireccionar a files
-        if (token) {
+            return {
+                token: req.data.token,
+                duration: req.data.duration
+            };
+        } catch(err) {
+            return new Error(err.response.data.message);
+        }
+    }, [ BASE_URL ]);
+
+    const logOutHandler = useCallback(async () => {
+        try {
+            await axios.delete(BASE_URL + '/auth/logout?cookie=yes');
+            return 'User logged out successfully';
+        } catch(err) {
+            return new Error(err.response.data.message);
+        }
+    }, [ BASE_URL]);
+
+    const verifyToken = useCallback(async () => {
+        try {
+            const req = await axios.get(BASE_URL + '/auth/verify');
+
+            return {
+                token: req.data.token,
+                durationRemaining: req.data.durationRemaining
+            }
+        } catch(err) {
+            throw new Error(err.response.data.message);
+        }
+    }, [ BASE_URL ]);
+
+    useEffect(() => {
+        if(isLogged) return;
+        
+        verifyToken()
+        .then((currentTokenInfo) => {
             setIsLogged(true);
-            setToken(token);
+            setToken(currentTokenInfo.token);
             
             if(currentRoute == '/login' || currentRoute == '/register') {
-                navigate("/files");
+                navigate('/files');
             }
             
-            // Si el token expiro redireccionar a login
-            const expire = Date.parse(localStorage.getItem('expires'));
-            if(expire - Date.now() <= 0) {
-                navigate("/login");
-                resetAuthData();
+            if(currentTokenInfo.durationRemaining <= 10) {
+                refreshTokenHandler()
+                .then((newTokenInfo) => {
+                    setToken(newTokenInfo.token);
+                    setIsLogged(true);
+                }).catch(() => {
+                    logOutHandler();
+                    navigate('/login');
+                });
             }
-            return;
-        } 
-        
-        // Si el token no esta seteado y la ruta actual es login o register no redireccionar a login
-        if(currentRoute == '/login' || currentRoute == '/register') return;
-        
-        // Si el token no esta seteado redireccionar a login
-        navigate("/login");
-        resetAuthData();
-    }, [ token, currentRoute, navigate, BASE_URL ]);
+        })
+        .catch(() => {
+            // Si el token no esta seteado y la ruta actual no es login o register redireccionar a login
+            setIsLogged(false);
+            setToken('');
+            logOutHandler();
+            
+            if(currentRoute != '/login' && currentRoute != '/register') {
+                navigate("/login");
+            }
+        });
+    }, [token, currentRoute, navigate, BASE_URL, verifyToken, logOutHandler, isLogged, refreshTokenHandler]);
 
     const loginHandler = async (username, password) => {
         try {
-            const req = await axios.post(BASE_URL + '/auth/login', {
+            const req = await axios.post(BASE_URL + '/auth/login?cookie=yes', {
                 username: username,
                 password: password
             });
 
-            setAuthData(req.data.token, req.data.duration);
             setToken(req.data.token);
             setIsLogged(true);
-            return Promise.resolve('User logged in successfully');
+            navigate('/files');
+            return 'User logged in successfully';
         } catch(err) {
-            return Promise.reject(new Error(err.response.data.message));
+            return new Error(err.response.data.message);
         }
     };
 
     const restoreTokenHandler = async (username, password) => {
         try {
-            await axios.post(BASE_URL + '/auth/restore', {
+            await axios.post(BASE_URL + '/auth/restore?cookie=yes', {
                 username: username,
                 password: password
             });
-            resetAuthData();
-            return Promise.resolve('All Tokens are restore successfully');
+            return 'All Tokens are restore successfully';
         } catch(err) {
-            return Promise.reject(new Error(err.response.data.message));
-        }
-    };
-
-    const logOutHandler = async () => {
-        try {
-            await axios.delete(BASE_URL + '/auth/logout', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            return Promise.resolve('User logged out successfully');
-        } catch(err) {
-            return Promise.reject(new Error(err.response.data.message));
-        } finally {
-            resetAuthData();
-            navigate('/login');
+            return new Error(err.response.data.message);
         }
     };
 
@@ -119,18 +129,12 @@ export const AuthContextProvider = (props) => {
                 username: username,
                 password: password
             });
-            return Promise.resolve('User created successfully');
+            return 'User created successfully';
         } catch(err) {
-            return Promise.reject(new Error(err.response.data.message));
+            return new Error(err.response.data.message);
         }
     };
     
-    const addTokenParam = (url) => {
-        const urlObj = new URL(url);
-        urlObj.searchParams.append('api-token', token);
-        return urlObj.toString();
-    };
-
     return <AuthContext.Provider value={{
         token: token,
         isLogged: isLogged,
@@ -138,8 +142,7 @@ export const AuthContextProvider = (props) => {
         onLogin: loginHandler,
         onLogOut: logOutHandler,
         onRegister: registerHandler,
-        onRestore: restoreTokenHandler,    
-        addTokenParam: addTokenParam
+        onRestore: restoreTokenHandler
     }}>{props.children}</AuthContext.Provider>
 };
 

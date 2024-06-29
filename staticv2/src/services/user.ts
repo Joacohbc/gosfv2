@@ -13,13 +13,13 @@ interface UsersAPI {
 };
 
 const getUserService = (baseUrlInput: string, tokenInput: string) : UsersAPI => {
-    const { addTokenParam, cAxios, baseUrl } = getAuthBasic(baseUrlInput, tokenInput);
+    const { cAxios, baseUrl } = getAuthBasic(baseUrlInput, tokenInput);
 
     return {
         getMyIconURL: () => {
             const url = new URL(`${baseUrl}/api/users/me/icon`);
             url.searchParams.append('random', new Date().getTime().toString());
-            return addTokenParam(url.toString());
+            return url.toString();
         },
         getMyInfo: async () => {
             try {
