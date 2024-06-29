@@ -67,8 +67,9 @@ export default function Files() {
                 file.savedLocal = localFile != null;
             }));
 
-            // Carga de 5 en 5 archivos o todos los archivos si son menos de 5
-            const numberOfFilesPerLoad = data.length >= 5 ? 5 : data.length;
+            const x = 35;
+            // Carga de X en X archivos o todos los archivos si son menos de X
+            const numberOfFilesPerLoad = data.length >= x ? x : data.length;
             setFiles(data);
             setProgress(0);
             return () => {
