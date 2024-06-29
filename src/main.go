@@ -90,7 +90,7 @@ func main() {
 	e.HideBanner = true
 	e.HidePort = true
 	e.Logger = logger.Logger(log.DEBUG)
-	e.Debug = false
+	e.Debug = env.Config.DevMode
 
 	// Configuración de la salida de la información del servidor
 	staticAbs, err := filepath.Abs(env.Config.StaticFiles)

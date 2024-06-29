@@ -1,7 +1,6 @@
 package jwt
 
 import (
-	"gosfV2/src/models/env"
 	"net/http"
 	"time"
 
@@ -24,8 +23,7 @@ func GetTokenCookie(c echo.Context) (string, error) {
 // Setea la Cookie en la respuesta (si se pasara el QueryParam de la Cookie)
 func SetTokenCookieFromQuery(c echo.Context, token string) {
 	if c.QueryParam(cookieQueryName) != "" {
-
-		config := &http.Cookie{
+		c.SetCookie(&http.Cookie{
 			Name:     cookieName,
 			Value:    token,
 			Expires:  time.Now().Add(tokenDuration),
@@ -34,16 +32,7 @@ func SetTokenCookieFromQuery(c echo.Context, token string) {
 			HttpOnly: true,
 			Secure:   true,
 			SameSite: http.SameSiteStrictMode,
-		}
-
-		// Si estamos en modo desarrollo, no se establece la cookie como segura y se establece el SameSite como None
-		// para poder probar la aplicación en local sin problemas
-		if env.Config.DevMode {
-			config.Secure = false
-			config.SameSite = http.SameSiteDefaultMode
-		}
-
-		c.SetCookie(config)
+		})
 	}
 }
 
