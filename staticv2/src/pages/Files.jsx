@@ -2,7 +2,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './Files.css';
 import AuthContext from '../context/auth-context';
 import Modal from 'react-bootstrap/Modal';
-import { useCallback, useContext, useEffect, useState, useReducer, useRef, lazy } from 'react';
+import { useCallback, useContext, useEffect, useState, useReducer, useRef } from 'react';
 import { handleKeyUpWithTimeout } from '../utils/input-text';
 import PreviewFile from './PreviewFile';
 import { MessageContext } from '../context/message-context';
@@ -39,7 +39,6 @@ export default function Files() {
     const [ files, setFiles ] = useState([]);
     const [ progress, setProgress ] = useState(0);
     const [ fileLoader, setFileLoader ] = useState(() => {});
-    const [ uploading, setUploading ] = useState(false);
     const [ searching, setSearching ]= useState(false);
 
     const [ state , setPreview ] = useReducer(previewReducer, { previewFile: emptyFile, showPreview: false });
@@ -47,7 +46,7 @@ export default function Files() {
 
     const { getFilenameInfo } = useGetInfo();
     const { getFiles, uploadFile, getShareFileInfo } = useFiles();
-    const { addJob, undoLastJob, jobsQueue, executeAllJobs } = useJobsQueue(3000);
+    const { addJob, undoLastJob, undoJob, jobsQueue, executeAllJobs } = useJobsQueue(3000);
     const { getFileFromLocal } = useFilesIDB();
 
     const createFileLoader = useCallback(async (filterCb = (data) => data) => {
@@ -117,7 +116,30 @@ export default function Files() {
         }).finally(() => setSearching(false));
     }, 500);
 
-    const handleFileUpload = (e) => {
+    const handleFileUpload = (form) => {
+        const uploadPromise = async () => {
+            setSearching(true);
+            
+            try {
+                const res = await uploadFile(form)
+            
+                const loadInfo = await createFileLoader()
+                setFileLoader(() => loadInfo);
+                loadInfo();
+                setSearching(false);
+    
+                return res.message;
+            } catch(err) {
+                throw new Error(err.message);
+            }
+        };
+        messageContext.showPromise(uploadPromise, 
+            'Uploading files...', 
+            (message) => message, 
+            'Error uploading files');
+    }
+    
+    const handleFileUploadClick = (e) => {
         e.preventDefault();
 
         const files = e.target.files;
@@ -129,32 +151,26 @@ export default function Files() {
         for(let i = 0; i < files.length; i++) {
             form.append('files', files[i]);
         }
-
-        setUploading(true);
-
-        uploadFile(form).then(res => {
-            messageContext.showSuccess(res.message);
-            setSearching(true);
-            createFileLoader().then((loadInfo) => {
-                setFileLoader(() => loadInfo);
-                loadInfo();
-            }).finally(() => setSearching(false));
-        })
-        .catch(err => messageContext.showError(err.message))
-        .finally(() => setUploading(false));
+    
+        handleFileUpload(form);
     }
 
     const handleFilesDelete = useCallback(async(deleteFunc, deletedFile) => {
-        const undoDelete = () => {
+        const job = addJob(deleteFunc, () => {
             setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: false } : file));
             messageContext.showSuccess(`File ${deletedFile.filename} (${deletedFile.id}) restored`);
-        };
+        });
 
-        addJob(deleteFunc, undoDelete);
         setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: true } : file));
-    }, [ addJob, messageContext ]);
+
+        messageContext.showAction(`File ${deletedFile.filename} 
+            (${deletedFile.id}) deleted`, 
+            'Undo', 
+            () => undoJob(job));
+    }, [ addJob, undoJob, messageContext ]);
     
-    const handleFilesUpdate = useCallback((updatedFile) => setFiles((files) => files.map(file => file.id == updatedFile.id ? updatedFile : file)) , [ ]);
+    const handleFilesUpdate = useCallback((updatedFile) => 
+        setFiles((files) => files.map(file => file.id == updatedFile.id ? updatedFile : file)) , [ ]);
 
     const handleOpenPreview = useCallback(async (file) => {
         // Si el archivo esta en la base de datos local, se obtiene la URL del archivo
@@ -197,23 +213,10 @@ export default function Files() {
             form.append('files', files[i]);
         }
 
-        setUploading(true);
-
-        uploadFile(form).then(res => {
-            messageContext.showSuccess(res.message);
-            setSearching(true);
-            createFileLoader().then((loadInfo) => {
-                setFileLoader(() => loadInfo);
-                loadInfo();
-            }).finally(() => setSearching(false));
-        })
-        .catch(err => messageContext.showError(err.message))
-        .finally(() => setUploading(false));
+        handleFileUpload(form);
     }
 
     return <>
-        <div className="loader file-loading" hidden={!uploading}> Uploading files </div> 
-
         { showPreview && 
         <Modal show={showPreview} onHide={handleClosePreview} className='d-flex modal-bg' fullscreen centered>
             <Modal.Header closeButton className='bg-modal' closeVariant='white'>{previewFile.filename}</Modal.Header>
@@ -245,7 +248,7 @@ export default function Files() {
                 <i className='bi bi-plus-square-dotted'/>
             </label>
 
-            <input id="input-upload" type="file" style={{display: 'none'}} onChange={handleFileUpload} multiple/>
+            <input id="input-upload" type="file" style={{display: 'none'}} onChange={handleFileUploadClick} multiple/>
 
             { jobsQueue.length > 0 && 
             <div className='undo-button'>

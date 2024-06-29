@@ -46,6 +46,7 @@
     border-radius: 5px;
     padding: 10px;
     font-size: 2em;
+    border: 0;
 }
 
 .btn-upload {

@@ -18,9 +18,9 @@ export default function Notes() {
 
         getNote().then((note) => {
             setText(note.content);
-            messageContext.showSuccess(note.message);
-        }).catch((err) => {
-            messageContext.showError(err.message)
+            messageContext.showSuccess("Note loaded");
+        }).catch(() => {
+            messageContext.showInfo("Note not found, start up")
         });
     }, [ getNote, messageContext, isLogged ]);
 
