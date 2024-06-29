@@ -42,13 +42,14 @@ func main() {
 	front.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
 		TokenLookup:    "cookie:_csrf",
 		CookiePath:     "/",
-		CookieDomain:   "example.com",
+		CookieDomain:   "gosf.com",
 		CookieSecure:   true,
 		CookieHTTPOnly: true,
 		CookieSameSite: http.SameSiteStrictMode,
 	}))
 	e.Use(middleware.CORS())
 	e.Use(middleware.Recover())
+	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
 
 	// Configuración de los middlewares de utilidad
 	e.Use(logger.RequestLoggerConfig())
@@ -121,6 +122,7 @@ Powered By Echo v4 with Go Language - ` + Version)
 	fmt.Println("- Frontend files are served from " + staticAbs)
 	fmt.Println("- Files are stored in " + filesAbs)
 	fmt.Println("- Logs are stored in " + logAbs)
+	fmt.Println("- Dev mode is " + strconv.FormatBool(env.Config.DevMode))
 	fmt.Println()
 	fmt.Println("MySQL's Connection: ")
 	fmt.Println("- Host: " + env.Config.SQL.Host)
