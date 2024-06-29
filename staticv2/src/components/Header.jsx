@@ -1,6 +1,6 @@
 import './Header.css';
 import Logo from '../assets/gosf-icon.png';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useContext } from 'react';
 import AuthContext from '../context/auth-context';
 import { MessageContext } from '../context/message-context';
@@ -9,9 +9,11 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 export default function Header() {
     const auth = useContext(AuthContext);
     const messageContext = useContext(MessageContext);
+    const navigate = useNavigate();
 
     const logoutHandler = () => {
         auth.onLogOut()
+        .then(() => navigate('/login'))
         .catch(err => messageContext.showError(err.message));
     };
 

@@ -85,8 +85,6 @@ export default function getContentTypeByFileName(fileName) {
     const fileExtension = fileName.slice(fileName.lastIndexOf("."));
 
     // Buscar el tipo de contenido en el mapa y devolverlo
-    const contentType =
-        contentTypeMap[fileExtension.toLowerCase()] ||
-        "application/octet-stream";
+    const contentType = contentTypeMap[fileExtension.toLowerCase()] || "application/octet-stream";
     return contentType;
 }
