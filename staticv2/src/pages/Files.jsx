@@ -168,7 +168,7 @@ export default function Files() {
     const handleClosePreview = useCallback(() => {
         setPreview({ type: 'HIDE_PREVIEW' });
         setPreview({ type: 'SET_PREVIEW_FILE', payload: emptyFile });
-        navigate('/files');
+        navigate('/files'); // To avoid that in the next re-load the file is opened again
     }, [ navigate ]);  
 
     const handleFileDropEnd = (e) => {
