@@ -30,7 +30,7 @@ func SetTokenCookieFromQuery(c echo.Context, token string) {
 			MaxAge:   int(tokenDuration.Seconds()),
 			Path:     "/",
 			HttpOnly: true,
-			Secure:   true,
+			// Secure:   true,
 			SameSite: http.SameSiteStrictMode,
 		})
 	}
