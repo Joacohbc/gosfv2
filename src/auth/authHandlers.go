@@ -6,6 +6,7 @@ import (
 	"gosfV2/src/ent"
 	"gosfV2/src/models"
 	"gosfV2/src/models/env"
+	"math"
 	"net/http"
 	"strings"
 	"time"
@@ -82,10 +83,12 @@ func Login(c echo.Context) error {
 // Refresca el token del usuario y lo guarda en la base de datos
 // y en el cookie del usuario (si se paso el cookie en el QueryParam)
 func RefreshToken(c echo.Context) error {
-	if err := jwt.TokenManager.RemoveToken(Middlewares.GetUserId(c), Middlewares.GetUserToken(c)); err != nil {
-		c.Logger().Error(err)
-		return jwt.HandlerTokenError(err)
-	}
+	defer func(id uint, token string) {
+		if err := jwt.TokenManager.RemoveToken(id, token); err != nil {
+			c.Logger().Error(err)
+			jwt.HandlerTokenError(err)
+		}
+	}(Middlewares.GetUserId(c), Middlewares.GetUserToken(c))
 
 	claims := Middlewares.GetUserClaims(c)
 	tokenString, err := jwt.GenerateJWT(claims.UserID, c.RealIP())
@@ -127,7 +130,14 @@ func Logout(c echo.Context) error {
 
 // Si se puede acceder a la ruta, se retorna un mensaje de que se esta autenticado
 func VerifyAuth(c echo.Context) error {
-	return c.JSON(http.StatusOK, utils.ToJSON("You are authenticated"))
+	claims := Middlewares.GetUserClaims(c)
+	durationRemaining := time.Until(claims.ExpiresAt.Time).Minutes()
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"message":           "You are authenticated",
+		"durationRemaining": math.Round(durationRemaining),
+		// "token":             Middlewares.GetUserToken(c),
+	})
 }
 
 func init() {
