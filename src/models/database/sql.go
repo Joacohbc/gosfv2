@@ -62,7 +62,7 @@ func init() {
 
 		if err := temp.Ping(context.Background()).Err(); err != nil {
 			log.Printf("Error to connect to Redis (%s:%d - %s - %d): %s\n", env.Config.Redis.Host, env.Config.Redis.Port, env.Config.Redis.Password, env.Config.Redis.DB, err.Error())
-			log.Printf("Retrying the MySQL connection in 20 seconds (time %d)..\n", i)
+			log.Printf("Retrying the Redis connection in 20 seconds (time %d)..\n", i)
 			time.Sleep(20 * time.Second)
 			continue
 		}
