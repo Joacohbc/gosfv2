@@ -75,7 +75,7 @@ echo "
     \"redis_db\": $REDIS_DB,
     \"files_directory\": \"./files\",
     \"static_files\": \"./static\",
-    \"max_token_per_user\": $MAX_TOKEN_PER_USER
+    \"max_token_per_user\": $MAX_TOKEN_PER_USER,
     \"dev_mode\": false
 }
 " > /app/config.json
