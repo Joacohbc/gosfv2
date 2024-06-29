@@ -1,41 +1,62 @@
 import { createContext, useRef } from 'react';
-import Message from '../components/Message';
+import { Toaster, toast } from 'sonner'
 import PropTypes from 'prop-types';
 
 export const MessageContext = createContext({
     showError: (message) => {},
     showInfo: (message) => {},
     showWarning: (message) => {},
-    showSuccess: (message) => {}
+    showSuccess: (message) => {},
+    showPromise: (promise, loadingMessage, successMessage, errorMessage) => {},
+    showAction: (message, label, onClick) => {},
+    dismiss: (id) => {},
 });
 
 const MessageComponentProvider = (props) => {
-    const messageRef = useRef(null);
-
     const showError = (message) => {
-        messageRef.current.showError(message);
+        return toast.error(message);
     };
 
     const showInfo = (message) => {
-        messageRef.current.showInfo(message);
+        return toast.info(message);
     };
 
     const showWarning = (message) => {
-        messageRef.current.showWarning(message);
+        return toast.warning(message);
     };
 
     const showSuccess = (message) => {
-        messageRef.current.showSuccess(message);
+        return toast.success(message);
     };
+
+    const showPromise = (promise, loadingMessage, successMessage, errorMessage) => {
+        return toast.promise(promise, {
+            loading: loadingMessage,
+            success: successMessage,
+            error: errorMessage,
+        });
+    }
+
+    const showAction = (message, label, onClick) => {
+        return toast(message, {
+            action: {
+                label: label,
+                onClick: onClick
+            }
+        });
+    }
 
     return (
         <MessageContext.Provider value={{
             showError,
             showInfo,
             showWarning,
-            showSuccess
+            showSuccess,
+            showPromise,
+            showAction,
+            dismiss: toast.dismiss,
         }}>
-            <Message ref={messageRef}/>
+            <Toaster position="bottom-center" richColors/>
             {props.children}
         </MessageContext.Provider>
     );
