@@ -61,7 +61,12 @@ export const AuthContextProvider = (props) => {
     }, [ BASE_URL ]);
 
     useEffect(() => {
-        if(isLogged) return;
+        if(isLogged) {
+            if(currentRoute == '/login' || currentRoute == '/register' || currentRoute == '/') {
+                navigate('/files');
+            }
+            return;
+        }
         
         verifyToken()
         .then((currentTokenInfo) => {
