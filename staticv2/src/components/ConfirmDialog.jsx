@@ -11,7 +11,7 @@ const ConfirmDialog = forwardRef((props, ref) => {
     useImperativeHandle(ref, () => ({
         show: () => setShowed(true),
         hide: () => setShowed(false), 
-        toogleShowed: () => setShowed(!showed),
+        toggleShowed: () => setShowed(!showed),
         isShowed: () => showed,
     }));
     

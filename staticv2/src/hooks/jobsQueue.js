@@ -32,7 +32,7 @@ const useJobsQueue = (ms) => {
     }, [ ms, jobsQueue ]);
     
     /**
-     * Deshace un job.
+     * Deshace un job. Y lo elimina de la cola.
      * @param {Object} job - El job que se debe deshacer.
      */
     const undoJob = useCallback((job) => {

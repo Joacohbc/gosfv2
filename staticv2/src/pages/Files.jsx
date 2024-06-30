@@ -2,13 +2,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './Files.css';
 import AuthContext from '../context/auth-context';
 import Modal from 'react-bootstrap/Modal';
-import { useCallback, useContext, useEffect, useState, useReducer, useRef } from 'react';
+import { useCallback, useContext, useEffect, useState, useReducer } from 'react';
 import { handleKeyUpWithTimeout } from '../utils/input-text';
 import PreviewFile from './PreviewFile';
 import { MessageContext } from '../context/message-context';
 import { useGetInfo, useFiles } from '../hooks/files';
 import useJobsQueue from '../hooks/jobsQueue';
-import '../components/Message.css';
 import useFilesIDB from '../hooks/useFilesIDB';
 import FileContainer from '../components/FileContainer';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -27,7 +26,6 @@ const previewReducer = (state, action) => {
             return state;
     }
 };
-
 
 function removeDefault(e) {
     e.preventDefault();
@@ -203,7 +201,8 @@ export default function Files() {
     }, [ addJob, undoJob, messageContext ]);
     
     const handleFilesUpdate = useCallback((updatedFile) => 
-        setFiles((files) => files.map(file => file.id == updatedFile.id ? updatedFile : file)) , [ ]);
+        setFiles((files) => files.map(file => file.id == updatedFile.id ? updatedFile : file)),
+    []);
 
     const handleOpenPreview = useCallback(async (file) => {
         // Si el archivo esta en la base de datos local, se obtiene la URL del archivo

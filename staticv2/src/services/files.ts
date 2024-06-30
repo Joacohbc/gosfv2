@@ -22,7 +22,6 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
 
     return {
         addTokenParam,
-
         async getFileInfo(fileId: string): Promise<cFile> {
             try {
                 const res = await cAxios.get(`/api/files/${fileId}/info`);

@@ -1,6 +1,5 @@
 import axios, { AxiosInstance } from "axios";
 
-
 type AuthBasic = {
     baseUrl: string;
     token: string;

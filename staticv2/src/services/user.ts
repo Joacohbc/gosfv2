@@ -1,4 +1,3 @@
-import axios from "axios";
 import { User } from "./models";
 import getAuthBasic from "./utils";
 

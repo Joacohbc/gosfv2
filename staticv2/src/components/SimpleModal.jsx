@@ -12,7 +12,7 @@ const SimpleModal = forwardRef((props, ref) => {
         setShowed: (value) => setShowed(value),
         show: () => setShowed(true),
         hide: () => setShowed(false), 
-        toogleShowed: () => setShowed(!showed),
+        toggleShowed: () => setShowed(!showed),
         isShowed: () => showed,
     }));
     
