@@ -55,6 +55,8 @@ export default function Files() {
 
     const createFileLoader = useCallback(async (filterCb = (data) => data) => {
         try {
+            setSearching(true)
+
             const files = await getFiles();
 
             // Filtra los archivos
@@ -84,6 +86,8 @@ export default function Files() {
         } catch(err) {
             messageContext.showError(err.message);
             return [];
+        } finally {
+            setSearching(false);
         }
     }, [ messageContext, getFilenameInfo, getFiles, getFileFromLocal ]);
     
@@ -97,12 +101,10 @@ export default function Files() {
             }).catch(err => messageContext.showError(err.message));
         }
 
-        setSearching(true);
-        
         createFileLoader().then((loadInfo) => {
             setFileLoader(() => loadInfo);
             loadInfo();
-        }).finally(() => setSearching(false));
+        })
     }, [ isLogged, createFileLoader, getShareFileInfo, sharedFileId, messageContext, getFilenameInfo]);
 
     const handleDeleteAllInQueue = () => {
@@ -122,7 +124,6 @@ export default function Files() {
 
     const handleFileUpload = (form) => {
         const uploadPromise = async () => {
-            setSearching(true);
             
             try {
                 const res = await uploadFile(form)
@@ -130,7 +131,6 @@ export default function Files() {
                 const loadInfo = await createFileLoader()
                 setFileLoader(() => loadInfo);
                 loadInfo();
-                setSearching(false);
     
                 return res.message;
             } catch(err) {
