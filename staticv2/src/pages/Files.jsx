@@ -28,14 +28,18 @@ const previewReducer = (state, action) => {
     }
 };
 
+
+function removeDefault(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
 export default function Files() {
     const messageContext = useContext(MessageContext);
     const { isLogged } = useContext(AuthContext);
     const { sharedFileId } = useParams();
     const navigate = useNavigate();
 
-    const uploadButton = useRef(null);
-    
     const [ files, setFiles ] = useState([]);
     const [ progress, setProgress ] = useState(0);
     const [ fileLoader, setFileLoader ] = useState(() => {});
@@ -139,7 +143,7 @@ export default function Files() {
             'Error uploading files');
     }
     
-    const handleFileUploadClick = (e) => {
+    const handleFileUploadByClick = (e) => {
         e.preventDefault();
 
         const files = e.target.files;
@@ -152,6 +156,23 @@ export default function Files() {
             form.append('files', files[i]);
         }
     
+        handleFileUpload(form);
+    }
+
+    const handleFileUploadByDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const files = e.dataTransfer.files;
+        if(files.length == 0) {
+            return;
+        }
+
+        const form = new FormData();
+        for(let i = 0; i < files.length; i++) {
+            form.append('files', files[i]);
+        }
+
         handleFileUpload(form);
     }
 
@@ -175,7 +196,7 @@ export default function Files() {
 
         removeMessageId = messageContext.showAction(
             `File ${deletedFile.filename} (${deletedFile.id}) deleted`, 
-            'Undo', 
+            'Undo',
             // bind retorna una nueva función que cuando se llama, llama a la función original con el job ya como parámetro
             undoJob.bind(null, job)
         );        
@@ -200,33 +221,6 @@ export default function Files() {
         setPreview({ type: 'SET_PREVIEW_FILE', payload: emptyFile });
         navigate('/files'); // To avoid that in the next re-load the file is opened again
     }, [ navigate ]);  
-
-    const handleFileDropEnd = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-
-    const handleFileDropOver = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-
-    const handleFileDrop = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        const files = e.dataTransfer.files;
-        if(files.length == 0) {
-            return;
-        }
-
-        const form = new FormData();
-        for(let i = 0; i < files.length; i++) {
-            form.append('files', files[i]);
-        }
-
-        handleFileUpload(form);
-    }
 
     return <>
         { showPreview && 
@@ -253,14 +247,13 @@ export default function Files() {
             
         <div className='d-flex flex-column fixed-top align-items-end mr-1'>
             <label htmlFor="input-upload" className="btn-upload"
-                onDrop={handleFileDrop}
-                onDragLeaveCapture={handleFileDropEnd}
-                onDragOverCapture={handleFileDropOver} 
-                ref={uploadButton} >
+                onDrop={handleFileUploadByDrop}
+                onDragLeaveCapture={removeDefault}
+                onDragOverCapture={removeDefault}>
                 <i className='bi bi-plus-square-dotted'/>
             </label>
 
-            <input id="input-upload" type="file" style={{display: 'none'}} onChange={handleFileUploadClick} multiple/>
+            <input id="input-upload" type="file" style={{display: 'none'}} onChange={handleFileUploadByClick} multiple/>
 
             { jobsQueue.length > 0 && 
             <div className='undo-button'>
