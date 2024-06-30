@@ -6,6 +6,8 @@ import FileItem from '../components/fileItem/FileItem';
 import SpinnerDiv from '../components/SpinnerDiv';
 import { memo } from 'react';
 import PropTypes from 'prop-types';
+import FileItemPlaceholder from './fileItem/FileItemPlaceholder';
+import Collapse from 'react-bootstrap/Collapse';
 
 /**
  * Renderiza un contenedor para mostrar archivos.
@@ -23,16 +25,16 @@ import PropTypes from 'prop-types';
 const FileContainer = memo(({ files, progress = files.length, fileLoader = () => {}, loading, handleOpenPreview, handleFilesDelete, handleFilesUpdate }) => {
 
     return (
-        <SpinnerDiv isLoading={loading}>
+        // <SpinnerDiv isLoading={loading}>
         <Container fluid="md">
-            <Col>
+            <Col hidden={loading}>
                 <div className="d-flex justify-content-center align-items-center">
                     { files.length == 0 && <p className="text-center text-white">No files, start uploading files c:</p> }
                 </div>
             </Col>
             
             <Row xs={1} sm={2} md={3} lg={4} xl={5} className='row-gap-3 d-flex justify-content-center'>
-            { files.slice(0, progress).map(file => 
+                { !loading && files.slice(0, progress).map(file => 
                 <Col key={file.id} hidden={file.deleted}>
                     <FileItem 
                         id={file.id}
@@ -47,7 +49,14 @@ const FileContainer = memo(({ files, progress = files.length, fileLoader = () =>
                         onUpdate={handleFilesUpdate}
                     />
                 </Col>) }
+
+                { loading && Array.from({ length: 15 }).map((_, i) =>
+                <Col key={i}>
+                    <FileItemPlaceholder/>
+                </Col>) }
             </Row>
+
+
             
             { files.length != 0 && files.length != progress && 
             <Row className='p-3'>
@@ -56,7 +65,7 @@ const FileContainer = memo(({ files, progress = files.length, fileLoader = () =>
                 </button>
             </Row> }
         </Container>
-        </SpinnerDiv>
+        // </SpinnerDiv>
     )
 })
 

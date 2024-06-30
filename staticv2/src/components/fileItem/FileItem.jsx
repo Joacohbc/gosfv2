@@ -136,10 +136,11 @@ const FileItem = memo((props) => {
 
     const openShareModel = async () => {
         try {
+            shareModal.current.open();
             const res = await getFileInfo(file.id);
             file.shared = res.shared;
             file.sharedWith = res.sharedWith?.map(user => getUserInfo(user, true)) ?? [];
-            shareModal.current.open(file);
+            shareModal.current.setFile(file);
         } catch(err) {
             messageContext.showError(err.message);
         }

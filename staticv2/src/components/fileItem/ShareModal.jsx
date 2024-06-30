@@ -23,9 +23,10 @@ const SharedWithModal = forwardRef((props, ref) => {
 
     useImperativeHandle(ref, () => ({
         open: (file) => {
-            setFile(file);
+            if(!file) setFile(file);
             shareModal.current.show();
         },
+        setFile,
     }), [ shareModal ]);
 
     const handleMarkAsPublic = (value) => {
