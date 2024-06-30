@@ -9,13 +9,17 @@ import { MessageContext } from '../context/message-context';
 export default function Register() {
     const username = useRef();
     const password = useRef();
-    const { onRegister } = useContext(AuthContext);
+    const { onRegister, onLogin } = useContext(AuthContext);
     const messageContext = useContext(MessageContext);
 
     const registerHandler = (e) => {
         e.preventDefault();
         onRegister(username.current.value, password.current.value)
-        .then((mes) => messageContext.showSuccess(mes))
+        .then((res) => {
+            messageContext.showSuccess(res);
+            return onLogin(username.current.value, password.current.value);
+        })
+        .then((res) => messageContext.showSuccess(res))
         .catch(err => messageContext.showError(err.message));
     };
 
