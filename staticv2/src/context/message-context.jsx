@@ -3,46 +3,58 @@ import { Toaster, toast } from 'sonner'
 import PropTypes from 'prop-types';
 
 export const MessageContext = createContext({
-    showError: (message) => {},
-    showInfo: (message) => {},
-    showWarning: (message) => {},
-    showSuccess: (message) => {},
-    showPromise: (promise, loadingMessage, successMessage, errorMessage) => {},
-    showAction: (message, label, onClick) => {},
+    showError: (message, duration) => {},
+    showInfo: (message, duration) => {},
+    showWarning: (message, duration) => {},
+    showSuccess: (message, duration) => {},
+    showPromise: (promise, loadingMessage, successMessage, errorMessage, duration) => {},
+    showAction: (message, label, onClick, duration) => {},
     dismiss: (id) => {},
 });
 
+const DEFAULT_DURATION = 2000;
+
 const MessageComponentProvider = (props) => {
-    const showError = (message) => {
-        return toast.error(message);
+    const showError = (message, duration = DEFAULT_DURATION) => {
+        return toast.error(message, {
+            duration: duration,
+        });
     };
 
-    const showInfo = (message) => {
-        return toast.info(message);
+    const showInfo = (message, duration = DEFAULT_DURATION) => {
+        return toast.info(message, {
+            duration: duration,
+        });
     };
 
-    const showWarning = (message) => {
-        return toast.warning(message);
+    const showWarning = (message, duration = DEFAULT_DURATION) => {
+        return toast.warning(message, {
+            duration: duration,
+        });
     };
 
-    const showSuccess = (message) => {
-        return toast.success(message);
+    const showSuccess = (message, duration = DEFAULT_DURATION) => {
+        return toast.success(message, {
+            duration: duration,
+        });
     };
 
-    const showPromise = (promise, loadingMessage, successMessage, errorMessage) => {
+    const showPromise = (promise, loadingMessage, successMessage, errorMessage, duration = DEFAULT_DURATION) => {
         return toast.promise(promise, {
             loading: loadingMessage,
             success: successMessage,
             error: errorMessage,
+            duration: duration,
         });
     }
 
-    const showAction = (message, label, onClick) => {
+    const showAction = (message, label, onClick, duration = DEFAULT_DURATION) => {
         return toast(message, {
             action: {
                 label: label,
                 onClick: onClick
-            }
+            },
+            duration: duration,
         });
     }
 
@@ -56,7 +68,7 @@ const MessageComponentProvider = (props) => {
             showAction,
             dismiss: toast.dismiss,
         }}>
-            <Toaster position="bottom-center" richColors/>
+            <Toaster position="bottom-center" richColors />
             {props.children}
         </MessageContext.Provider>
     );

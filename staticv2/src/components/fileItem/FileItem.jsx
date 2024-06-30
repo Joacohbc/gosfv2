@@ -85,9 +85,8 @@ const FileItem = memo((props) => {
             
             props.onDelete(async () => {
                 try {
-                    const res = await deleteFile(file.id);
+                    await deleteFile(file.id);
                     await deleteFileFromLocal(file.id);
-                    messageContext.showSuccess(res.message);
                 } catch(err) {
                     messageContext.showError(err.message);
                 }

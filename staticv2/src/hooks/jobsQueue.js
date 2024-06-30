@@ -15,16 +15,19 @@ const useJobsQueue = (ms) => {
      * @param {Object} actionInfo - La información del job.
      */
     const addJob = useCallback((actionCb, undoCb, actionInfo) => {
+        const duration = ms + ((ms / 2) * jobsQueue.length);
+        
         const timeoutId = setTimeout(() => {
             actionCb();
             setJobsQueue((jobsQueue) => jobsQueue.filter(job => job.id !== timeoutId));
-        }, ms + (ms * jobsQueue.length));
+        }, duration);
 
         const job = {
             id: timeoutId,
             undoJobFunc: undoCb,
             action: actionCb,
-            info: actionInfo
+            info: actionInfo,
+            deleteIn: duration
         };
 
         setJobsQueue((prevJobsQueue) => [...prevJobsQueue, job]);

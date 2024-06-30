@@ -32,6 +32,8 @@ function removeDefault(e) {
     e.stopPropagation();
 }
 
+const DELETE_UNDO_DURATION = 5000;
+
 export default function Files() {
     const messageContext = useContext(MessageContext);
     const { isLogged } = useContext(AuthContext);
@@ -48,7 +50,7 @@ export default function Files() {
 
     const { getFilenameInfo } = useGetInfo();
     const { getFiles, uploadFile, getShareFileInfo } = useFiles();
-    const { addJob, undoLastJob, undoJob, jobsQueue, executeAllJobs } = useJobsQueue(3000);
+    const { addJob, undoLastJob, undoJob, jobsQueue, executeAllJobs } = useJobsQueue(DELETE_UNDO_DURATION);
     const { getFileFromLocal } = useFilesIDB();
 
     const createFileLoader = useCallback(async (filterCb = (data) => data) => {
@@ -187,7 +189,7 @@ export default function Files() {
         () => {
             // Si se deshace la eliminación, se restaura el archivo
             setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: false } : file));
-            messageContext.showSuccess(`File ${deletedFile.filename} (${deletedFile.id}) restored`);
+            messageContext.dismiss(removeMessageId);
         });
 
         setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: true } : file));
@@ -195,10 +197,10 @@ export default function Files() {
         removeMessageId = messageContext.showAction(
             `File ${deletedFile.filename} (${deletedFile.id}) deleted`, 
             'Undo',
-            // bind retorna una nueva función que cuando se llama, llama a la función original con el job ya como parámetro
-            undoJob.bind(null, job)
+            undoJob.bind(null, job), // bind retorna una nueva función que cuando se llama, llama a la función original con el job ya como parámetro
+            job.deleteIn
         );        
-    }, [ addJob, undoJob, messageContext ]);
+    }, [addJob, undoJob, messageContext]);
     
     const handleFilesUpdate = useCallback((updatedFile) => 
         setFiles((files) => files.map(file => file.id == updatedFile.id ? updatedFile : file)),
