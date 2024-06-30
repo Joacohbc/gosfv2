@@ -156,17 +156,29 @@ export default function Files() {
     }
 
     const handleFilesDelete = useCallback(async(deleteFunc, deletedFile) => {
-        const job = addJob(deleteFunc, () => {
+        
+        // Id del mensaje de deshacer eliminación
+        let removeMessageId = null;
+
+        const job = addJob(() => {
+            // Si la eliminación es exitosa, se elimina el mensaje de deshacer eliminación
+            messageContext.dismiss(removeMessageId);
+            deleteFunc();
+        },
+        () => {
+            // Si se deshace la eliminación, se restaura el archivo
             setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: false } : file));
             messageContext.showSuccess(`File ${deletedFile.filename} (${deletedFile.id}) restored`);
         });
 
         setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: true } : file));
 
-        messageContext.showAction(`File ${deletedFile.filename} 
-            (${deletedFile.id}) deleted`, 
+        removeMessageId = messageContext.showAction(
+            `File ${deletedFile.filename} (${deletedFile.id}) deleted`, 
             'Undo', 
-            () => undoJob(job));
+            // bind retorna una nueva función que cuando se llama, llama a la función original con el job ya como parámetro
+            undoJob.bind(null, job)
+        );        
     }, [ addJob, undoJob, messageContext ]);
     
     const handleFilesUpdate = useCallback((updatedFile) => 
