@@ -12,21 +12,27 @@ import { useImperativeHandle } from 'react';
 import Col from 'react-bootstrap/esm/Col';
 import { MessageContext } from '../../context/message-context';
 import { useFiles, useGetInfo } from '../../hooks/files';
+import Placeholder from 'react-bootstrap/Placeholder';
+
+function random(min, max) { 
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
 
 const SharedWithModal = forwardRef((props, ref) => {
     const shareModal = useRef(null);
     const userIdAdded = useRef(null);
     const messageContext = useContext(MessageContext);
+    const [ completedInfo, setCompletedInfo ] = useState(false);
     const [ file, setFile ] = useState(null);
     const { getUserInfo } = useGetInfo();
     const { updateFile, removeUserFromFile, addUserToFile } = useFiles();
 
     useImperativeHandle(ref, () => ({
-        open: (file) => {
-            if(!file) setFile(file);
-            shareModal.current.show();
+        open: shareModal.current.show,
+        setFile: (file, completed) => {
+            setCompletedInfo(completed);
+            setFile(file);
         },
-        setFile,
     }), [ shareModal ]);
 
     const handleMarkAsPublic = (value) => {
@@ -60,6 +66,7 @@ const SharedWithModal = forwardRef((props, ref) => {
                 messageContext.showError(err.message);
             }
         }
+
     }
 
     const handleAddUser = async (e) => {
@@ -106,7 +113,7 @@ const SharedWithModal = forwardRef((props, ref) => {
         <hr className="hr" />
 
         <Container className='d-block'>
-            { file?.sharedWith.map(user => {
+            { completedInfo && file?.sharedWith.map(user => {
                 return <Row key={user.id} className='overlay-user-share align-items-center'>
                     <Col xs={9}>
                         <img src={user.icon} className='modal-user-share-icon'/>
@@ -118,20 +125,40 @@ const SharedWithModal = forwardRef((props, ref) => {
                 </Row>
             }) }
 
-            { file?.sharedWith.length == 0 && <p className='text-center'>The file is not shared with anyone</p>}
+            { !completedInfo && Array.from({ length: 3 }).map((_, i) =>
+                <Row key={i} className='overlay-user-share align-items-center'>
+                    <Col xs={9}>
+                        <Placeholder as="div" animation="wave">
+                            <Placeholder as="img" xs={3} className='modal-user-share-icon'/>
+                            <Placeholder as="span" xs={8} className='ms-3'/>
+                        </Placeholder>
+                    </Col>
+                    <Col className='p-2 d-flex justify-content-end'>
+                        <Placeholder as="button" xs={1} className='file-actions-item'><i className='bi bi-person-fill-dash'/></Placeholder>
+                    </Col>
+                </Row>
+            )}
+
+
+            { completedInfo && file?.sharedWith.length == 0 && <p className='text-center'>The file is not shared with anyone</p>}
         </Container>
         
         <hr className="hr" />
         <Form>
             <InputGroup>
                 <Form.Control value={`${window.location.origin}/shared/${file?.id}`} onClick={handleCopyLink} readOnly/>
+                
                 <InputGroup.Text className='cursor-pointer'>
-                    <Button text={<i className='bi bi-clipboard'/>} onClick={handleCopyLink}/>
+                    { completedInfo && <Button text={<i className='bi bi-clipboard'/>} onClick={handleCopyLink}/> }
+                    { !completedInfo && <Placeholder as="button" xs={1} className='file-actions-item'><i className='bi bi-clipboard'/></Placeholder> }
                 </InputGroup.Text>
+
                 <InputGroup.Text className='cursor-pointer'>
-                    { file?.shared ? 
+                    { completedInfo && (file?.shared ? 
                         <Button text={<i className='bi bi-unlock-fill'/>} onClick={handleMarkAsPublic(false)}/> 
-                        : <Button text={<i className='bi bi-lock-fill'/>} onClick={handleMarkAsPublic(true)}/> }
+                        : <Button text={<i className='bi bi-lock-fill'/>} onClick={handleMarkAsPublic(true)}/>) }
+
+                    { !completedInfo && <Placeholder as="button" xs={1} className='file-actions-item'><i className='bi bi-lock-fill'/></Placeholder> }
                 </InputGroup.Text>
             </InputGroup>
         </Form>

@@ -3,12 +3,9 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import FileItem from '../components/fileItem/FileItem';
-import SpinnerDiv from '../components/SpinnerDiv';
 import { memo } from 'react';
 import PropTypes from 'prop-types';
 import FileItemPlaceholder from './fileItem/FileItemPlaceholder';
-import Collapse from 'react-bootstrap/Collapse';
-
 /**
  * Renderiza un contenedor para mostrar archivos.
  *
@@ -25,7 +22,6 @@ import Collapse from 'react-bootstrap/Collapse';
 const FileContainer = memo(({ files, progress = files.length, fileLoader = () => {}, loading, handleOpenPreview, handleFilesDelete, handleFilesUpdate }) => {
 
     return (
-        // <SpinnerDiv isLoading={loading}>
         <Container fluid="md">
             <Col hidden={loading}>
                 <div className="d-flex justify-content-center align-items-center">
@@ -65,7 +61,6 @@ const FileContainer = memo(({ files, progress = files.length, fileLoader = () =>
                 </button>
             </Row> }
         </Container>
-        // </SpinnerDiv>
     )
 })
 

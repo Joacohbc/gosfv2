@@ -21,7 +21,7 @@ const FileItemPlaceholder = memo(() => {
                         <Placeholder key={i} xs={random(4, 8)} />
                     ))}
                 </Placeholder>
-                <Placeholder as="div" animation="wave">
+                <Placeholder as="div" animation="wave" className='text-center'>
                     <Placeholder as="button" className='file-actions-item' xs={1}><i className='bi bi-file-arrow-down-fill'/></Placeholder>
                     <Placeholder as="button" className='file-actions-item' xs={1}><i className='bi bi-trash3-fill'/></Placeholder>
                     <Placeholder as="button" className='file-actions-item' xs={1}><i className='bi bi-pencil-square'/></Placeholder>
