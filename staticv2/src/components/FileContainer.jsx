@@ -4,7 +4,6 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import FileItem from '../components/fileItem/FileItem';
 import SpinnerDiv from '../components/SpinnerDiv';
-import '../components/Message.css';
 import { memo } from 'react';
 import PropTypes from 'prop-types';
 

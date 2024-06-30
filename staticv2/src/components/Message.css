@@ -1,9 +1,0 @@
-.message {
-    font-weight: bold;
-    color: var(--color-text);
-    background-color: rgba(0, 0, 0, .5);
-    /* 2147483647 is the highest number for z-index */
-    z-index: 2147483647; 
-    width: fit-content;
-    pointer-events: none;
-}
