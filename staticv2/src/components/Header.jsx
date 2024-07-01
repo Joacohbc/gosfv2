@@ -1,5 +1,5 @@
 import './Header.css';
-import Logo from '../assets/gosf-icon.png';
+import Logo from '../assets/gosf-icon.webp';
 import { Link, useNavigate } from "react-router-dom";
 import { useContext } from 'react';
 import AuthContext from '../context/auth-context';
