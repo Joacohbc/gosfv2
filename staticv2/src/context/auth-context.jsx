@@ -41,11 +41,14 @@ export const AuthContextProvider = (props) => {
     const logOutHandler = useCallback(async () => {
         try {
             await axios.delete(BASE_URL + '/auth/logout?cookie=yes');
+            setToken('');
+            setIsLogged(false);
+            navigate('/login');
             return 'User logged out successfully';
         } catch(err) {
             throw new Error(err.response.data.message);
         }
-    }, [ BASE_URL]);
+    }, [BASE_URL, navigate]);
 
     const verifyToken = useCallback(async () => {
         try {
@@ -73,7 +76,7 @@ export const AuthContextProvider = (props) => {
             setIsLogged(true);
             setToken(currentTokenInfo.token);
             
-            if(currentRoute == '/login' || currentRoute == '/register') {
+            if(currentRoute == '/login' || currentRoute == '/register' || currentRoute == '/') {
                 navigate('/files');
             }
             
