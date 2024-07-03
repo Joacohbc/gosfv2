@@ -70,7 +70,9 @@ export default function User() {
         try {
             const res = await uploadIcon(e.target.files[0]);
             messageContext.showSuccess(res.message);
-            setIconURL(getMyIconURL());
+            
+            // Call random to avoid cache issues
+            setIconURL(getMyIconURL(true));
         } catch(err) {
             messageContext.showError(err.message);
         }

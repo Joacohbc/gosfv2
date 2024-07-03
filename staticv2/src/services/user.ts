@@ -2,7 +2,7 @@ import { User } from "./models";
 import getAuthBasic from "./utils";
 
 interface UsersAPI {
-    getMyIconURL: () => string;
+    getMyIconURL: (updated) => string;
     getMyInfo: () => Promise<User>;
     updateUser: (newUsername: string) => Promise<{ data: User, message: string }>;
     changePassword: (oldPassword: string, newPassword: string) => Promise<{ message: string }>;
@@ -15,9 +15,9 @@ const getUserService = (baseUrlInput: string, tokenInput: string) : UsersAPI => 
     const { cAxios, baseUrl } = getAuthBasic(baseUrlInput, tokenInput);
 
     return {
-        getMyIconURL: () => {
+        getMyIconURL: (updated = false) => {
             const url = new URL(`${baseUrl}/api/users/me/icon`);
-            url.searchParams.append('random', new Date().getTime().toString());
+            if(updated) url.searchParams.append('random', new Date().getTime().toString());
             return url.toString();
         },
         getMyInfo: async () => {
