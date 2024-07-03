@@ -30,7 +30,7 @@ type noteBD struct {
 func (n *noteBD) GetNote(userId uint) (Note, error) {
 	value, ok := n.mapNote.Load(userId)
 	if !ok {
-		return Note{}, ErrNoteNotFound
+		return Note{Content: ""}, nil
 	}
 
 	return value.(Note), nil

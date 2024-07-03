@@ -1,5 +1,5 @@
+import './Notes.css';
 import Form from 'react-bootstrap/Form';
-import { handleKeyUpWithTimeout } from '../utils/input-text';
 import { useEffect } from 'react';
 import { useNotes } from '../hooks/notes';
 import { useState, useContext } from 'react';
@@ -9,6 +9,7 @@ import Button from '../components/Button';
 
 export default function Notes() {
     const [ text, setText ] = useState('');
+    const [ saved, setSaved ] = useState({ saved: true, id: null});
     const { getNote, setNote } = useNotes({});
     const { isLogged } = useContext(AuthContext);
     const messageContext = useContext(MessageContext);
@@ -16,33 +17,24 @@ export default function Notes() {
     useEffect(() => {
         if(!isLogged) return;
 
-        getNote().then((note) => {
-            setText(note.content);
-            messageContext.showSuccess("Note loaded");
-        }).catch(() => {
-            messageContext.showInfo("Note not found, start up")
-        });
+        getNote().then((note) => setText(note.content))
+            .catch((err) => messageContext.showInfo(err));
     }, [ getNote, messageContext, isLogged ]);
 
     const copyLink = async (e) => {
         e.preventDefault();
-        try {
-            const note = await getNote();
-            await navigator.clipboard.writeText(note.content);
-            messageContext.showSuccess('Copied to clipboard');
-        } catch(err) {
-            messageContext.showError(err.message);
-        }
+        await navigator.clipboard.writeText(text);
     }
 
-    const onTextChange = handleKeyUpWithTimeout((e) => {
-        setNote(e.target.value).then((res) => {
-            messageContext.showSuccess(res.message);
-        }).catch((err) => {
-            messageContext.showError(err.message);
-        });
-    }, 500);
+    const onTextChange = (e) => {
+        const id = setTimeout(() =>{
+            setNote(e.target.value).then(() => setSaved({ saved: true, id: null }))
+                .catch((err) => messageContext.showError(err.message));
+        }, 2500);
 
+        if(saved.id) clearTimeout(saved.id);
+        setSaved({ saved: false, id});
+    }
     return <div className='d-flex justify-content-center d-flex align-items-center flex-column m-3'>
         <Form.Control 
             as="textarea" 
@@ -50,6 +42,12 @@ export default function Notes() {
             style={{ height: '25em', maxWidth: '50em'}} 
             onKeyUp={onTextChange}
             defaultValue={text}/>
-        <Button onClick={copyLink} text={<span>{'Copy Link'} <i className='bi bi-clipboard-fill'/></span>} className="p-2 mt-2 rounded border border-white text-white"/>
+
+
+        <div className='d-flex flex-row align-items-center'>
+            <Button onClick={copyLink} text={<span>{'Copy Link'} <i className='bi bi-clipboard-fill'/></span>} className="p-2 mt-2 rounded border border-white text-white"/>
+            { !saved.saved ? <i className="bi bi-cloud-slash saving-cloud"></i> 
+                : <i className="bi bi-cloud-check saved-cloud"></i> }
+        </div>
     </div>
 }
