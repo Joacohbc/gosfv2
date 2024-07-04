@@ -6,6 +6,7 @@ import FileItem from '../components/fileItem/FileItem';
 import { memo } from 'react';
 import PropTypes from 'prop-types';
 import FileItemPlaceholder from './fileItem/FileItemPlaceholder';
+import { useCache } from '../hooks/cache';
 /**
  * Renderiza un contenedor para mostrar archivos.
  *
@@ -20,7 +21,9 @@ import FileItemPlaceholder from './fileItem/FileItemPlaceholder';
  * @returns {JSX.Element} El componente FileContainer.
  */
 const FileContainer = memo(({ files, progress = files.length, fileLoader = () => {}, loading, handleOpenPreview, handleFilesDelete, handleFilesUpdate }) => {
-
+    const { cacheService } = useCache();
+    const numLoadingFiles = cacheService.getCacheNumberOfFiles().value || 15;
+    
     return (
         <Container fluid="md">
             <Col hidden={loading}>
@@ -46,7 +49,7 @@ const FileContainer = memo(({ files, progress = files.length, fileLoader = () =>
                     />
                 </Col>) }
 
-                { loading && Array.from({ length: 15 }).map((_, i) =>
+                { loading && Array.from({ length: numLoadingFiles }).map((_, i) =>
                 <Col key={i}>
                     <FileItemPlaceholder/>
                 </Col>) }

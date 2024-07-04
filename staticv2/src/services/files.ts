@@ -1,6 +1,7 @@
 import { User, cFile } from "./models.ts";
 import getAuthBasic from "./utils.ts";
 import getContentTypeByFileName from "../utils/content-types";
+import { getCacheService } from "./cache.ts";
 
 interface FilesAPI {
     getFileInfo: (fileId: string) => Promise<cFile>;
@@ -19,6 +20,7 @@ interface FilesAPI {
 
 const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => {
     const { addTokenParam, cAxios, baseUrl } = getAuthBasic(baseUrlInput, tokenInput);
+    const { setCacheFiles, addCacheFiles, removeCacheFile, updateCacheFile } = getCacheService();
 
     return {
         addTokenParam,
@@ -49,6 +51,7 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
         async getFiles(): Promise<cFile[]> {
             try {                
                 const res = await cAxios.get('/api/files');
+                setCacheFiles(res.data ?? []);
                 return res.data ?? [];
             } catch (err : any) {
                 throw new Error(err.response.data.message);
@@ -57,6 +60,7 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
         async updateFile(fileId: string, fileData: cFile): Promise<{ data: cFile; message: string; }> {
             try {
                 const res = await cAxios.put(`/api/files/${fileId}`, fileData);
+                updateCacheFile(res.data.id, res.data);
                 return {
                     data: res.data,
                     message: `${res.data.filename} (${res.data.id}) updated successfully`,
@@ -68,6 +72,7 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
         async deleteFile(fileId: string, force: boolean): Promise<{ data: cFile; message: string; }> {
             try {
                 const res = await cAxios.delete(`/api/files/${fileId}${force ? '?force=yes' : ''}`);
+                removeCacheFile(res.data.id);
                 return {
                     data: res.data,
                     message: `${res.data.filename} (${res.data.id}) deleted successfully`,
@@ -103,6 +108,7 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
         async uploadFile(files: cFile[]): Promise<{ data: cFile[]; message: string; }> {
             try {
                 const res = await cAxios.post('/api/files', files);
+                addCacheFiles(res.data);
                 return {
                     data: res.data,
                     message: `${res.data.length} files uploaded successfully`,

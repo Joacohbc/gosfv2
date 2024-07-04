@@ -2,6 +2,7 @@ import { createContext, useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PropTypes from 'prop-types';
 import axios from "axios";
+import { useCache } from "../hooks/cache";
 
 const AuthContext = createContext({
     token: '',
@@ -13,9 +14,9 @@ const AuthContext = createContext({
     onRestore: async (username, password) => {}
 });
 
-export const AuthContextProvider = (props) => { 
-    // const BASE_URL = 'http://localhost:3000';
+export const AuthContextProvider = (props) => {
     const BASE_URL = window.location.origin;
+    const { cacheService } = useCache();
     
     const navigate = useNavigate();
     const location = useLocation();
@@ -43,12 +44,13 @@ export const AuthContextProvider = (props) => {
             await axios.delete(BASE_URL + '/auth/logout?cookie=yes');
             setToken('');
             setIsLogged(false);
+            cacheService.clean();
             navigate('/login');
             return 'User logged out successfully';
         } catch(err) {
             throw new Error(err.response.data.message);
         }
-    }, [BASE_URL, navigate]);
+    }, [BASE_URL, navigate, cacheService]);
 
     const verifyToken = useCallback(async () => {
         try {
@@ -112,10 +114,10 @@ export const AuthContextProvider = (props) => {
 
             setToken(req.data.token);
             setIsLogged(true);
+            cacheService.clean();
             navigate('/files');
             return 'User logged in successfully';
         } catch(err) {
-            console.log(err.response.data.message);
             throw new Error(err.response.data.message);
         }
     };

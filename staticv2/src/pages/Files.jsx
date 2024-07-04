@@ -10,6 +10,7 @@ import useJobsQueue from '../hooks/jobsQueue';
 import useFilesIDB from '../hooks/useFilesIDB';
 import FileContainer from '../components/FileContainer';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useCache } from '../hooks/cache';
 
 const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extension: '', deleted: false });
 
@@ -39,10 +40,12 @@ export default function Files() {
     const { sharedFileId } = useParams();
     const navigate = useNavigate();
 
-    const [ files, setFiles ] = useState([]);
-    const [ progress, setProgress ] = useState(0);
+
+    const { cacheService } = useCache();
+    const [ files, setFiles ] = useState(cacheService.getCacheFiles().value ?? []);
+    const [ progress, setProgress ] = useState(files.length);
     const [ fileLoader, setFileLoader ] = useState(() => {});
-    const [ searching, setSearching ]= useState(false);
+    const [ loading, setLoading ]= useState(true);
 
     const [ state , setPreview ] = useReducer(previewReducer, { previewFile: emptyFile, showPreview: false });
     const { previewFile, showPreview } = state;
@@ -54,7 +57,7 @@ export default function Files() {
 
     const createFileLoader = useCallback(async (filterCb = (data) => data) => {
         try {
-            setSearching(true)
+            setLoading(true);
 
             const files = await getFiles();
 
@@ -63,7 +66,7 @@ export default function Files() {
                 const f = getFilenameInfo(file, false);
                 f.deleted = false;
                 return f;
-            }))
+            }));
 
             // Verifica si los archivos están guardados localmente
             await Promise.allSettled(data.map(async (file) => {
@@ -84,9 +87,9 @@ export default function Files() {
             }
         } catch(err) {
             messageContext.showError(err.message);
-            return [];
+            return () => [];
         } finally {
-            setSearching(false);
+            setLoading(false);
         }
     }, [ messageContext, getFilenameInfo, getFiles, getFileFromLocal ]);
     
@@ -112,13 +115,13 @@ export default function Files() {
     }
 
     const handleSearch = handleKeyUpWithTimeout((e) => {
-        setSearching(true);
+        setLoading(true);
 
         const filterCb = (data) => data.filter(file => file.filename.toLowerCase().includes(e.target.value.toLowerCase()) || file.id == e.target.value);
         createFileLoader(filterCb).then((loadInfo) => {
             setFileLoader(() => loadInfo);
             loadInfo();
-        }).finally(() => setSearching(false));
+        }).finally(() => setLoading(false));
     }, 500);
 
     const handleFileUpload = (form) => {
@@ -239,7 +242,7 @@ export default function Files() {
             files={files}
             progress={progress}
             fileLoader={fileLoader}
-            loading={searching}
+            loading={loading}
             handleOpenPreview={handleOpenPreview}
             handleFilesDelete={handleFilesDelete}
             handleFilesUpdate={handleFilesUpdate}
