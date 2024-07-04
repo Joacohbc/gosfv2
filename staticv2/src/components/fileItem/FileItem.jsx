@@ -75,7 +75,7 @@ const FileItem = memo((props) => {
         try {
             const res = await getFileInfo(file.id);
             file.shared = res.shared;
-            file.sharedWith = res.sharedWith?.map(user => getUserInfo(user, true)) ?? [];
+            file.sharedWith = res.sharedWith?.map(user => getUserInfo(user, false)) ?? [];
 
             // Si el archivo esta compartido, se muestra el dialogo de confirmación
             if(file.shared || file.sharedWith.length > 0) {
@@ -141,7 +141,7 @@ const FileItem = memo((props) => {
 
             const res = await getFileInfo(file.id);
             file.shared = res.shared;
-            file.sharedWith = res.sharedWith?.map(user => getUserInfo(user, true)) ?? [];
+            file.sharedWith = res.sharedWith?.map(user => getUserInfo(user, false)) ?? [];
             shareModal.current.setFile(file, true);
         } catch(err) {
             messageContext.showError(err.message);

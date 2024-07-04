@@ -14,10 +14,6 @@ import { MessageContext } from '../../context/message-context';
 import { useFiles, useGetInfo } from '../../hooks/files';
 import Placeholder from 'react-bootstrap/Placeholder';
 
-function random(min, max) { 
-    return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
 const SharedWithModal = forwardRef((props, ref) => {
     const shareModal = useRef(null);
     const userIdAdded = useRef(null);
@@ -58,7 +54,7 @@ const SharedWithModal = forwardRef((props, ref) => {
                 const res = await removeUserFromFile(file.id, userId);
                 setFile((file) => ({
                     ...file,
-                    sharedWith: res.data.sharedWith.map(user => getUserInfo(user, true)),
+                    sharedWith: res.data.sharedWith.map(user => getUserInfo(user, false)),
                 }));
                 messageContext.showSuccess(res.message);
                 props.onUpdate();
@@ -84,7 +80,7 @@ const SharedWithModal = forwardRef((props, ref) => {
             const res = await addUserToFile(file.id, userId)
             setFile((file) => ({
                 ...file,
-                sharedWith: res.data.sharedWith.map(user => getUserInfo(user, true)),
+                sharedWith: res.data.sharedWith.map(user => getUserInfo(user, false)),
             }));
             messageContext.showSuccess(res.message);
             props.onUpdate();

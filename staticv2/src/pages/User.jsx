@@ -42,6 +42,7 @@ export default function User() {
 
         try {
             const res = await updateUser(newUsername.current.value);
+            setIconURL(getMyIconURL(true));
             messageContext.showSuccess(res.message);
         } catch(err) {
             messageContext.showError(err.message);

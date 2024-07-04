@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"fmt"
 	"gosfV2/src/auth"
 	"gosfV2/src/auth/jwt"
 	"gosfV2/src/dtos"
 	"gosfV2/src/models"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -25,12 +27,45 @@ func (u userController) GetUser(c echo.Context) error {
 	return jsonDTO(c, http.StatusOK, user)
 }
 
+func generateUserIcon(username string) string {
+	size := 512
+	backgroundColor := "ffffff"
+	fontColor := "000000"
+
+	userNameDivided := strings.Split(username, " ")
+
+	firstLetter := strings.ToUpper(string(userNameDivided[0][0]))
+	secondLetter := ""
+
+	if len(userNameDivided) > 1 && len(userNameDivided[1]) > 0 {
+		secondLetter = strings.ToUpper(string(userNameDivided[1][0]))
+	}
+
+	icon := fmt.Sprintf(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 250 250">
+        <g id="icon">
+            <circle cx="125" cy="125" r="125" fill="#%s"/>
+            <text x="50%%" y="54%%" fill="#%s" font-size="110" style="font-family:monospace;" dominant-baseline="middle" text-anchor="middle">%s</text>
+        </g>
+    </svg>`, size, size, backgroundColor, fontColor, firstLetter+secondLetter)
+
+	// return []byte(icon)
+	return icon
+}
+
 // Obtiene el icono del usuario actual
 func (u userController) GetIcon(c echo.Context) error {
 	path := models.Users().GetIcon(auth.Middlewares.GetUserId(c))
 	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
-			return c.File(models.DefaultIcon)
+
+			file, err := models.Users().FindUserById(auth.Middlewares.GetUserId(c))
+			if err != nil {
+				return c.File(models.DefaultIcon)
+			}
+
+			// reader := strings.NewReader(generateUserIcon(file.Username))
+			return c.Blob(http.StatusOK, "image/svg+xml", []byte(generateUserIcon(file.Username)))
 		}
 		return echo.NewHTTPError(http.StatusNotFound, "Icon not found")
 	}
@@ -52,7 +87,14 @@ func (u userController) GetIconFromUser(c echo.Context) error {
 	path := models.Users().GetIcon(id)
 	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
-			return c.File(models.DefaultIcon)
+
+			file, err := models.Users().FindUserById(id)
+			if err != nil {
+				return c.File(models.DefaultIcon)
+			}
+
+			// reader := strings.NewReader(generateUserIcon(file.Username))
+			return c.Blob(http.StatusOK, "image/svg+xml", []byte(generateUserIcon(file.Username)))
 		}
 		return echo.NewHTTPError(http.StatusNotFound, "Icon not found")
 	}
