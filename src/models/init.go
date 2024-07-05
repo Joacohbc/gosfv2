@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"gosfV2/src/models/env"
 	"image"
 	"image/jpeg"
@@ -26,8 +25,7 @@ func init() {
 
 	file, err := os.Create(DefaultIcon)
 	if err != nil {
-		fmt.Println("Error creating default icon: ", err.Error())
-		os.Exit(1)
+		log.Fatal("Error creating default icon: ", err.Error())
 	}
 
 	img := image.NewRGBA(image.Rect(0, 0, 256, 256))

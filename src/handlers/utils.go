@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"gosfV2/src/dtos"
 	"gosfV2/src/ent"
 	"net/http"
@@ -23,7 +22,6 @@ func getIdFromURL(c echo.Context, param string) (uint, error) {
 }
 
 func jsonDTO(c echo.Context, code int, model interface{}) error {
-	fmt.Println(reflect.TypeOf(model))
 	if reflect.TypeOf(model) == reflect.TypeOf(&ent.File{}) {
 		return c.JSON(code, dtos.ToFileDTO(model.(*ent.File)))
 	}
