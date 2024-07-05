@@ -248,7 +248,7 @@ export default function Files() {
             handleFilesUpdate={handleFilesUpdate}
         />
             
-        <div className='d-flex flex-column fixed-top align-items-end mr-1'>
+            <div className='d-flex flex-row fixed-bottom justify-content-center align-items-end gap-2'>
             <label htmlFor="input-upload" className="btn-upload"
                 onDrop={handleFileUploadByDrop}
                 onDragLeaveCapture={removeDefault}

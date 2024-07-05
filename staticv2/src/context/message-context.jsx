@@ -68,7 +68,8 @@ const MessageComponentProvider = (props) => {
             showAction,
             dismiss: toast.dismiss,
         }}>
-            <Toaster position="bottom-center" richColors />
+            { window.screen.width < 768 && <Toaster position="top-center" richColors /> }
+            { window.screen.width >= 768 && <Toaster position="bottom-left" richColors /> }
             {props.children}
         </MessageContext.Provider>
     );
