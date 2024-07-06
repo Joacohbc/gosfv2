@@ -14,6 +14,14 @@ interface UsersAPI {
 const getUserService = (baseUrlInput: string, tokenInput: string) : UsersAPI => {
     const { cAxios, baseUrl } = getAuthBasic(baseUrlInput, tokenInput);
 
+    const rawToUser = (rawData: any) : User => {
+        return {
+            id: rawData.id,
+            icon: rawData.icon,
+            username: rawData.username,
+        };
+    }
+
     return {
         getMyIconURL: (updated = false) => {
             const url = new URL(`${baseUrl}/api/users/me/icon`);
@@ -23,7 +31,7 @@ const getUserService = (baseUrlInput: string, tokenInput: string) : UsersAPI => 
         getMyInfo: async () => {
             try {
                 const res = await cAxios.get('/api/users/me');
-                return res.data;
+                return rawToUser(res.data);
             } catch (err : any) {
                 throw new Error(err.response.data.message);
             }
@@ -33,7 +41,7 @@ const getUserService = (baseUrlInput: string, tokenInput: string) : UsersAPI => 
             try {
                 const res = await cAxios.put('/api/users/me', { username: newUsername });
                 return {
-                    data: res.data,
+                    data: rawToUser(res.data),
                     message: 'Username updated successfully',
                 }
             } catch(err : any) {

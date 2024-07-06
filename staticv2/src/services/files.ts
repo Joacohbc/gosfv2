@@ -5,7 +5,6 @@ import { getCacheService } from "./cache.ts";
 
 interface FilesAPI {
     getFileInfo: (fileId: string) => Promise<cFile>;
-    getShareFile: (fileId: string) => Promise<cFile>;
     getShareFileInfo(fileId: string): Promise<cFile>;
     getFiles: () => Promise<Array<cFile>>;
     updateFile: (fileId: string, fileData: any) => Promise<{ data: cFile, message: string }>;
@@ -23,28 +22,41 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
     const { addTokenParam, cAxios, baseUrl } = getAuthBasic(baseUrlInput, tokenInput);
     const { setCacheFiles, addCacheFiles, removeCacheFile, updateCacheFile } = getCacheService();
 
+    const rawToFile = (rawData: any) : cFile => {
+        return {
+            id: rawData.id,
+            filename: rawData.filename,
+            createdAt: rawData.createdAt,
+            updatedAt: rawData.updatedAt,
+            owner_id: rawData.owner_id,
+            parentId: rawData.parentId ?? null,
+            children: rawData.children ?? [],
+            shared: rawData.shared ?? false,
+            sharedWith: rawData.sharedWith ?? [],
+            isDir: rawData.isDir ?? false,
+        };
+    }
+
     return {
         addTokenParam,
         async getFileInfo(fileId: string): Promise<cFile> {
             try {
                 const res = await cAxios.get(`/api/files/${fileId}/info`);
-                return res.data;
+
+                const file = rawToFile(res.data);
+                updateCacheFile(res.data.id, file);
+                return file;                
             } catch (err : any) {
                 throw new Error(err.response.data.message);
             }
         },    
-        async getShareFile(fileId: string): Promise<cFile> {
-            try {
-                const res = await cAxios.get(`/api/files/share/${fileId}`);
-                return res.data ?? {};
-            } catch (err : any) {
-                throw new Error(err.response.data.message);
-            }
-        },
         async getShareFileInfo(fileId: string): Promise<cFile> {
             try {
                 const res = await cAxios.get(`/api/files/share/${fileId}/info`);
-                return res.data ?? {};
+
+                const file = rawToFile(res.data);
+                updateCacheFile(res.data.id, file);
+                return file;
             } catch (err : any) {
                 throw new Error(err.response.data.message);
             }
@@ -52,8 +64,10 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
         async getFiles(): Promise<cFile[]> {
             try {                
                 const res = await cAxios.get('/api/files');
-                setCacheFiles(res.data ?? []);
-                return res.data ?? [];
+
+                const fileList : cFile[] = (res.data ?? []).map((file: any) => rawToFile(file));
+                setCacheFiles(fileList);
+                return fileList;
             } catch (err : any) {
                 throw new Error(err.response.data.message);
             }
@@ -61,9 +75,11 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
         async updateFile(fileId: string, fileData: cFile): Promise<{ data: cFile; message: string; }> {
             try {
                 const res = await cAxios.put(`/api/files/${fileId}`, fileData);
-                updateCacheFile(res.data.id, res.data);
+                
+                const file = rawToFile(res.data);
+                updateCacheFile(res.data.id, file);
                 return {
-                    data: res.data,
+                    data: file,
                     message: `${res.data.filename} (${res.data.id}) updated successfully`,
                 };
             } catch (err : any) {
@@ -73,9 +89,11 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
         async deleteFile(fileId: string, force: boolean): Promise<{ data: cFile; message: string; }> {
             try {
                 const res = await cAxios.delete(`/api/files/${fileId}${force ? '?force=yes' : ''}`);
+
+                const file = rawToFile(res.data);
                 removeCacheFile(res.data.id);
                 return {
-                    data: res.data,
+                    data: file,
                     message: `${res.data.filename} (${res.data.id}) deleted successfully`,
                 };
             } catch (err : any) {
@@ -87,10 +105,11 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
                 const res = await cAxios.delete(`/api/files${force ? '?force=yes' : ''}`, {
                     data: fileIds,
                 });
-                
-                res.data.forEach((file: cFile) => removeCacheFile(file.id));
+
+                const files : cFile[] = (res.data ?? []).map ((file: any) => rawToFile(file));
+                files.forEach((file: cFile) => removeCacheFile(file.id));
                 return {
-                    data: res.data,
+                    data: files,
                     message: `${res.data.length} files deleted successfully`,
                 };
             } catch (err : any) {
@@ -100,9 +119,10 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
         async addUserToFile(fileId: string, userId: string): Promise<{ data: cFile; message: string; }> {
             try {
                 const res = await cAxios.post(`/api/files/share/${fileId}/user/${userId}`);
-                res.data.sharedWith ||= [];
+
+                const file = rawToFile(res.data);
                 return {
-                    data: res.data,
+                    data: file,
                     message: 'User added successfully',
                 };
             } catch (err : any) {
@@ -112,9 +132,10 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
         async removeUserFromFile(fileId: string, userId: string): Promise<{ data: cFile; message: string; }> {
             try {
                 const res = await cAxios.delete(`/api/files/share/${fileId}/user/${userId}`);
-                res.data.sharedWith ||= [];
+
+                const file = rawToFile(res.data);
                 return {
-                    data: res.data,
+                    data: file,
                     message: 'User removed successfully',
                 };
             } catch (err : any) {
@@ -124,9 +145,11 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
         async uploadFile(files: cFile[]): Promise<{ data: cFile[]; message: string; }> {
             try {
                 const res = await cAxios.post('/api/files', files);
-                addCacheFiles(res.data);
+
+                const fileList : cFile[] = (res.data ?? []).map((file: any) => rawToFile(file));
+                addCacheFiles(fileList);
                 return {
-                    data: res.data,
+                    data: fileList,
                     message: `${res.data.length} files uploaded successfully`,
                 };
             } catch (err : any) {
@@ -143,6 +166,7 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
             const fileExtended : cFile = {
                 id: fileRawData.id,
                 filename: fileRawData?.filename,
+                owner_id: fileRawData?.owner_id,
                 name: filenameArray.slice(0, -1).join('.'),
                 extension: filenameArray.pop() ?? '',
                 contentType: getContentTypeByFileName(fileRawData?.filename),
@@ -155,6 +179,7 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
                 savedLocal: false,
                 shared: fileRawData.shared,
                 sharedWith: fileRawData.sharedWith,
+                isDir: fileRawData.isDir,
             };
             
             return additionalChanges(fileExtended);
