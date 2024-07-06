@@ -33,7 +33,7 @@ type FileInterface interface {
 	Delete(fileId uint) (*ent.File, error)
 
 	// Elimina varios archivos
-	DeleteFiles(fileIds []uint) error
+	DeleteFiles(fileIds []uint) ([]*ent.File, error)
 
 	// Cambia el estado de un archivo a compartido o no compartido
 	SetShared(fileId uint, shared bool) (*ent.File, error)
@@ -210,19 +210,34 @@ func (f fileService) Delete(fileId uint) (*ent.File, error) {
 		return nil, err
 	}
 
-	FilesToDelete <- []uint{fileId}
+	go func() {
+		if err := os.Remove(f.GetPath(file.ID, file.Filename)); err != nil {
+			FilesToDelete <- []uint{fileId}
+		}
+	}()
 
 	return file, nil
 }
 
-func (f fileService) DeleteFiles(fileIds []uint) error {
-	if _, err := f.BD.File.Delete().Where(file.IDIn(fileIds...)).Exec(f.Context); err != nil {
-		return err
+func (f fileService) DeleteFiles(fileIds []uint) ([]*ent.File, error) {
+	files, err := f.GetByIds(fileIds)
+	if err != nil {
+		return nil, err
 	}
 
-	FilesToDelete <- fileIds
+	if _, err := f.BD.File.Delete().Where(file.IDIn(fileIds...)).Exec(f.Context); err != nil {
+		return nil, err
+	}
 
-	return nil
+	go func() {
+		for _, file := range files {
+			if err := os.Remove(f.GetPath(file.ID, file.Filename)); err != nil {
+				FilesToDelete <- []uint{file.ID}
+			}
+		}
+	}()
+
+	return files, nil
 }
 
 //
@@ -359,15 +374,12 @@ func fileNameWithoutExtTrimSuffix(fileName string) string {
 	return strings.TrimSuffix(fileName, filepath.Ext(fileName))
 }
 
-func ManageFilesToDelete() {
+// ManageFailedDeletion is a goroutine that manages the files to delete
+// It receives a list of file IDs to delete and deletes them from the OS
+// if the file is not in the database (if the file is in the database, it is not deleted)
+func ManageFailedDeletion() {
 	FilesToDelete <- []uint{} // First execution
 
-	// TODO: Esto se tiene que mejorar, ya que si hubiera muchos archivos
-	// se tendría que hacer una consulta al sistema de archivos por cada archivo
-	// y eso no es eficiente en absoluto, considerar hacerlo de otra forma
-	// como por ejemplo, guardar en la base de datos los archivos que se van a eliminar
-	// y luego hacer una consulta a la base de datos para obtener los archivos a eliminar
-	// tipo una papelera de reciclaje archivos que se van a eliminar (en un futuro)
 	for fileIds := range FilesToDelete {
 
 		// Get all SystemFile (from os)

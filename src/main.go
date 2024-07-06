@@ -140,7 +140,7 @@ Powered By Echo v4 with Go Language - ` + Version)
 	fmt.Println("Press CTRL+C to stop the server")
 
 	models.FilesToDelete = make(chan []uint)
-	go models.ManageFilesToDelete()
+	go models.ManageFailedDeletion()
 
 	// Inicio del servidor
 	if err := e.Start(":" + strconv.Itoa(env.Config.Port)); err != nil {

@@ -325,7 +325,7 @@ func (fc *fileController) DeleteFiles(c echo.Context) error {
 		}
 	}
 
-	if err := models.Files().DeleteFiles(files); err != nil {
+	if _, err := models.Files().DeleteFiles(files); err != nil {
 		return HandleFileError(err)
 	}
 
