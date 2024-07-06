@@ -35,6 +35,8 @@ func ToFileDTO(file *ent.File) FileDTO {
 		IsDir:      &file.IsDir,
 		ParentId:   getParentId(file),
 		Children:   ToFileListDTO(file.Edges.Children),
+		CreatedAt:  file.CreatedAt,
+		UpdatedAt:  file.UpdatedAt,
 	}
 }
 
