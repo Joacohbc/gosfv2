@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"fmt"
 	"gosfV2/src/auth/jwt"
 	"gosfV2/src/ent"
 	"gosfV2/src/models"
@@ -148,19 +149,19 @@ func init() {
 			time.Sleep(time.Minute * 1)
 			users, err := models.Users().GetAllUsers()
 			if err != nil && err != models.ErrUserNotFound {
-				panic(err)
+				fmt.Println(err)
 			}
 
 			for _, user := range users {
 				tokens, err := jwt.TokenManager.GetTokens(user.ID)
 				if err != nil && err != jwt.ErrTokenNotFound {
-					panic(err)
+					fmt.Println(err)
 				}
 
 				for _, token := range tokens {
 					if _, err := jwt.ValidJWT(token); err != nil {
 						if err := jwt.TokenManager.RemoveToken(user.ID, token); err != nil {
-							panic(err)
+							fmt.Println(err)
 						}
 					}
 				}

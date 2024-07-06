@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gosfV2/src/auth"
 	"gosfV2/src/middleware/logger"
+	"gosfV2/src/models"
 	"gosfV2/src/models/database"
 	"gosfV2/src/models/env"
 	"gosfV2/src/routes"
@@ -137,6 +138,9 @@ Powered By Echo v4 with Go Language - ` + Version)
 	fmt.Println()
 	fmt.Println("Starting server...")
 	fmt.Println("Press CTRL+C to stop the server")
+
+	models.FilesToDelete = make(chan []uint)
+	go models.ManageFilesToDelete()
 
 	// Inicio del servidor
 	if err := e.Start(":" + strconv.Itoa(env.Config.Port)); err != nil {

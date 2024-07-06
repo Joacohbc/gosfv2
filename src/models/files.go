@@ -12,6 +12,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -209,28 +210,17 @@ func (f fileService) Delete(fileId uint) (*ent.File, error) {
 		return nil, err
 	}
 
-	if err := os.Remove(f.GetPath(file.ID, file.Filename)); err != nil {
-		return nil, err
-	}
+	FilesToDelete <- []uint{fileId}
 
 	return file, nil
 }
 
 func (f fileService) DeleteFiles(fileIds []uint) error {
-	files, err := f.GetByIds(fileIds)
-	if err != nil {
-		return err
-	}
-
-	for _, file := range files {
-		if err := os.Remove(f.GetPath(file.ID, file.Filename)); err != nil {
-			return err
-		}
-	}
-
 	if _, err := f.BD.File.Delete().Where(file.IDIn(fileIds...)).Exec(f.Context); err != nil {
 		return err
 	}
+
+	FilesToDelete <- fileIds
 
 	return nil
 }
@@ -361,4 +351,62 @@ func (f fileService) GetFilesShared(userId uint) ([]*ent.File, error) {
 	}
 
 	return files, nil
+}
+
+var FilesToDelete chan []uint
+
+func fileNameWithoutExtTrimSuffix(fileName string) string {
+	return strings.TrimSuffix(fileName, filepath.Ext(fileName))
+}
+
+func ManageFilesToDelete() {
+	FilesToDelete <- []uint{} // First execution
+
+	// TODO: Esto se tiene que mejorar, ya que si hubiera muchos archivos
+	// se tendría que hacer una consulta al sistema de archivos por cada archivo
+	// y eso no es eficiente en absoluto, considerar hacerlo de otra forma
+	// como por ejemplo, guardar en la base de datos los archivos que se van a eliminar
+	// y luego hacer una consulta a la base de datos para obtener los archivos a eliminar
+	// tipo una papelera de reciclaje archivos que se van a eliminar (en un futuro)
+	for fileIds := range FilesToDelete {
+
+		// Get all SystemFile (from os)
+		dir, err := os.ReadDir(env.Config.FilesDirectory)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		// Get all SystemFile names
+		fileNames := make(map[uint]string)
+		for _, file := range dir {
+			if file.IsDir() {
+				continue
+			}
+			id, _ := strconv.Atoi(fileNameWithoutExtTrimSuffix(file.Name()))
+			fileNames[uint(id)] = file.Name()
+		}
+
+		// Validate that ALL files are not in the database
+		filesDb, err := Files().GetByIds(fileIds)
+		if err != nil {
+			continue
+		}
+
+		// Delete from the map the files that are in the database
+		for _, file := range filesDb {
+			delete(fileNames, file.ID)
+		}
+
+		// Totally remove the SystemFiles from the OS
+		for _, file := range fileNames {
+			if err := os.Remove(filepath.Join(env.Config.FilesDirectory, file)); err != nil {
+				fmt.Println(err)
+			}
+		}
+
+		fmt.Println("Auto delete files: ", fileIds)
+	}
+
+	fmt.Println("End of auto delete files")
 }
