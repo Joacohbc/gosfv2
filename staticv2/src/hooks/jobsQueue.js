@@ -56,10 +56,21 @@ const useJobsQueue = (ms) => {
         if(job.undoJobFunc) job.undoJobFunc();
     }, [ jobsQueue ]);
 
+
+    /**
+     * Borra todos los jobs en la cola.
+     * No deshace los jobs.
+     * Solo los borra.
+     **/
+    const clearAllJobs = useCallback(() => {
+        jobsQueue.forEach(job => clearTimeout(job.id));
+        setJobsQueue([]);
+    }, [ jobsQueue ]);
+
     /**
      * Deshace todos los jobs en la cola.
      */
-    const clearAllJobs = useCallback(() => {
+    const undoAllJobs = useCallback(() => {
         if(jobsQueue.length === 0) return;
 
         // Borra todos los timeouts, luego deshace todos los jobs.
@@ -84,8 +95,9 @@ const useJobsQueue = (ms) => {
         addJob, 
         undoLastJob,
         undoJob,
-        clearAllJobs,
+        undoAllJobs,
         executeAllJobs,
+        clearAllJobs,
         jobsQueue
     };
 };

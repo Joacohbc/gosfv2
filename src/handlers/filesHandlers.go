@@ -274,10 +274,8 @@ func (fc *fileController) DeleteFile(c echo.Context) error {
 
 		// Si viene el QueryParam "force" y es true, elimino el archivo (aunque este compartido)
 		if force == "yes" {
-			for _, user := range fileDeleted.Edges.SharedWith {
-				if err := models.Files().RemoveUserFromFile(user.ID, fileDeleted.ID); err != nil {
-					return HandleFileError(err)
-				}
+			if err := models.Files().RemoveAllUsersFromFile(fileDeleted.ID); err != nil {
+				return HandleFileError(err)
 			}
 		} else {
 			return echo.NewHTTPError(http.StatusBadRequest, "File is shared with other users")
@@ -289,6 +287,49 @@ func (fc *fileController) DeleteFile(c echo.Context) error {
 	}
 
 	return jsonDTO(c, http.StatusOK, fileDeleted)
+}
+
+func (fc *fileController) DeleteFiles(c echo.Context) error {
+	var files []uint
+	if err := c.Bind(&files); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid files ids")
+	}
+
+	filesToDelete, err := models.Files().GetByIds(files)
+	if err != nil {
+		return HandleFileError(err)
+	}
+
+	if len(filesToDelete) == 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, "No files to delete")
+	}
+
+	if len(filesToDelete) != len(files) {
+		return echo.NewHTTPError(http.StatusBadRequest, "Some files do not exist")
+	}
+
+	// El QueryParam "force" es opcional, si no viene se asume false
+	force := c.QueryParam("force")
+
+	// Verifico si los archivos estan compartidos con otros usuarios
+	for _, file := range filesToDelete {
+		if len(file.Edges.SharedWith) != 0 {
+			// Si viene el QueryParam "force" y es true, elimino el archivo (aunque este compartido)
+			if force == "yes" {
+				if err := models.Files().RemoveAllUsersFromFile(file.ID); err != nil {
+					return HandleFileError(err)
+				}
+			} else {
+				return echo.NewHTTPError(http.StatusBadRequest, "File is shared with other users")
+			}
+		}
+	}
+
+	if err := models.Files().DeleteFiles(files); err != nil {
+		return HandleFileError(err)
+	}
+
+	return jsonDTO(c, http.StatusOK, filesToDelete)
 }
 
 // Agrega un usuario a la lista de usuarios con los que se comparte el archivo

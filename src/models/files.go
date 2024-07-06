@@ -31,6 +31,9 @@ type FileInterface interface {
 	// Elimina un archivo del sistema de archivos y de la ruta de la base de datos
 	Delete(fileId uint) (*ent.File, error)
 
+	// Elimina varios archivos
+	DeleteFiles(fileIds []uint) error
+
 	// Cambia el estado de un archivo a compartido o no compartido
 	SetShared(fileId uint, shared bool) (*ent.File, error)
 
@@ -56,6 +59,9 @@ type FileInterface interface {
 
 	// Elimina un usuario de un archivo
 	RemoveUserFromFile(userId, fileId uint) error
+
+	// Elimina todos los usuarios de un archivo
+	RemoveAllUsersFromFile(fileId uint) error
 
 	// Obtiene todos los archivos compartidos con un usuario
 	GetFilesShared(userId uint) ([]*ent.File, error)
@@ -210,6 +216,25 @@ func (f fileService) Delete(fileId uint) (*ent.File, error) {
 	return file, nil
 }
 
+func (f fileService) DeleteFiles(fileIds []uint) error {
+	files, err := f.GetByIds(fileIds)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		if err := os.Remove(f.GetPath(file.ID, file.Filename)); err != nil {
+			return err
+		}
+	}
+
+	if _, err := f.BD.File.Delete().Where(file.IDIn(fileIds...)).Exec(f.Context); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 //
 // Updates
 //
@@ -302,6 +327,18 @@ func (f fileService) RemoveUserFromFile(userId, fileId uint) error {
 	_, err := f.BD.File.UpdateOneID(fileId).
 		RemoveSharedWithIDs(userId).
 		Save(f.Context)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f fileService) RemoveAllUsersFromFile(fileId uint) error {
+	_, err := f.BD.File.UpdateOneID(fileId).
+		ClearSharedWith().
+		Save(f.Context)
+
 	if err != nil {
 		return err
 	}

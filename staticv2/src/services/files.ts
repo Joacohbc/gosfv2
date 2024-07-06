@@ -10,6 +10,7 @@ interface FilesAPI {
     getFiles: () => Promise<Array<cFile>>;
     updateFile: (fileId: string, fileData: any) => Promise<{ data: cFile, message: string }>;
     deleteFile: (fileId: string, force: boolean) => Promise<{ data: cFile, message: string }>;
+    deleteFiles: (fileIds: string[], force: boolean) => Promise<{ data: cFile[], message: string }>;
     addUserToFile: (fileId: string, userId: string) => Promise<{ data: cFile, message: string }>;
     removeUserFromFile: (fileId: string, userId: string) => Promise<{ data: cFile, message: string }>;
     uploadFile: (files: cFile[]) => Promise<{ data: cFile[], message: string }>;
@@ -80,7 +81,24 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
             } catch (err : any) {
                 throw new Error(err.response.data.message);
             }
-        },        
+        },
+        async deleteFiles(fileIds: string[], force: boolean): Promise<{ data: cFile[]; message: string; }> {
+            try {
+                const res = await cAxios.delete(`/api/files${force ? '?force=yes' : ''}`, {
+                    data: fileIds,
+                });
+
+                console.log(res);
+                
+                res.data.forEach((file: cFile) => removeCacheFile(file.id));
+                return {
+                    data: res.data,
+                    message: `${res.data.length} files deleted successfully`,
+                };
+            } catch (err : any) {
+                throw new Error(err.response.data.message);
+            }
+        },   
         async addUserToFile(fileId: string, userId: string): Promise<{ data: cFile; message: string; }> {
             try {
                 const res = await cAxios.post(`/api/files/share/${fileId}/user/${userId}`);

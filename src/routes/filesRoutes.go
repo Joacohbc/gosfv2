@@ -24,6 +24,7 @@ func (f *filesRoutes) AddFilesRoutes(group *echo.Group) {
 
 	// Borrar
 	files.DELETE("/:id", handlers.Files.DeleteFile)
+	files.DELETE("", handlers.Files.DeleteFiles)
 
 	// Modificación
 	files.PUT("/:id", handlers.Files.UpdateFile)

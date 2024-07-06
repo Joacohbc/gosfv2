@@ -51,8 +51,8 @@ export default function Files() {
     const { previewFile, showPreview } = state;
 
     const { getFilenameInfo } = useGetInfo();
-    const { getFiles, uploadFile, getShareFileInfo } = useFiles();
-    const { addJob, undoLastJob, undoJob, jobsQueue, executeAllJobs } = useJobsQueue(DELETE_UNDO_DURATION);
+    const { getFiles, uploadFile, getShareFileInfo, deleteFiles } = useFiles();
+    const { addJob, undoLastJob, undoJob, jobsQueue, clearAllJobs, undoAllJobs } = useJobsQueue(DELETE_UNDO_DURATION);
     const { getFileFromLocal } = useFilesIDB();
 
     const createFileLoader = useCallback(async (filterCb = (data) => data) => {
@@ -110,8 +110,15 @@ export default function Files() {
     }, [ isLogged, createFileLoader, getShareFileInfo, sharedFileId, messageContext, getFilenameInfo]);
 
     const handleDeleteAllInQueue = () => {
-        executeAllJobs();
-        messageContext.showSuccess('All files deleted');
+        deleteFiles(files.filter(file => file.deleted).map(file => file.id), true)
+            .then((res) => {
+                clearAllJobs();
+                messageContext.showSuccess(res.message);
+            })
+            .catch((err) => {
+                undoAllJobs();
+                messageContext.showError(err.message);
+            });
     }
 
     const handleSearch = handleKeyUpWithTimeout((e) => {
