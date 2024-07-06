@@ -42,6 +42,8 @@ const FileContainer = memo(({ files, progress = files.length, fileLoader = () =>
                         contentType={file.contentType}
                         extension={file.extension}
                         url={file.url}
+                        shared={file.shared}
+                        sharedWith={file.sharedWith}
                         savedLocal={file.savedLocal}
                         onOpen={handleOpenPreview}
                         onDelete={handleFilesDelete}

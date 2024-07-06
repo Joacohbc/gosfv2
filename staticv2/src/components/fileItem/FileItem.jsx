@@ -36,8 +36,8 @@ const FileItem = memo((props) => {
         url: props.url,
         extension: props.extension,
         name: props.name,
-        shared: null,
-        sharedWith: [],
+        shared: props.shared,
+        sharedWith: props.sharedWith ?? [],
         savedLocal: props.savedLocal ?? false,
     });
 
@@ -207,6 +207,8 @@ FileItem.propTypes = {
     url: PropTypes.string.isRequired,
     extension: PropTypes.string.isRequired,
     name: PropTypes.string,
+    shared: PropTypes.bool,
+    sharedWith: PropTypes.array,
     savedLocal: PropTypes.bool,
     onOpen: PropTypes.func,
     onDelete: PropTypes.func,

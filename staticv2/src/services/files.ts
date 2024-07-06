@@ -87,8 +87,6 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
                 const res = await cAxios.delete(`/api/files${force ? '?force=yes' : ''}`, {
                     data: fileIds,
                 });
-
-                console.log(res);
                 
                 res.data.forEach((file: cFile) => removeCacheFile(file.id));
                 return {
@@ -141,8 +139,8 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
             const filenameArray = fileRawData.filename.split('.');
             const fileUrl = `${baseUrl}/api/files/${fileRawData.id}`;
             const sharedFileUrl = `${baseUrl}/api/files/share/${fileRawData.id}`;
-        
-            return additionalChanges({
+            
+            const fileExtended : cFile = {
                 id: fileRawData.id,
                 filename: fileRawData?.filename,
                 name: filenameArray.slice(0, -1).join('.'),
@@ -154,8 +152,12 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
                 updatedAt: fileRawData?.updatedAt,
                 parentId: fileRawData?.parentId,
                 children: fileRawData?.children || [],
-                savedLocal: false
-            });
+                savedLocal: false,
+                shared: fileRawData.shared,
+                sharedWith: fileRawData.sharedWith,
+            };
+            
+            return additionalChanges(fileExtended);
         },
         getUserInfo(userRawData: User, withToken: boolean, additionalChanges: (data: User) => User): User {
             if(additionalChanges === undefined) additionalChanges = (data: User) => data;

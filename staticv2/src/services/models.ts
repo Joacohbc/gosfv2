@@ -6,6 +6,8 @@ export type cFile = {
     contentType: string;
     url: string;
     sharedUrl: string;
+    sharedWith: User[];
+    shared: boolean;
     createdAt: string;
     updatedAt: string;
     parentId: number;
