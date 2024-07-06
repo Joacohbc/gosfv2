@@ -110,7 +110,7 @@ export default function Files() {
     }, [ isLogged, createFileLoader, getShareFileInfo, sharedFileId, messageContext, getFilenameInfo]);
 
     const handleDeleteAllInQueue = () => {
-        deleteFiles(files.filter(file => file.deleted).map(file => file.id), true)
+        deleteFiles(jobsQueue.map(job => job.info.fileId), true)
             .then((res) => {
                 clearAllJobs();
                 messageContext.showSuccess(res.message);
@@ -199,7 +199,8 @@ export default function Files() {
             // Si se deshace la eliminación, se restaura el archivo
             setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: false } : file));
             messageContext.dismiss(removeMessageId);
-        });
+        },
+        { filename: deletedFile.filename, fileId: deletedFile.id });
 
         setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: true } : file));
 

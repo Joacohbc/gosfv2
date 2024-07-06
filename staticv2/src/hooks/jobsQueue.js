@@ -27,7 +27,7 @@ const useJobsQueue = (ms) => {
             undoJobFunc: undoCb,
             action: actionCb,
             info: actionInfo,
-            deleteIn: duration
+            deleteIn: duration,
         };
 
         setJobsQueue((prevJobsQueue) => [...prevJobsQueue, job]);
