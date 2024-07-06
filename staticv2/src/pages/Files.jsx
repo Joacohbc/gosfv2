@@ -111,14 +111,14 @@ export default function Files() {
 
     const handleDeleteAllInQueue = () => {
         deleteFiles(jobsQueue.map(job => job.info.fileId), true)
-            .then((res) => {
-                clearAllJobs();
-                messageContext.showSuccess(res.message);
-            })
-            .catch((err) => {
-                undoAllJobs();
-                messageContext.showError(err.message);
-            });
+        .then((res) => {
+            clearAllJobs();
+            messageContext.showSuccess(res.message);
+        })
+        .catch((err) => {
+            undoAllJobs();
+            messageContext.showError(err.message);
+        });
     }
 
     const handleSearch = handleKeyUpWithTimeout((e) => {
@@ -190,17 +190,23 @@ export default function Files() {
         // Id del mensaje de deshacer eliminación
         let removeMessageId = null;
 
-        const job = addJob(() => {
-            // Si la eliminación es exitosa, se elimina el mensaje de deshacer eliminación
-            messageContext.dismiss(removeMessageId);
-            deleteFunc();
-        },
-        () => {
-            // Si se deshace la eliminación, se restaura el archivo
-            setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: false } : file));
-            messageContext.dismiss(removeMessageId);
-        },
-        { filename: deletedFile.filename, fileId: deletedFile.id });
+        const job = addJob({
+            actionCb: () => {
+                // Si la eliminación es exitosa, se elimina el mensaje de deshacer eliminación
+                messageContext.dismiss(removeMessageId);
+                deleteFunc();
+            },
+            undoCb: () => {
+                // Si se deshace la eliminación, se restaura el archivo
+                setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: false } : file));
+                messageContext.dismiss(removeMessageId);
+            },
+            clearCb: () => {
+                // Si se limpia el job, se elimina el mensaje de deshacer eliminación
+                messageContext.dismiss(removeMessageId);
+            },
+            actionInfo: { fileId: deletedFile.id }
+        });
 
         setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: true } : file));
 
@@ -209,7 +215,8 @@ export default function Files() {
             'Undo',
             undoJob.bind(null, job), // bind retorna una nueva función que cuando se llama, llama a la función original con el job ya como parámetro
             job.deleteIn
-        );        
+        );
+
     }, [addJob, undoJob, messageContext]);
     
     const handleFilesUpdate = useCallback((updatedFile) => 
@@ -256,13 +263,14 @@ export default function Files() {
             handleFilesUpdate={handleFilesUpdate}
         />
             
-            <div className='d-flex flex-row fixed-bottom justify-content-center align-items-end gap-2'>
+        <div className='d-flex flex-row fixed-bottom justify-content-center align-items-end gap-2'>
+            { jobsQueue.length == 0 &&             
             <label htmlFor="input-upload" className="btn-upload"
                 onDrop={handleFileUploadByDrop}
                 onDragLeaveCapture={removeDefault}
                 onDragOverCapture={removeDefault}>
                 <i className='bi bi-plus-square-dotted'/>
-            </label>
+            </label>}
 
             <input id="input-upload" type="file" style={{display: 'none'}} onChange={handleFileUploadByClick} multiple/>
 
