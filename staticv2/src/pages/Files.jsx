@@ -2,7 +2,6 @@ import './Files.css';
 import AuthContext from '../context/auth-context';
 import Modal from 'react-bootstrap/Modal';
 import { useCallback, useContext, useEffect, useState, useReducer } from 'react';
-import { handleKeyUpWithTimeout } from '../utils/input-text';
 import PreviewFile from './PreviewFile';
 import { MessageContext } from '../context/message-context';
 import { useGetInfo, useFiles } from '../hooks/files';
@@ -11,6 +10,7 @@ import useFilesIDB from '../hooks/useFilesIDB';
 import FileContainer from '../components/FileContainer';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCache } from '../hooks/cache';
+import SearchBar from '../components/SearchBar';
 
 const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extension: '', deleted: false });
 
@@ -39,7 +39,6 @@ export default function Files() {
     const { isLogged } = useContext(AuthContext);
     const { sharedFileId } = useParams();
     const navigate = useNavigate();
-
 
     const { cacheService } = useCache();
     const [ files, setFiles ] = useState(cacheService.getCacheFiles().value ?? []);
@@ -120,16 +119,6 @@ export default function Files() {
             messageContext.showError(err.message);
         });
     }
-
-    const handleSearch = handleKeyUpWithTimeout((e) => {
-        setLoading(true);
-
-        const filterCb = (data) => data.filter(file => file.filename.toLowerCase().includes(e.target.value.toLowerCase()) || file.id == e.target.value);
-        createFileLoader(filterCb).then((loadInfo) => {
-            setFileLoader(() => loadInfo);
-            loadInfo();
-        }).finally(() => setLoading(false));
-    }, 500);
 
     const handleFileUpload = (form) => {
         const uploadPromise = async () => {
@@ -240,6 +229,7 @@ export default function Files() {
         navigate('/files'); // To avoid that in the next re-load the file is opened again
     }, [ navigate ]);  
 
+
     return <>
         { showPreview && 
         <Modal show={showPreview} onHide={handleClosePreview} className='d-flex modal-bg' fullscreen centered>
@@ -249,9 +239,7 @@ export default function Files() {
             </div>
         </Modal> }
 
-        <div className="d-flex justify-content-center align-items-center mb-4">
-            <input type="text" placeholder="Enter Search" className='search-input' onKeyUp={handleSearch}/>
-        </div>
+        <SearchBar createFileLoader={createFileLoader} setFileLoader={setFileLoader}/>
         
         <FileContainer
             files={files}
