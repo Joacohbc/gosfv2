@@ -1,5 +1,5 @@
 import './SearchBar.css';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { handleKeyUpWithTimeout } from '../utils/input-text';
 import PropTypes from "prop-types";
 import ToolTip from './ToolTip';
@@ -79,23 +79,23 @@ const SearchBar = ({ createFileLoader, setFileLoader  }) => {
         loadInfo();
     }, 500);
 
-    const handleSortByName = async () => {
+    const handleSortByName = useCallback(async () => {
         const newSortName = sortName == 'asc' ? 'desc' : 'asc';
         setSortName(newSortName);
 
         const loadInfo = await createFileLoader(sortByName(newSortName));
         setFileLoader(loadInfo);
         loadInfo();
-    }
+    }, [ sortName, setSortName, setFileLoader, createFileLoader ]);
 
-    const handleSortByDate = async () => {
+    const handleSortByDate = useCallback(async () => {
         const newSortDate = sortDate == 'asc' ? 'desc' : 'asc';
         setSortDate(newSortDate);
 
         const loadInfo = await createFileLoader(sortByDate(newSortDate));
         setFileLoader(loadInfo);
         loadInfo();
-    }
+    }, [ sortDate, setSortDate, setFileLoader, createFileLoader ])
 
     return (
         <div className="d-flex justify-content-center align-items-center mb-4 gap-1">

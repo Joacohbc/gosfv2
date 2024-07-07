@@ -41,7 +41,7 @@ export default function Files() {
     const navigate = useNavigate();
 
     const { cacheService } = useCache();
-    const [ files, setFiles ] = useState(cacheService.getCacheFiles().value ?? []);
+    const [ files, setFiles ] = useState([]);
     const [ progress, setProgress ] = useState(files.length);
     const [ fileLoader, setFileLoader ] = useState(() => {});
     const [ loading, setLoading ]= useState(true);
@@ -53,12 +53,20 @@ export default function Files() {
     const { getFiles, uploadFile, getShareFileInfo, deleteFiles } = useFiles();
     const { addJob, undoLastJob, undoJob, jobsQueue, clearAllJobs, undoAllJobs } = useJobsQueue(DELETE_UNDO_DURATION);
     const { getFileFromLocal } = useFilesIDB();
-
+    
     const createFileLoader = useCallback(async (filterCb = (data) => data) => {
         try {
             setLoading(true);
 
-            const files = await getFiles();
+            let files = [];
+
+            // Check difference between the current files and the files in the cache (+1 second)
+            const cacheFiles = cacheService.getCacheFiles();
+            if(cacheFiles.timestamp.getTime() > Date.now() - 1000) {
+                files = cacheFiles.value;
+            } else {
+                files = await getFiles();
+            }
 
             // Filtra los archivos
             let data = filterCb(files.map(file => {
@@ -90,7 +98,7 @@ export default function Files() {
         } finally {
             setLoading(false);
         }
-    }, [ messageContext, getFilenameInfo, getFiles, getFileFromLocal ]);
+    }, [ messageContext, getFilenameInfo, getFiles, getFileFromLocal, cacheService ]);
     
     useEffect(() => {
         if(!isLogged) return;
@@ -106,7 +114,8 @@ export default function Files() {
             setFileLoader(() => loadInfo);
             loadInfo();
         })
-    }, [ isLogged, createFileLoader, getShareFileInfo, sharedFileId, messageContext, getFilenameInfo]);
+        setLoading(false);
+    }, [ isLogged, createFileLoader, getShareFileInfo, sharedFileId, messageContext, getFilenameInfo ]);
 
     const handleDeleteAllInQueue = () => {
         deleteFiles(jobsQueue.map(job => job.info.fileId), true)
