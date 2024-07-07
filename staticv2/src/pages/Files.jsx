@@ -62,7 +62,7 @@ export default function Files() {
 
             // Check difference between the current files and the files in the cache (+1 second)
             const cacheFiles = cacheService.getCacheFiles();
-            if(cacheFiles.timestamp.getTime() > Date.now() - 1000) {
+            if(cacheFiles.value && cacheFiles.timestamp.getTime() > Date.now() - 1000) {
                 files = cacheFiles.value;
             } else {
                 files = await getFiles();
