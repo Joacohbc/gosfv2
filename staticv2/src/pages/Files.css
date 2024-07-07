@@ -1,36 +1,5 @@
 @import url("../css/index.css");
 
-.file-loading {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    padding: 10px;
-    margin: 10px;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 2;
-}
-
-.loader {
-    animation: loading 1s linear infinite;
-    color: var(--color-text);
-    border-radius: 5px;
-    padding: 10px;
-}
-
-@keyframes loading {
-    0% {
-        color: #96D373;
-    }
-
-    50% {
-        color: #F5F5F5;
-    }
-
-    100% {
-        color: #96D373;
-    }
-}
-
 .btn-load {
     color: var(--color-text);
     border-radius: 5px;

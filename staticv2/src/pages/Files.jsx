@@ -250,8 +250,8 @@ export default function Files() {
             handleFilesDelete={handleFilesDelete}
             handleFilesUpdate={handleFilesUpdate}
         />
-            
-        <div className='d-flex flex-row fixed-bottom justify-content-center align-items-end gap-2'>
+        
+        <div className='d-flex flex-row sticky-bottom justify-content-center align-items-end gap-2'>
             { jobsQueue.length == 0 &&             
             <label htmlFor="input-upload" className="btn-upload"
                 onDrop={handleFileUploadByDrop}
