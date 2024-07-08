@@ -14,6 +14,14 @@ const AuthContext = createContext({
     onRestore: async (username, password) => {}
 });
 
+const deleteAllCookies = () => {
+    document.cookie.split(';').forEach(cookie => {
+        const eqPos = cookie.indexOf('=');
+        const name = eqPos > -1 ? cookie.substring(0, eqPos) : cookie;
+        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    });
+}
+
 export const AuthContextProvider = (props) => {
     const BASE_URL = window.location.origin;
     const { cacheService } = useCache();
@@ -25,6 +33,13 @@ export const AuthContextProvider = (props) => {
     const [ token, setToken ] = useState('');
 
     const { pathname: currentRoute } = location;
+    
+    const clearSession = useCallback(() => {
+        setToken('');
+        setIsLogged(false);
+        cacheService.clean();
+        deleteAllCookies();
+    }, [ cacheService]);
 
     const refreshTokenHandler = useCallback(async () => {
         try {
@@ -42,15 +57,14 @@ export const AuthContextProvider = (props) => {
     const logOutHandler = useCallback(async () => {
         try {
             await axios.delete(BASE_URL + '/auth/logout?cookie=yes');
-            setToken('');
-            setIsLogged(false);
-            cacheService.clean();
-            navigate('/login');
             return 'User logged out successfully';
         } catch(err) {
             throw new Error(err.response.data.message);
+        } finally {
+            clearSession();
+            navigate('/login');
         }
-    }, [BASE_URL, navigate, cacheService]);
+    }, [BASE_URL, navigate, clearSession]);
 
     const verifyToken = useCallback(async () => {
         try {
@@ -66,13 +80,15 @@ export const AuthContextProvider = (props) => {
     }, [ BASE_URL ]);
 
     useEffect(() => {
+        if(currentRoute == '/register') return;
+
         if(isLogged) {
             if(currentRoute == '/login' || currentRoute == '/register' || currentRoute == '/') {
                 navigate('/files');
             }
             return;
         }
-        
+
         verifyToken()
         .then((currentTokenInfo) => {
             setIsLogged(true);
@@ -94,16 +110,10 @@ export const AuthContextProvider = (props) => {
             }
         })
         .catch(() => {
-            // Si el token no esta seteado y la ruta actual no es login o register redireccionar a login
-            setIsLogged(false);
-            setToken('');
-            logOutHandler();
-            
-            if(currentRoute != '/login' && currentRoute != '/register') {
-                navigate("/login");
-            }
+            clearSession();
+            navigate('/login');
         });
-    }, [token, currentRoute, navigate, BASE_URL, verifyToken, logOutHandler, isLogged, refreshTokenHandler]);
+    }, [token, currentRoute, navigate, BASE_URL, verifyToken, logOutHandler, isLogged, refreshTokenHandler, clearSession]);
 
     const loginHandler = async (username, password) => {
         try {
@@ -140,6 +150,7 @@ export const AuthContextProvider = (props) => {
                 username: username,
                 password: password
             });
+            clearSession();
             return 'User created successfully';
         } catch(err) {
             throw new Error(err.response.data.message);
