@@ -21,9 +21,14 @@ export default function Notes() {
             .catch((err) => messageContext.showInfo(err));
     }, [ getNote, messageContext, isLogged ]);
 
-    const copyLink = async (e) => {
+    const handleCopy = async (e) => {
         e.preventDefault();
-        await navigator.clipboard.writeText(text);
+        try {
+            await navigator.clipboard.writeText(text);
+            messageContext.showInfo('Link copied to clipboard');
+        } catch(err) {
+            messageContext.showError(err.message);
+        }
     }
 
     const onTextChange = (e) => {
@@ -45,7 +50,7 @@ export default function Notes() {
 
 
         <div className='d-flex flex-row align-items-center'>
-            <Button onClick={copyLink} text={<span>{'Copy Link'} <i className='bi bi-clipboard-fill'/></span>} className="p-2 mt-2 rounded border border-white text-white"/>
+            <Button onClick={handleCopy} text={<span>{'Copy'} <i className='bi bi-clipboard-fill'/></span>} className="p-2 mt-2 rounded border border-white text-white"/>
             { !saved.saved ? <i className="bi bi-cloud-slash saving-cloud"></i> 
                 : <i className="bi bi-cloud-check saved-cloud"></i> }
         </div>
