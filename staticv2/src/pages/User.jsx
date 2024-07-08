@@ -41,6 +41,10 @@ export default function User() {
         e.preventDefault();
 
         try {
+            if(newUsername.current.value === userInfo.username) {
+                messageContext.showWarning('Username is the same');
+                return;
+            }
             const res = await updateUser(newUsername.current.value);
             setIconURL(getMyIconURL(true));
             messageContext.showSuccess(res.message);
