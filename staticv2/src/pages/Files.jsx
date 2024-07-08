@@ -41,7 +41,7 @@ export default function Files() {
 
     const { cacheService } = useCache();
     const [ files, setFiles ] = useState([]);
-    const [ progress, setProgress ] = useState(files.length);
+    const [ progress, setProgress ] = useState(0);
     const [ fileLoader, setFileLoader ] = useState(() => {});
     const [ loading, setLoading ]= useState(true);
 
@@ -58,9 +58,9 @@ export default function Files() {
 
             let files = [];
 
-            // Check difference between the current files and the files in the cache (+1 second)
+            // Check difference between the current files and the files in the cache (+5 second)
             const cacheFiles = cacheService.getCacheFiles();
-            if(cacheFiles.value && cacheFiles.timestamp.getTime() > Date.now() - 1000) {
+            if(cacheFiles.value && cacheFiles.timestamp.getTime() > Date.now() - 5000) {
                 files = cacheFiles.value;
             } else {
                 files = await getFiles();
@@ -74,10 +74,12 @@ export default function Files() {
             }));
 
             const x = 35;
+            
             // Carga de X en X archivos o todos los archivos si son menos de X
             const numberOfFilesPerLoad = data.length >= x ? x : data.length;
             setFiles(data);
             setProgress(0);
+
             return () => {
                 setProgress(prevProgress => {
                     const nextProgress = prevProgress + numberOfFilesPerLoad;
@@ -223,7 +225,6 @@ export default function Files() {
         setPreview({ type: 'SET_PREVIEW_FILE', payload: emptyFile });
         navigate('/files'); // To avoid that in the next re-load the file is opened again
     }, [ navigate ]);  
-
 
     return <>
         { showPreview && 
