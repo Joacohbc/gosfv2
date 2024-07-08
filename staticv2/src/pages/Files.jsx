@@ -6,7 +6,6 @@ import PreviewFile from './PreviewFile';
 import { MessageContext } from '../context/message-context';
 import { useGetInfo, useFiles } from '../hooks/files';
 import useJobsQueue from '../hooks/jobsQueue';
-import useFilesIDB from '../hooks/useFilesIDB';
 import FileContainer from '../components/FileContainer';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCache } from '../hooks/cache';
@@ -52,7 +51,6 @@ export default function Files() {
     const { getFilenameInfo } = useGetInfo();
     const { getFiles, uploadFile, getShareFileInfo, deleteFiles } = useFiles();
     const { addJob, undoLastJob, undoJob, jobsQueue, clearAllJobs, undoAllJobs } = useJobsQueue(DELETE_UNDO_DURATION);
-    const { getFileFromLocal } = useFilesIDB();
     
     const createFileLoader = useCallback(async (filterCb = (data) => data) => {
         try {
@@ -75,12 +73,6 @@ export default function Files() {
                 return f;
             }));
 
-            // Verifica si los archivos están guardados localmente
-            await Promise.allSettled(data.map(async (file) => {
-                const localFile = await getFileFromLocal(file.id);
-                file.savedLocal = localFile != null;
-            }));
-
             const x = 35;
             // Carga de X en X archivos o todos los archivos si son menos de X
             const numberOfFilesPerLoad = data.length >= x ? x : data.length;
@@ -98,7 +90,7 @@ export default function Files() {
         } finally {
             setLoading(false);
         }
-    }, [ messageContext, getFilenameInfo, getFiles, getFileFromLocal, cacheService ]);
+    }, [ messageContext, getFilenameInfo, getFiles, cacheService ]);
     
     useEffect(() => {
         if(!isLogged) return;
@@ -221,16 +213,10 @@ export default function Files() {
         setFiles((files) => files.map(file => file.id == updatedFile.id ? updatedFile : file)),
     []);
 
-    const handleOpenPreview = useCallback(async (file) => {
-        // Si el archivo esta en la base de datos local, se obtiene la URL del archivo
-        const localFile = await getFileFromLocal(file.id);
-        if (localFile != null) {
-            file.url = window.URL.createObjectURL(localFile.blob);
-        }
-        
+    const handleOpenPreview = useCallback(async (file) => {        
         setPreview({ type: 'SET_PREVIEW_FILE', payload: file });
         setPreview({ type: 'SHOW_PREVIEW' });
-    }, [ getFileFromLocal ]);
+    }, [ ]);
 
     const handleClosePreview = useCallback(() => {
         setPreview({ type: 'HIDE_PREVIEW' });

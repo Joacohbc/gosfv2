@@ -26,7 +26,6 @@ const FileItemPlaceholder = memo(() => {
                     <Placeholder as="button" className='file-actions-item' xs={1}><i className='bi bi-trash3-fill'/></Placeholder>
                     <Placeholder as="button" className='file-actions-item' xs={1}><i className='bi bi-pencil-square'/></Placeholder>
                     <Placeholder as="button" className='file-actions-item' xs={1}><i className='bi bi-share-fill'/></Placeholder>
-                    <Placeholder as="button" className='file-actions-item' xs={1}><i className='bi bi-folder-check file-actions-item-no-hover'/></Placeholder>
                 </Placeholder>
             </Card.Body>
         </Card>

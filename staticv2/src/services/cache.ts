@@ -35,11 +35,9 @@ export const getCacheService = () : CacheAPI => {
 }
 
 const setLocalStorage = (key: string, value: any) => {
-    const timestampString = new Date().toISOString();
-    
     localStorage.setItem(key, JSON.stringify({
         value,
-        timestamp: timestampString,
+        timestamp: new Date(),
     }));
 }
 
@@ -96,7 +94,6 @@ const updateFile = (fileId: number, fileData: cFile) => {
     });
     setFiles(newFiles);
 }
-
 
 const clean = () => {
     localStorage.removeItem(LS_KEYS.files);
