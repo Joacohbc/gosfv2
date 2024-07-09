@@ -33,10 +33,8 @@ export const RawDataToFile = (rawData: any) : cFile => {
     };
 }
 
-export const getDisplayFilename = (filename: string, maxLength: number = 33): string => {
-    return filename.length >= maxLength - 3 ? 
-            filename.substring(0, maxLength) + '...' 
-            : filename;
+export const getDisplayFilename = (filename: string, maxLength: number = 30): string => {
+    return filename.length > maxLength - 3 ? filename.substring(0, maxLength - 3) + '...' : filename;
 }
 
 const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => {
