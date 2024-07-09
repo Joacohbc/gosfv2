@@ -18,24 +18,31 @@ interface FilesAPI {
     addTokenParam: (url: string) => string;
 };
 
+export const RawDataToFile = (rawData: any) : cFile => {
+    return {
+        id: rawData.id,
+        filename: rawData.filename,
+        createdAt: rawData.createdAt,
+        updatedAt: rawData.updatedAt,
+        owner_id: rawData.owner_id,
+        parentId: rawData.parentId ?? null,
+        children: rawData.children ?? [],
+        shared: rawData.shared ?? false,
+        sharedWith: rawData.sharedWith ?? [],
+        isDir: rawData.isDir ?? false,
+    };
+}
+
+export const getDisplayFilename = (filename: string, maxLength: number = 33): string => {
+    return filename.length >= maxLength - 3 ? 
+            filename.substring(0, maxLength) + '...' 
+            : filename;
+}
+
 const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => {
     const { addTokenParam, cAxios, baseUrl } = getAuthBasic(baseUrlInput, tokenInput);
     const { setCacheFiles, addCacheFiles, removeCacheFile, updateCacheFile } = getCacheService();
 
-    const rawToFile = (rawData: any) : cFile => {
-        return {
-            id: rawData.id,
-            filename: rawData.filename,
-            createdAt: rawData.createdAt,
-            updatedAt: rawData.updatedAt,
-            owner_id: rawData.owner_id,
-            parentId: rawData.parentId ?? null,
-            children: rawData.children ?? [],
-            shared: rawData.shared ?? false,
-            sharedWith: rawData.sharedWith ?? [],
-            isDir: rawData.isDir ?? false,
-        };
-    }
 
     return {
         addTokenParam,
@@ -43,7 +50,7 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
             try {
                 const res = await cAxios.get(`/api/files/${fileId}/info`);
 
-                const file = rawToFile(res.data);
+                const file = RawDataToFile(res.data);
                 updateCacheFile(res.data.id, file);
                 return file;                
             } catch (err : any) {
@@ -54,7 +61,7 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
             try {
                 const res = await cAxios.get(`/api/files/share/${fileId}/info`);
 
-                const file = rawToFile(res.data);
+                const file = RawDataToFile(res.data);
                 updateCacheFile(res.data.id, file);
                 return file;
             } catch (err : any) {
@@ -65,7 +72,7 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
             try {                
                 const res = await cAxios.get('/api/files');
 
-                const fileList : cFile[] = (res.data ?? []).map((file: any) => rawToFile(file));
+                const fileList : cFile[] = (res.data ?? []).map((file: any) => RawDataToFile(file));
                 setCacheFiles(fileList);
                 return fileList;
             } catch (err : any) {
@@ -76,7 +83,7 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
             try {
                 const res = await cAxios.put(`/api/files/${fileId}`, fileData);
                 
-                const file = rawToFile(res.data);
+                const file = RawDataToFile(res.data);
                 updateCacheFile(res.data.id, file);
                 return {
                     data: file,
@@ -90,7 +97,7 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
             try {
                 const res = await cAxios.delete(`/api/files/${fileId}${force ? '?force=yes' : ''}`);
 
-                const file = rawToFile(res.data);
+                const file = RawDataToFile(res.data);
                 removeCacheFile(res.data.id);
                 return {
                     data: file,
@@ -106,7 +113,7 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
                     data: fileIds,
                 });
 
-                const files : cFile[] = (res.data ?? []).map ((file: any) => rawToFile(file));
+                const files : cFile[] = (res.data ?? []).map ((file: any) => RawDataToFile(file));
                 files.forEach((file: cFile) => removeCacheFile(file.id));
                 return {
                     data: files,
@@ -120,7 +127,7 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
             try {
                 const res = await cAxios.post(`/api/files/share/${fileId}/user/${userId}`);
 
-                const file = rawToFile(res.data);
+                const file = RawDataToFile(res.data);
                 return {
                     data: file,
                     message: 'User added successfully',
@@ -133,7 +140,7 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
             try {
                 const res = await cAxios.delete(`/api/files/share/${fileId}/user/${userId}`);
 
-                const file = rawToFile(res.data);
+                const file = RawDataToFile(res.data);
                 return {
                     data: file,
                     message: 'User removed successfully',
@@ -146,7 +153,7 @@ const getFileService = (baseUrlInput: string, tokenInput: string) : FilesAPI => 
             try {
                 const res = await cAxios.post('/api/files', files);
 
-                const fileList : cFile[] = (res.data ?? []).map((file: any) => rawToFile(file));
+                const fileList : cFile[] = (res.data ?? []).map((file: any) => RawDataToFile(file));
                 addCacheFiles(fileList);
                 return {
                     data: fileList,

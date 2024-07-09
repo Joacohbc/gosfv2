@@ -6,7 +6,8 @@ import PropTypes from 'prop-types';
 const ToolTip = ({ children, toolTipMessage, placement }) => (
     <OverlayTrigger 
         placement={placement}
-        overlay={<BoostrapTooltip>{toolTipMessage}</BoostrapTooltip>}>
+        overlay={<BoostrapTooltip>{toolTipMessage}</BoostrapTooltip>}
+        delay={100}>
         {children}
     </OverlayTrigger>
 );

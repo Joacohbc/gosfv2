@@ -10,6 +10,7 @@ import FileContainer from '../components/FileContainer';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCache } from '../hooks/cache';
 import SearchBar from '../components/SearchBar';
+import { getDisplayFilename } from '../services/files';
 
 const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extension: '', deleted: false });
 
@@ -112,9 +113,11 @@ export default function Files() {
     }, [ isLogged, createFileLoader, getShareFileInfo, sharedFileId, messageContext, getFilenameInfo ]);
 
     const handleDeleteAllInQueue = () => {
-        deleteFiles(jobsQueue.map(job => job.info.fileId), true)
+        const fileIds = jobsQueue.map(job => job.info.fileId);
+        deleteFiles(fileIds, true)
         .then((res) => {
             clearAllJobs();
+            setFiles((files) => files.filter(file => !fileIds.includes(file.id)));
             messageContext.showSuccess(res.message);
         })
         .catch((err) => {
@@ -229,7 +232,7 @@ export default function Files() {
     return <>
         { showPreview && 
         <Modal show={showPreview} onHide={handleClosePreview} className='d-flex modal-bg' fullscreen centered>
-            <Modal.Header closeButton className='bg-modal' closeVariant='white'>{previewFile.filename}</Modal.Header>
+            <Modal.Header closeButton className='bg-modal' closeVariant='white'>{getDisplayFilename(previewFile.filename)}</Modal.Header>
             <div className='d-flex flex-fill'>
                 <PreviewFile contentType={previewFile.contentType} url={sharedFileId ? previewFile.sharedUrl : previewFile.url} className="flex-fill" />
             </div>

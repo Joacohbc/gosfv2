@@ -13,6 +13,7 @@ import { useGetInfo, useFiles } from '../../hooks/files';
 import ConfirmDialog from '../ConfirmDialog';
 import SharedWithModal from './ShareModal';
 import 'bootstrap-icons/font/bootstrap-icons.css'
+import { getDisplayFilename } from '../../services/files';
 
 const filesModal = document.getElementById('files-modals');
 
@@ -44,11 +45,15 @@ const FileItem = memo((props) => {
         props.onDownload(file);
     };
 
-    const handleOpen = () => {
+    const handleOpen = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         props.onOpen(file);
     };
 
-    const handleDelete = async () => {
+    const handleDelete = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         try {
             const res = await getFileInfo(file.id);
             file.shared = res.shared;
@@ -72,7 +77,9 @@ const FileItem = memo((props) => {
         }
     };
 
-    const forceFileDelete = async() => {
+    const forceFileDelete = async(e) => {
+        e.preventDefault();
+        e.stopPropagation();
         props.onDelete(async () => {
             try {
                 const res = await deleteFile(file.id, true);
@@ -83,7 +90,9 @@ const FileItem = memo((props) => {
         }, file);
     };
 
-    const handleUpdate = async () => {
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         if(inputUpdate.current.value.trim() == '') {
             messageContext.showError('Filename cannot be empty');
             return;
@@ -110,7 +119,9 @@ const FileItem = memo((props) => {
         }
     } 
 
-    const openShareModel = async () => {
+    const openShareModel = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         try {
             shareModal.current.open();
             shareModal.current.setFile(file, false);
@@ -124,11 +135,15 @@ const FileItem = memo((props) => {
         }
     }
 
-    const openUpdateNameModel = () => {
+    const openUpdateNameModel = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         updateModal.current.show();
     }
 
-    const handleShare = () => { 
+    const handleShare = (e) => { 
+        e.preventDefault();
+        e.stopPropagation();
         props.onShare(file);
     };
 
@@ -156,10 +171,10 @@ const FileItem = memo((props) => {
             </InputGroup>
         </SimpleModal>, filesModal) }
 
-        <Card className='file'>
+        <Card className='file' onClick={handleOpen}>
             <Card.Body>
                 <ToolTip toolTipMessage={file.filename} placement='bottom'>
-                    <p className="text-center file-filename" onClick={handleOpen}>{file.filename}</p>
+                    <p className="text-center file-filename">{getDisplayFilename(file.filename)}</p>
                 </ToolTip>
 
                 <div className='text-center'>
