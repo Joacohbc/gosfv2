@@ -7,6 +7,7 @@ import { memo } from 'react';
 import PropTypes from 'prop-types';
 import FileItemPlaceholder from './fileItem/FileItemPlaceholder';
 import { useCache } from '../hooks/cache';
+
 /**
  * Renderiza un contenedor para mostrar archivos.
  *
@@ -23,10 +24,10 @@ import { useCache } from '../hooks/cache';
 const FileContainer = memo(({ files, progress = files.length, fileLoader = () => {}, loading, handleOpenPreview, handleFilesDelete, handleFilesUpdate }) => {
     const { cacheService } = useCache();
     const numLoadingFiles = cacheService.getCacheNumberOfFiles().value || 15;
-    
+
     return (
         <Container fluid="md">
-            <Col hidden={loading}>
+            <Col hidden={loading || files.length != 0}>
                 <div className="d-flex justify-content-center align-items-center">
                     { files.length == 0 && <p className="text-center text-white">No files, start uploading files c:</p> }
                 </div>
