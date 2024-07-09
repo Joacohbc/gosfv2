@@ -112,6 +112,11 @@ export default function Files() {
         setLoading(false);
     }, [ isLogged, createFileLoader, getShareFileInfo, sharedFileId, messageContext, getFilenameInfo ]);
 
+    useEffect(() => {
+        if(files.length == 0) setProgress(0);
+        else if(progress > files.length) setProgress(files.length);
+    }, [ files, progress ])
+
     const handleDeleteAllInQueue = () => {
         const fileIds = jobsQueue.map(job => job.info.fileId);
         deleteFiles(fileIds, true)
