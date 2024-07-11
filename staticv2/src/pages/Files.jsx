@@ -1,7 +1,7 @@
 import './Files.css';
 import AuthContext from '../context/auth-context';
 import Modal from 'react-bootstrap/Modal';
-import { useCallback, useContext, useEffect, useState, useReducer } from 'react';
+import { useCallback, useContext, useEffect, useReducer } from 'react';
 import PreviewFile from './PreviewFile';
 import { MessageContext } from '../context/message-context';
 import { useGetInfo, useFiles } from '../hooks/files';
@@ -32,6 +32,56 @@ function removeDefault(e) {
     e.stopPropagation();
 }
 
+const initialFilesLoadingState = {
+    files: [],
+    progress: 0,
+    loading: true,
+    fileLoader: () => {},
+    defaultNumberOfFilesPerLoad: 10
+};
+
+function filesReducer(state, action) {
+
+    const calculateNextProgress = (currentProgress, filesLength) => {
+        const nextProgress = currentProgress + state.defaultNumberOfFilesPerLoad;
+        return nextProgress >= filesLength ? filesLength : nextProgress;
+    }
+
+    const resetProgress = (filesLength) => calculateNextProgress(0, filesLength);
+
+    const calculateProgressOnDelete = (currentProgress, deletedFiles) => {
+        const nextProgress = currentProgress - deletedFiles.length;
+        return nextProgress < 0 ? 0 : nextProgress;
+    }
+    
+    switch (action.type) {
+        case 'SET_FILES':
+            return { ...state, files: action.payload, progress: resetProgress(action.payload) };
+        case 'ADD_FILES': {
+            const newFiles = [ ...state.files, ...action.payload ];
+            return { ...state, files: newFiles, progress: calculateNextProgress(state.progress, newFiles.length) };
+        }
+        case 'REMOVE_FILES': {
+            const newFiles = state.files.filter(file => !action.payload.includes(file.id));
+            return { ...state, files: newFiles, progress: calculateProgressOnDelete(state.progress, action.payload) };
+        }
+        case 'UPDATE_FILE':
+            return { ...state, files: state.files.map(file => file.id === action.payload.id ? action.payload : file) };
+        case 'MARK_DELETED':
+            return { ...state, files: state.files.map(file => file.id === action.payload ? { ...file, deleted: true } : file) };
+        case 'UNMARK_DELETED':
+            return { ...state, files: state.files.map(file => file.id === action.payload ? { ...file, deleted: false } : file) };
+        case 'NEXT_PROGRESS':
+            return { ...state, progress: calculateNextProgress(state.progress, state.files.length) };
+        case 'SET_LOADING':
+            return { ...state, loading: action.payload };
+        case 'SET_FILE_LOADER':
+            return { ...state, fileLoader: action.payload };
+        default:
+            throw new Error(`Unhandled action type: ${action.type}`);
+    }
+}
+
 const DELETE_UNDO_DURATION = 5000;
 
 export default function Files() {
@@ -41,13 +91,12 @@ export default function Files() {
     const navigate = useNavigate();
 
     const { cacheService } = useCache();
-    const [ files, setFiles ] = useState([]);
-    const [ progress, setProgress ] = useState(0);
-    const [ fileLoader, setFileLoader ] = useState(() => {});
-    const [ loading, setLoading ]= useState(true);
 
-    const [ state , setPreview ] = useReducer(previewReducer, { previewFile: emptyFile, showPreview: false });
-    const { previewFile, showPreview } = state;
+    const [ filesLoadingState, dispatchFilesLoading ] = useReducer(filesReducer, initialFilesLoadingState);
+    const { files, progress, loading, fileLoader } = filesLoadingState;
+
+    const [ previewState, setPreview ] = useReducer(previewReducer, { previewFile: emptyFile, showPreview: false });
+    const { previewFile, showPreview } = previewState;
 
     const { getFilenameInfo } = useGetInfo();
     const { getFiles, uploadFile, getShareFileInfo, deleteFiles } = useFiles();
@@ -55,45 +104,33 @@ export default function Files() {
     
     const createFileLoader = useCallback(async (filterCb = (data) => data) => {
         try {
-            setLoading(true);
-
+            dispatchFilesLoading({ type: 'SET_LOADING', payload: true });
+            
             let files = [];
-
-            // Check difference between the current files and the files in the cache (+5 second)
             const cacheFiles = cacheService.getCacheFiles();
-            if(cacheFiles.value && cacheFiles.timestamp.getTime() > Date.now() - 5000) {
+            
+            if (cacheFiles.value && cacheFiles.timestamp.getTime() > Date.now() - 5000) {
                 files = cacheFiles.value;
             } else {
                 files = await getFiles();
             }
-
-            // Filtra los archivos
+            
             let data = filterCb(files.map(file => {
                 const f = getFilenameInfo(file, false);
                 f.deleted = false;
                 return f;
             }));
-
-            const x = 35;
             
-            // Carga de X en X archivos o todos los archivos si son menos de X
-            const numberOfFilesPerLoad = data.length >= x ? x : data.length;
-            setFiles(data);
-            setProgress(0);
-
-            return () => {
-                setProgress(prevProgress => {
-                    const nextProgress = prevProgress + numberOfFilesPerLoad;
-                    return nextProgress >= data.length ? data.length : nextProgress;
-                });
-            }
+            dispatchFilesLoading({ type: 'SET_FILES', payload: data });
+            return () => { dispatchFilesLoading({ type: 'NEXT_PROGRESS' } ) };
         } catch(err) {
             messageContext.showError(err.message);
             return () => [];
         } finally {
-            setLoading(false);
+            dispatchFilesLoading({ type: 'SET_LOADING', payload: false });
         }
     }, [ messageContext, getFilenameInfo, getFiles, cacheService ]);
+    
     
     useEffect(() => {
         if(!isLogged) return;
@@ -106,23 +143,16 @@ export default function Files() {
         }
 
         createFileLoader().then((loadInfo) => {
-            setFileLoader(() => loadInfo);
-            loadInfo();
+            dispatchFilesLoading({ type: 'SET_FILE_LOADER', payload: loadInfo });
         })
-        setLoading(false);
     }, [ isLogged, createFileLoader, getShareFileInfo, sharedFileId, messageContext, getFilenameInfo ]);
-
-    useEffect(() => {
-        if(files.length == 0) setProgress(0);
-        else if(progress > files.length) setProgress(files.length);
-    }, [ files, progress ])
 
     const handleDeleteAllInQueue = () => {
         const fileIds = jobsQueue.map(job => job.info.fileId);
         deleteFiles(fileIds, true)
         .then((res) => {
             clearAllJobs();
-            setFiles((files) => files.filter(file => !fileIds.includes(file.id)));
+            dispatchFilesLoading({ type: 'REMOVE_FILES', payload: fileIds });
             messageContext.showSuccess(res.message);
         })
         .catch((err) => {
@@ -138,7 +168,7 @@ export default function Files() {
                 const res = await uploadFile(form)
             
                 const loadInfo = await createFileLoader()
-                setFileLoader(() => loadInfo);
+                dispatchFilesLoading({ type: 'SET_FILE_LOADER', payload: loadInfo });
                 loadInfo();
     
                 return res.message;
@@ -198,7 +228,7 @@ export default function Files() {
             },
             undoCb: () => {
                 // Si se deshace la eliminación, se restaura el archivo
-                setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: false } : file));
+                dispatchFilesLoading({ type: 'UNMARK_DELETED', payload: deletedFile.id });
                 messageContext.dismiss(removeMessageId);
             },
             clearCb: () => {
@@ -208,7 +238,7 @@ export default function Files() {
             actionInfo: { fileId: deletedFile.id }
         });
 
-        setFiles((files) => files.map(file => file.id == deletedFile.id ? { ...file, deleted: true } : file));
+        dispatchFilesLoading({ type: 'MARK_DELETED', payload: deletedFile.id });
 
         removeMessageId = messageContext.showAction(
             `File ${deletedFile.filename} (${deletedFile.id}) deleted`, 
@@ -220,7 +250,7 @@ export default function Files() {
     }, [addJob, undoJob, messageContext]);
     
     const handleFilesUpdate = useCallback((updatedFile) => 
-        setFiles((files) => files.map(file => file.id == updatedFile.id ? updatedFile : file)),
+        dispatchFilesLoading({ type: 'UPDATE_FILE', payload: updatedFile }), 
     []);
 
     const handleOpenPreview = useCallback(async (file) => {        
@@ -243,7 +273,7 @@ export default function Files() {
             </div>
         </Modal> }
 
-        <SearchBar createFileLoader={createFileLoader} setFileLoader={setFileLoader}/>
+        <SearchBar createFileLoader={createFileLoader} setFileLoader={(fileLoader) => dispatchFilesLoading({ type: 'SET_FILE_LOADER', payload: fileLoader })}/>
         
         <FileContainer
             files={files}

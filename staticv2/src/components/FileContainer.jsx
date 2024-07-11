@@ -7,7 +7,6 @@ import { memo } from 'react';
 import PropTypes from 'prop-types';
 import FileItemPlaceholder from './fileItem/FileItemPlaceholder';
 import { useCache } from '../hooks/cache';
-
 /**
  * Renderiza un contenedor para mostrar archivos.
  *
@@ -27,11 +26,12 @@ const FileContainer = memo(({ files, progress = files.length, fileLoader = () =>
 
     return (
         <Container fluid="md">
-            <Col hidden={loading || files.length != 0}>
+            { (!loading || files.length) == 0 && 
+            <Col>
                 <div className="d-flex justify-content-center align-items-center">
                     { files.length == 0 && <p className="text-center text-white">No files, start uploading files c:</p> }
                 </div>
-            </Col>
+            </Col> }
             
             <Row xs={1} sm={2} md={3} lg={4} xl={5} className='row-gap-3 d-flex justify-content-center'>
                 { !loading && files.slice(0, progress).map(file => 
