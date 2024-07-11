@@ -8,7 +8,7 @@ import { useGetInfo, useFiles } from '../hooks/useFiles';
 import useJobsQueue from '../hooks/useJobsQueue';
 import FileContainer from '../components/FileContainer';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useCache } from '../hooks/cache';
+import { useCache } from '../hooks/useCache';
 import SearchBar from '../components/SearchBar';
 import { getDisplayFilename } from '../services/files';
 
@@ -131,7 +131,6 @@ export default function Files() {
         }
     }, [ messageContext, getFilenameInfo, getFiles, cacheService ]);
     
-    
     useEffect(() => {
         if(!isLogged) return;
     
@@ -169,7 +168,6 @@ export default function Files() {
             
                 const loadInfo = await createFileLoader()
                 dispatchFilesLoading({ type: 'SET_FILE_LOADER', payload: loadInfo });
-                loadInfo();
     
                 return res.message;
             } catch(err) {

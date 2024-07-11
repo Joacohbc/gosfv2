@@ -1,7 +1,7 @@
 import './Notes.css';
 import Form from 'react-bootstrap/Form';
 import { useEffect } from 'react';
-import { useNotes } from '../hooks/notes';
+import { useNotes } from '../hooks/useNotes';
 import { useState, useContext } from 'react';
 import { MessageContext } from '../context/message-context';
 import AuthContext from '../context/auth-context';
