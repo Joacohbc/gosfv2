@@ -56,7 +56,7 @@ function filesReducer(state, action) {
     
     switch (action.type) {
         case 'SET_FILES':
-            return { ...state, files: action.payload, progress: resetProgress(action.payload) };
+            return { ...state, files: action.payload, progress: resetProgress(action.payload.length) };
         case 'ADD_FILES': {
             const newFiles = [ ...state.files, ...action.payload ];
             return { ...state, files: newFiles, progress: calculateNextProgress(state.progress, newFiles.length) };
