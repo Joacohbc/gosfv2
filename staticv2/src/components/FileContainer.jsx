@@ -6,7 +6,7 @@ import FileItem from '../components/fileItem/FileItem';
 import { memo } from 'react';
 import PropTypes from 'prop-types';
 import FileItemPlaceholder from './fileItem/FileItemPlaceholder';
-import { useCache } from '../hooks/cache';
+import { useCache } from '../hooks/useCache';
 /**
  * Renderiza un contenedor para mostrar archivos.
  *

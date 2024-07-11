@@ -2,7 +2,7 @@ import { createContext, useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PropTypes from 'prop-types';
 import axios from "axios";
-import { useCache } from "../hooks/cache";
+import { useCache } from "../hooks/useCache";
 
 const AuthContext = createContext({
     token: '',

@@ -9,7 +9,7 @@ import SimpleModal from '../SimpleModal';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import { MessageContext } from '../../context/message-context';
-import { useGetInfo, useFiles } from '../../hooks/files';
+import { useGetInfo, useFiles } from '../../hooks/useFiles';
 import ConfirmDialog from '../ConfirmDialog';
 import SharedWithModal from './ShareModal';
 import 'bootstrap-icons/font/bootstrap-icons.css'

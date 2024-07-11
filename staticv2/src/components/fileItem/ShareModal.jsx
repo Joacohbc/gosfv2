@@ -11,7 +11,7 @@ import Row from 'react-bootstrap/Row';
 import { useImperativeHandle } from 'react';
 import Col from 'react-bootstrap/esm/Col';
 import { MessageContext } from '../../context/message-context';
-import { useFiles, useGetInfo } from '../../hooks/files';
+import { useFiles, useGetInfo } from '../../hooks/useFiles';
 import Placeholder from 'react-bootstrap/Placeholder';
 
 const SharedWithModal = forwardRef((props, ref) => {
