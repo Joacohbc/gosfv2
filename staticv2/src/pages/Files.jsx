@@ -37,7 +37,7 @@ const initialFilesLoadingState = {
     progress: 0,
     loading: true,
     fileLoader: () => {},
-    defaultNumberOfFilesPerLoad: 10
+    defaultNumberOfFilesPerLoad: 35
 };
 
 function filesReducer(state, action) {
