@@ -3,10 +3,12 @@ import Form from 'react-bootstrap/Form';
 import Button from '../components/Button';
 import Stack from 'react-bootstrap/Stack';
 import { useUsers } from '../hooks/useUsers';
-import { useEffect, useState, useContext, useRef } from 'react';
+import { useEffect, useState, useContext, useRef, useCallback } from 'react';
 import { MessageContext } from '../context/message-context';
 import AuthContext from '../context/auth-context';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { days, checkTimeFrom, hours } from '../utils/time';
+import { useCache } from '../hooks/useCache';
 
 export default function User() {
     const messageContext = useContext(MessageContext);
@@ -19,13 +21,27 @@ export default function User() {
     const newPassword = useRef(null);
     const confirmPassword = useRef(null);
     const deleteAccountDialog = useRef(null);
-    
+    const { getCacheIcon, getCacheUser } = useCache();
+
+    const getIconCheckingCache = useCallback(() => {
+        const icon = getCacheIcon();
+        if(icon.value && checkTimeFrom(icon.timestamp, hours(1))) return icon.value;
+        return getMyIconURL();
+    }, [ getCacheIcon, getMyIconURL ])
+
+    const getUserInfoCheckingCache = useCallback(async () => {
+        const info = getCacheUser();
+        if(info.value && checkTimeFrom(info.timestamp, hours(1))) return info.value;
+        return await getMyInfo();
+    }, [ getCacheUser, getMyInfo ])
+
     useEffect(() => {
         if(!isLogged) return;
         
-        getMyInfo().then(data => setUserInfo(data))
-        setIconURL(getMyIconURL());
-    }, [ getMyInfo, messageContext, getMyIconURL, isLogged ])
+        getUserInfoCheckingCache().then(data => setUserInfo(data))
+        setIconURL(getIconCheckingCache());
+        setTimeout(() => setIconURL(getMyIconURL(true)), 1000);        
+    }, [ getMyInfo, messageContext, getMyIconURL, isLogged, getIconCheckingCache, getUserInfoCheckingCache])
 
     const handleCopyUserId = async (e) => {
         e.preventDefault();
@@ -47,6 +63,7 @@ export default function User() {
             }
             const res = await updateUser(newUsername.current.value);
             setIconURL(getMyIconURL(true));
+            setUserInfo({ ...userInfo, username: newUsername.current.value });
             messageContext.showSuccess(res.message);
         } catch(err) {
             messageContext.showError(err.message);

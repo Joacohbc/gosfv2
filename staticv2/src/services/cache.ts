@@ -1,8 +1,10 @@
-import { cFile } from "./models";
+import { User, cFile } from "./models";
 
 const LS_KEYS = {
     files: 'files',
     numberOfFiles: 'numberOfFiles',
+    icon: 'icon',
+    user: 'user'
 };
 
 type LocalStorageItem<T> = {
@@ -18,6 +20,12 @@ interface CacheAPI {
     updateCacheFile: (fileId: number, fileData: cFile) => void;
     getCacheNumberOfFiles: () => LocalStorageItem<Number>;
     setCacheNumberOfFiles: (numberOfFiles: number) => void;
+
+    setCacheUser: (user: User) => void;
+    getCacheUser: () => LocalStorageItem<User>;
+    setCacheIcon: (icon: string) => void;
+    getCacheIcon: () => LocalStorageItem<string>;
+    
     clean: () => void;
 }
 
@@ -30,6 +38,10 @@ export const getCacheService = () : CacheAPI => {
         addCacheFiles: addFiles,
         removeCacheFile: removeFile,
         updateCacheFile: updateFile,
+        setCacheUser: setUser,
+        getCacheUser: getUser,
+        setCacheIcon: setIcon,
+        getCacheIcon: getIcon,
         clean
     };
 }
@@ -94,6 +106,23 @@ const updateFile = (fileId: number, fileData: cFile) => {
     });
     setFiles(newFiles);
 }
+
+const setUser = (user: User) => {
+    setLocalStorage(LS_KEYS.user, user);
+}
+
+const getUser = () : LocalStorageItem<User> => {
+    return getLocalStorage(LS_KEYS.user);
+}
+
+const setIcon = (icon: string) => {
+    setLocalStorage(LS_KEYS.icon, icon);
+}
+
+const getIcon = () : LocalStorageItem<string> => {
+    return getLocalStorage(LS_KEYS.icon);
+}
+
 
 const clean = () => {
     localStorage.removeItem(LS_KEYS.files);

@@ -1,4 +1,5 @@
 import { User } from "./models";
+import { getCacheService } from "./cache";
 import getAuthBasic from "./utils";
 
 interface UsersAPI {
@@ -13,6 +14,7 @@ interface UsersAPI {
 
 const getUserService = (baseUrlInput: string, tokenInput: string) : UsersAPI => {
     const { cAxios, baseUrl } = getAuthBasic(baseUrlInput, tokenInput);
+    const { setCacheIcon, setCacheUser } = getCacheService();
 
     const rawToUser = (rawData: any) : User => {
         return {
@@ -26,12 +28,30 @@ const getUserService = (baseUrlInput: string, tokenInput: string) : UsersAPI => 
         getMyIconURL: (updated = false) => {
             const url = new URL(`${baseUrl}/api/users/me/icon`);
             if(updated) url.searchParams.append('random', new Date().getTime().toString());
+
+            setTimeout(async () => {
+                try {
+                    const blob = await fetch(url).then(r => r.blob());
+                    let file = new FileReader();
+                    file.onload = () => {
+                        setCacheIcon(file.result as string);
+                    }
+                    file.readAsDataURL(blob);
+                } catch(err) {
+                    console.error(err);
+                }
+            }, 0);
+
             return url.toString();
         },
         getMyInfo: async () => {
             try {
                 const res = await cAxios.get('/api/users/me');
-                return rawToUser(res.data);
+                
+                const info = rawToUser(res.data);
+                setCacheUser(info);
+
+                return info;
             } catch (err : any) {
                 throw new Error(err.response.data.message);
             }
@@ -40,8 +60,12 @@ const getUserService = (baseUrlInput: string, tokenInput: string) : UsersAPI => 
             if(!newUsername) throw new Error('New username is required')
             try {
                 const res = await cAxios.put('/api/users/me', { username: newUsername });
+
+                const info = rawToUser(res.data);
+                setCacheUser(info);
+
                 return {
-                    data: rawToUser(res.data),
+                    data: info,
                     message: 'Username updated successfully',
                 }
             } catch(err : any) {
@@ -51,6 +75,7 @@ const getUserService = (baseUrlInput: string, tokenInput: string) : UsersAPI => 
         changePassword: async (oldPassword: string, newPassword: string) => {
             if(!oldPassword) throw new Error('Old password is required')
             if(!newPassword) throw new Error('New password is required')
+
             try {
                 await cAxios.put('/api/users/me/password', { old_password: oldPassword, new_password: newPassword });
                 return {
