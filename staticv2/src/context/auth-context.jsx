@@ -24,7 +24,7 @@ const deleteAllCookies = () => {
 
 export const AuthContextProvider = (props) => {
     const BASE_URL = window.location.origin;
-    const { cacheService } = useCache();
+    const { clean } = useCache();
     
     const navigate = useNavigate();
     const location = useLocation();
@@ -37,9 +37,9 @@ export const AuthContextProvider = (props) => {
     const clearSession = useCallback(() => {
         setToken('');
         setIsLogged(false);
-        cacheService.clean();
+        clean();
         deleteAllCookies();
-    }, [ cacheService]);
+    }, [ clean ]);
 
     const refreshTokenHandler = useCallback(async () => {
         try {
@@ -124,7 +124,7 @@ export const AuthContextProvider = (props) => {
 
             setToken(req.data.token);
             setIsLogged(true);
-            cacheService.clean();
+            clean();
             navigate('/files');
             return 'User logged in successfully';
         } catch(err) {

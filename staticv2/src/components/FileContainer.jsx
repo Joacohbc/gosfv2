@@ -22,8 +22,8 @@ import { useCache } from '../hooks/useCache';
  * @returns {JSX.Element} El componente FileContainer.
  */
 const FileContainer = memo(({ files, progress = files.length, fileLoader = () => {}, loading, handleOpenPreview, handleFilesDelete, handleFilesUpdate }) => {
-    const { cacheService } = useCache();
-    const numLoadingFiles = cacheService.getCacheNumberOfFiles().value || 15;
+    const { getCacheNumberOfFiles } = useCache();
+    const numLoadingFiles = getCacheNumberOfFiles().value || 15;
 
     return (
         <Container fluid="md">

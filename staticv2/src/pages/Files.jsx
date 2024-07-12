@@ -11,6 +11,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useCache } from '../hooks/useCache';
 import SearchBar from '../components/SearchBar';
 import { getDisplayFilename } from '../services/files';
+import { seconds, checkTimeFrom } from '../utils/time';
 
 const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extension: '', deleted: false });
 
@@ -90,7 +91,7 @@ export default function Files() {
     const { sharedFileId } = useParams();
     const navigate = useNavigate();
 
-    const { cacheService } = useCache();
+    const { getCacheFiles } = useCache();
 
     const [ filesLoadingState, dispatchFilesLoading ] = useReducer(filesReducer, initialFilesLoadingState);
     const { files, progress, loading, fileLoader } = filesLoadingState;
@@ -107,9 +108,9 @@ export default function Files() {
             dispatchFilesLoading({ type: 'SET_LOADING', payload: true });
             
             let files = [];
-            const cacheFiles = cacheService.getCacheFiles();
+            const cacheFiles = getCacheFiles();
             
-            if (cacheFiles.value && cacheFiles.timestamp.getTime() > Date.now() - 5000) {
+            if (cacheFiles.value && checkTimeFrom(cacheFiles.timestamp, seconds(5))) {
                 files = cacheFiles.value;
             } else {
                 files = await getFiles();
@@ -129,7 +130,7 @@ export default function Files() {
         } finally {
             dispatchFilesLoading({ type: 'SET_LOADING', payload: false });
         }
-    }, [ messageContext, getFilenameInfo, getFiles, cacheService ]);
+    }, [ messageContext, getFilenameInfo, getFiles, getCacheFiles ]);
     
     useEffect(() => {
         if(!isLogged) return;
