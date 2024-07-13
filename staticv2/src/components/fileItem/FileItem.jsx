@@ -159,7 +159,7 @@ const FileItem = memo((props) => {
             />, filesModal) }
         
         {createPortal(
-        <SimpleModal ref={updateModal} title={file.filename} buttonText={<span>Save changes <i className='bi bi-save'/></span>} onClick={handleUpdate}>
+        <SimpleModal ref={updateModal} title={getDisplayFilename(file.filename)} buttonText={<span>Save changes <i className='bi bi-save'/></span>} onClick={handleUpdate}>
             <InputGroup className="mb-3">
                 <Form.Control
                     placeholder="Filename"

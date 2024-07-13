@@ -13,6 +13,7 @@ import Col from 'react-bootstrap/esm/Col';
 import { MessageContext } from '../../context/message-context';
 import { useFiles, useGetInfo } from '../../hooks/useFiles';
 import Placeholder from 'react-bootstrap/Placeholder';
+import { getDisplayFilename } from '../../services/files';
 
 const SharedWithModal = forwardRef((props, ref) => {
     const shareModal = useRef(null);
@@ -99,7 +100,7 @@ const SharedWithModal = forwardRef((props, ref) => {
         }
     }
 
-    return <SimpleModal ref={shareModal} title={file?.filename}>
+    return <SimpleModal ref={shareModal} title={getDisplayFilename(file?.filename)}>
         <Form>
             <InputGroup>
                 <Form.Control placeholder='Enter User ID' ref={userIdAdded}/>

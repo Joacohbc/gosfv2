@@ -34,6 +34,7 @@ export const RawDataToFile = (rawData: any) : cFile => {
 }
 
 export const getDisplayFilename = (filename: string, maxLength: number = 30): string => {
+    if(!filename) return '';
     return filename.length > maxLength - 3 ? filename.substring(0, maxLength - 3) + '...' : filename;
 }
 

@@ -41,8 +41,7 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding: 5%;
-    background-color: var(--color-background-light);
+    padding: 0.5em;
     border-radius: 10px;
 }
 
