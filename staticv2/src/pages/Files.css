@@ -9,10 +9,12 @@
 }
 
 .btn-upload {
+    position: fixed;
+    bottom: 10px;
+    right: 15PX;
     color: var(--color-text);
-    margin-top: 10px;
     border-radius: 5px;
-    padding: 10px;
+    padding: 8px;
     font-size: 2em;
 }
 
@@ -21,10 +23,27 @@
     transform: scale(1.1);
 }
 
-.undo-button {
+.undo-all-button {
+    position: fixed;
+    bottom: 10px;
+    right: 15px;
     color: var(--color-text);
     border-radius: 5px;
-    padding: 10px;
+    padding: 8px;
+}
+
+.undo-all-button:hover {
+    background-color: var(--color-hover);
+    transform: scale(1.1);
+}
+
+.undo-button {
+    position: fixed;
+    bottom: 10px;
+    right: 65px;
+    color: var(--color-text);
+    border-radius: 5px;
+    padding: 8px;
 }
 
 .undo-button:hover {

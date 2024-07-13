@@ -263,7 +263,7 @@ export default function Files() {
         navigate('/files'); // To avoid that in the next re-load the file is opened again
     }, [ navigate ]);  
 
-    return <>
+    return <div className='pb-5'>
         { showPreview && 
         <Modal show={showPreview} onHide={handleClosePreview} className='d-flex modal-bg' fullscreen centered>
             <Modal.Header closeButton className='bg-modal' closeVariant='white'>{getDisplayFilename(previewFile.filename)}</Modal.Header>
@@ -284,25 +284,22 @@ export default function Files() {
             handleFilesUpdate={handleFilesUpdate}
         />
         
-        <div className='d-flex flex-row sticky-bottom justify-content-center align-items-end gap-2'>
-            { jobsQueue.length == 0 &&             
-            <label htmlFor="input-upload" className="btn-upload"
+
+        { jobsQueue.length != 0 && 
+            <label onClick={undoLastJob} className='undo-button'><i className="bi bi-arrow-clockwise fs-2"/>{jobsQueue.length}</label> }
+
+        { jobsQueue.length != 0 > 0 && 
+            <label className='undo-all-button' onClick={handleDeleteAllInQueue}><i className="bi bi-tornado fs-2"/></label> }
+
+        { jobsQueue.length == 0 &&             
+            <label htmlFor="input-upload" 
+                className="btn-upload"
                 onDrop={handleFileUploadByDrop}
                 onDragLeaveCapture={removeDefault}
                 onDragOverCapture={removeDefault}>
                 <i className='bi bi-plus-square-dotted'/>
             </label>}
 
-            <input id="input-upload" type="file" style={{display: 'none'}} onChange={handleFileUploadByClick} multiple/>
-
-            { jobsQueue.length > 0 && 
-            <div className='undo-button'>
-                <label onClick={undoLastJob}><i className="bi bi-arrow-clockwise fs-2"/></label>
-                <span>{jobsQueue.length}</span>
-            </div> }
-            
-            { jobsQueue.length > 0 && 
-            <label className='undo-button' onClick={handleDeleteAllInQueue}><i className="bi bi-tornado fs-2"/></label> }
-        </div>
-    </>
+        <input id="input-upload" type="file" style={{display: 'none'}} onChange={handleFileUploadByClick} multiple/>
+    </div>
 }
