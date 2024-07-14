@@ -263,7 +263,7 @@ export default function Files() {
         navigate('/files'); // To avoid that in the next re-load the file is opened again
     }, [ navigate ]);  
 
-    return <div className='pb-5'>
+    return <>
         { showPreview && 
         <Modal show={showPreview} onHide={handleClosePreview} className='d-flex modal-bg' fullscreen centered>
             <Modal.Header closeButton className='bg-modal' closeVariant='white'>{getDisplayFilename(previewFile.filename)}</Modal.Header>
@@ -301,5 +301,5 @@ export default function Files() {
             </label>}
 
         <input id="input-upload" type="file" style={{display: 'none'}} onChange={handleFileUploadByClick} multiple/>
-    </div>
+    </>
 }
