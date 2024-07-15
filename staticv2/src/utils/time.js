@@ -13,6 +13,11 @@ const checkTimeFrom = (date, ms) => {
     return date.getTime() > Date.now() - ms
 }
 
+const formatDate = (date) => {
+    const lang = navigator.language;
+    return Intl.DateTimeFormat(lang, { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+}
+
 export {
     ONE_SECOND,
     ONE_MINUTE,
@@ -22,6 +27,7 @@ export {
     minutes,
     hours,
     days,
-    checkTimeFrom
+    checkTimeFrom,
+    formatDate
 }
 

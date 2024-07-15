@@ -13,6 +13,7 @@
 
 .file-filename {
     text-decoration: none;
+    font-size: 1.1em;
 }
 
 .file-filename:hover {
@@ -25,13 +26,17 @@
     background-color: transparent;
     border: none;
     outline: none;
-    padding: 5px;
+    padding: 2px;
     width: 2em;
+}
+
+.file-actions-item > i {
+    font-size: 1.3em;
 }
 
 .file-actions-item-no-hover {
     border-radius: 5px;
-    color: var(--color-text-dark);
+    color: white;
     background-color: transparent;
     border: none;
     outline: none;

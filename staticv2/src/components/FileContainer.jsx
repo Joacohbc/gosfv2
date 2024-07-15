@@ -7,6 +7,7 @@ import { memo } from 'react';
 import PropTypes from 'prop-types';
 import FileItemPlaceholder from './fileItem/FileItemPlaceholder';
 import { useCache } from '../hooks/useCache';
+import { formatDate } from '../utils/time';
 
 /**
  * Renderiza un contenedor para mostrar archivos.
@@ -48,6 +49,7 @@ const FileContainer = memo(({ files, progress = files.length, fileLoader = () =>
                         shared={file.shared}
                         sharedWith={file.sharedWith}
                         savedLocal={file.savedLocal}
+                        createdAt={formatDate(new Date(file.createdAt))}
                         onOpen={handleOpenPreview}
                         onDelete={handleFilesDelete}
                         onUpdate={handleFilesUpdate}

@@ -37,6 +37,7 @@ const FileItem = memo((props) => {
         shared: props.shared,
         sharedWith: props.sharedWith ?? [],
         savedLocal: props.savedLocal ?? false,
+        createdAt: props.createdAt,
     });
 
     const handleDownload = () => {
@@ -152,10 +153,7 @@ const FileItem = memo((props) => {
             message="This file it shared with other users, if you delete it, it will be deleted for you and all users permanently."
             onOk={forceFileDelete} ref={forceDeleteDialog} />
 
-        {createPortal(<SharedWithModal
-            ref={shareModal}
-            onUpdate={handleShare}
-        />, filesModal)}
+        {createPortal(<SharedWithModal ref={shareModal} onUpdate={handleShare}/>, filesModal)}
 
         {createPortal(
             <SimpleModal ref={updateModal} 
@@ -176,17 +174,19 @@ const FileItem = memo((props) => {
         <Card className='file' onClick={handleOpen}>
             <Card.Body>
                 <ToolTip toolTipMessage={file.filename} placement='bottom'>
-                    <p className="text-center text-truncate">
+                    <p className="text-center text-truncate file-filename">
                         {file.filename}
                     </p>
                 </ToolTip>
-
+                <p className='text-center text-muted'>{file.createdAt}</p>
                 <div className='text-center'>
                     <a href={file.url} download={file.filename} ref={download} hidden />
                     <button className='file-actions-item' onClick={handleDownload}><i className='bi bi-file-arrow-down-fill' /></button>
                     <button className='file-actions-item' onClick={handleDelete}><i className='bi bi-trash3-fill' /></button>
                     <button className='file-actions-item' onClick={openUpdateNameModel}><i className='bi bi-pencil-square' /></button>
                     <button className='file-actions-item' onClick={openShareModel}><i className='bi bi-share-fill' /></button>
+                    { file?.shared && <i className="bi bi-people-fill file-actions-item-no-hover pl-2"/>}
+                    { file?.sharedWith?.length > 0 && <i className="bi bi-person-fill file-actions-item-no-hover pl-2"/>}
                 </div>
             </Card.Body>
         </Card>
@@ -199,6 +199,7 @@ FileItem.propTypes = {
     contentType: PropTypes.string.isRequired,
     url: PropTypes.string.isRequired,
     extension: PropTypes.string.isRequired,
+    createdAt: PropTypes.string,
     name: PropTypes.string,
     shared: PropTypes.bool,
     sharedWith: PropTypes.array,
