@@ -134,45 +134,49 @@ const SearchBar = ({ createFileLoader, setFileLoader  }) => {
 
     useWhatChanged([ sortName, sortDate, shared ]);
     return (
-        <div className="d-flex justify-content-center align-items-center mb-4 gap-1">
+        <div className="d-flex flex-column flex-sm-row justify-content-center align-items-center mb-4">
             <input type="text" placeholder="Enter Search" className='search-input' ref={searchRef} onKeyUp={handleSearch}/>
-            <div className={`sort-icons ${disableSort && 'sort-icons-disable'}`}>
-                { sortName == 'asc' && 
-                <ToolTip toolTipMessage='Sort by name A to Z' placement='top'>
-                    <i className='bi bi-sort-alpha-down' onClick={handleSortByName}/>
-                </ToolTip> }
-                
-                { sortName == 'desc' &&
-                <ToolTip toolTipMessage='Sort by name Z to A' placement='top'>
-                    <i className='bi bi-sort-alpha-up' onClick={handleSortByName}/>
-                </ToolTip> }
-            </div>
 
-            <div className={`sort-icons ${disableSort && 'sort-icons-disable'}`}>
-                { sortDate == 'asc' && <ToolTip toolTipMessage='Sort by date oldest to newest' placement='top'>
-                    <i className='bi bi-sort-numeric-down' onClick={handleSortByDate}/>
-                </ToolTip> }
+            <div className='d-flex justify-content-center align-items-center gap-1'>
+                <div className={`sort-icons ${disableSort && 'sort-icons-disable'}`}>
+                    { sortName == 'asc' && 
+                    <ToolTip toolTipMessage='Sort by name A to Z' placement='top'>
+                        <i className='bi bi-sort-alpha-down' onClick={handleSortByName}/>
+                    </ToolTip> }
+                    
+                    { sortName == 'desc' &&
+                    <ToolTip toolTipMessage='Sort by name Z to A' placement='top'>
+                        <i className='bi bi-sort-alpha-up' onClick={handleSortByName}/>
+                    </ToolTip> }
+                </div>
 
-                { sortDate == 'desc' && <ToolTip toolTipMessage='Sort by date newest to oldest' placement='top'>
-                    <i className='bi bi-sort-numeric-up' onClick={handleSortByDate}/>
-                </ToolTip> }
-            </div>
+                <div className={`sort-icons ${disableSort && 'sort-icons-disable'}`}>
+                    { sortDate == 'asc' && <ToolTip toolTipMessage='Sort by date oldest to newest' placement='top'>
+                        <i className='bi bi-sort-numeric-down' onClick={handleSortByDate}/>
+                    </ToolTip> }
 
-            <div className={`sort-icons ${disableSort && 'sort-icons-disable'}`}>
-                { !shared && <ToolTip toolTipMessage='Show all files' placement='top'>
-                    <i className='bi bi-people' onClick={handleShared}/>
-                </ToolTip> }
+                    { sortDate == 'desc' && <ToolTip toolTipMessage='Sort by date newest to oldest' placement='top'>
+                        <i className='bi bi-sort-numeric-up' onClick={handleSortByDate}/>
+                    </ToolTip> }
+                </div>
 
-                { shared && <ToolTip toolTipMessage='Show shared files' placement='top'>
-                    <i className='bi bi-people-fill' onClick={handleShared}/>
-                </ToolTip> }
-            </div>
+                <div className={`sort-icons ${disableSort && 'sort-icons-disable'}`}>
+                    { !shared && <ToolTip toolTipMessage='Show all files' placement='top'>
+                        <i className='bi bi-people' onClick={handleShared}/>
+                    </ToolTip> }
 
-            <div>
-                { (searchRef?.current?.value || sortDate != 'asc' || sortName != 'asc' || shared) && 
-                <ToolTip toolTipMessage='Reset sorting and filtering' placement='top'> 
-                    <i className='bi bi-arrow-repeat sort-icons' onClick={resetSortingAndFiltering}/>
-                </ToolTip> }
+                    { shared && <ToolTip toolTipMessage='Show shared files' placement='top'>
+                        <i className='bi bi-people-fill' onClick={handleShared}/>
+                    </ToolTip> }
+                </div>
+
+                <div> 
+                    <ToolTip toolTipMessage='Reset sorting and filtering' placement='top'>
+                        <i className={ `bi bi-arrow-repeat sort-icons 
+                            ${(searchRef?.current?.value == '' && sortDate == 'asc' && sortName == 'asc' && !shared) && 'sort-icons-disable'}`} 
+                        onClick={resetSortingAndFiltering}/>
+                    </ToolTip> 
+                </div>
             </div>
         </div>
     );
