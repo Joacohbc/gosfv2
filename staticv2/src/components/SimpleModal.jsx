@@ -30,7 +30,7 @@ const SimpleModal = forwardRef((props, ref) => {
             autoFocus
         >
             <Modal.Header closeButton closeVariant="white">
-                <Modal.Title className="text-center file-filename">{props.title}</Modal.Title>
+                <Modal.Title className="text-center text-truncate">{props.title}</Modal.Title>
             </Modal.Header>
             <Modal.Body>{props.children}</Modal.Body>
             {props.buttonText && props.onClick && <Modal.Footer className="d-flex justify-content-center">

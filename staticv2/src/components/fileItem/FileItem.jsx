@@ -176,7 +176,7 @@ const FileItem = memo((props) => {
         <Card className='file' onClick={handleOpen}>
             <Card.Body>
                 <ToolTip toolTipMessage={file.filename} placement='bottom'>
-                    <p className="text-center file-filename">
+                    <p className="text-center text-truncate">
                         {file.filename}
                     </p>
                 </ToolTip>

@@ -265,9 +265,7 @@ export default function Files() {
     return <>
         { showPreview && 
         <Modal show={showPreview} onHide={handleClosePreview} className='d-flex modal-bg' fullscreen centered>
-            <Modal.Header closeButton className='bg-modal' closeVariant='white'>
-                <span className='file-filename'>{previewFile.filename}</span>
-            </Modal.Header>
+            <Modal.Header closeButton className='bg-modal text-truncate' closeVariant='white'>{previewFile.filename}</Modal.Header>
             <div className='d-flex flex-fill'>
                 <PreviewFile contentType={previewFile.contentType} url={sharedFileId ? previewFile.sharedUrl : previewFile.url} className="flex-fill" />
             </div>
