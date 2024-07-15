@@ -35,7 +35,7 @@ const FileContainer = memo(({ files, progress = files.length, fileLoader = () =>
                 }
             </Col> 
             
-            <Row xs={1} sm={2} md={3} lg={4} xl={5} className='row-gap-3 d-flex justify-content-center'>
+            <Row xs={1} sm={2} md={3} lg={4} className='row-gap-3 d-flex justify-content-center'>
                 { !loading && files.slice(0, progress).map(file => 
                 <Col key={file.id} hidden={file.deleted}>
                     <FileItem 
