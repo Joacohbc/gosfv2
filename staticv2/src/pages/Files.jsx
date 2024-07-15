@@ -10,7 +10,6 @@ import FileContainer from '../components/FileContainer';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCache } from '../hooks/useCache';
 import SearchBar from '../components/SearchBar';
-import { getDisplayFilename } from '../services/files';
 import { seconds, checkTimeFrom } from '../utils/time';
 
 const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extension: '', deleted: false });
@@ -266,7 +265,9 @@ export default function Files() {
     return <>
         { showPreview && 
         <Modal show={showPreview} onHide={handleClosePreview} className='d-flex modal-bg' fullscreen centered>
-            <Modal.Header closeButton className='bg-modal' closeVariant='white'>{getDisplayFilename(previewFile.filename)}</Modal.Header>
+            <Modal.Header closeButton className='bg-modal' closeVariant='white'>
+                <span className='file-filename'>{previewFile.filename}</span>
+            </Modal.Header>
             <div className='d-flex flex-fill'>
                 <PreviewFile contentType={previewFile.contentType} url={sharedFileId ? previewFile.sharedUrl : previewFile.url} className="flex-fill" />
             </div>

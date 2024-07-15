@@ -13,11 +13,14 @@
 
 .file-filename {
     text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.file-filename:hover {
+/* .file-filename:hover {
     font-weight: bold;
-}
+} */
 
 .file-actions-item {
     border-radius: 5px;
