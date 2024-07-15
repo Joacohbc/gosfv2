@@ -36,12 +36,16 @@
 
 .file-actions-item-no-hover {
     border-radius: 5px;
-    color: white;
     background-color: transparent;
     border: none;
     outline: none;
     padding: 7px;
     width: 2em;
+}
+
+.small-info {
+    font-size: 0.8em;
+    padding: 0.1em;
 }
 
 .file-actions-item:hover {

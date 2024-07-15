@@ -16,6 +16,27 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 
 const filesModal = document.getElementById('files-modals');
 
+const getSharedWithInfo = (file) => {
+    const names = file?.sharedWith.map(user => user.username).join(', ');
+    
+    if(file?.sharedWith.length > 0) {
+        return <ToolTip toolTipMessage={names} placement='bottom'>
+            <i className="bi bi-person-fill file-actions-item-no-hover text-white pl-2">
+                <span className='small-info'>{file.sharedWith.length}</span>
+            </i>
+        </ToolTip>
+    } else {
+        return <i className="bi bi-person-fill file-actions-item-no-hover pl-2">
+                    <span className='small-info'>0</span>
+                </i>
+    }
+}
+
+const getShareInfo = (file) => {
+    if(file?.shared) return <i className="bi bi-people-fill file-actions-item-no-hover text-white pl-2"/>
+    else return <i className="bi bi-person-fill-lock file-actions-item-no-hover pl-2"/>
+}
+
 const FileItem = memo((props) => {
     const download = useRef(null);
     const shareModal = useRef(null);
@@ -141,9 +162,7 @@ const FileItem = memo((props) => {
         updateModal.current.show();
     }
 
-    const handleShare = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+    const handleShare = (file) => {
         props.onShare(file);
     };
 
@@ -185,8 +204,8 @@ const FileItem = memo((props) => {
                     <button className='file-actions-item' onClick={handleDelete}><i className='bi bi-trash3-fill' /></button>
                     <button className='file-actions-item' onClick={openUpdateNameModel}><i className='bi bi-pencil-square' /></button>
                     <button className='file-actions-item' onClick={openShareModel}><i className='bi bi-share-fill' /></button>
-                    { file?.shared && <i className="bi bi-people-fill file-actions-item-no-hover pl-2"/>}
-                    { file?.sharedWith?.length > 0 && <i className="bi bi-person-fill file-actions-item-no-hover pl-2"/>}
+                    { getShareInfo(file) }
+                    { getSharedWithInfo(file) }
                 </div>
             </Card.Body>
         </Card>

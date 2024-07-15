@@ -27,6 +27,7 @@ const SharedWithModal = forwardRef((props, ref) => {
         open: shareModal.current.show,
         setFile: (file, completed) => {
             setCompletedInfo(completed);
+            console.log();
             setFile(file);
         },
     }), [ shareModal ]);
@@ -38,9 +39,11 @@ const SharedWithModal = forwardRef((props, ref) => {
                 const res = await updateFile(file.id, { 
                     shared: value,
                 });
-                setFile((file) => ({ ...file, shared: value }));
+                file.shared = res.data.shared;
+                setFile(file);
+                
                 messageContext.showSuccess(res.data.shared ? "File updated to: public" : "File updated to: restricted");
-                props.onUpdate();
+                props.onUpdate(file);
             } catch(err) {
                 messageContext.showError(err.message);
             }
@@ -52,12 +55,11 @@ const SharedWithModal = forwardRef((props, ref) => {
             e.preventDefault();
             try {
                 const res = await removeUserFromFile(file.id, userId);
-                setFile((file) => ({
-                    ...file,
-                    sharedWith: res.data.sharedWith.map(user => getUserInfo(user, false)),
-                }));
+                file.sharedWith = res.data.sharedWith.map(user => getUserInfo(user, false));
+                setFile(file);
+
                 messageContext.showSuccess(res.message);
-                props.onUpdate();
+                props.onUpdate(file);
             } catch(err) {
                 messageContext.showError(err.message);
             }
@@ -67,7 +69,6 @@ const SharedWithModal = forwardRef((props, ref) => {
 
     const handleAddUser = async (e) => {
         e.preventDefault();
-        props.onUpdate();
 
         const username = userIdAdded.current.value;
         if(username.trim() == "") {
@@ -78,12 +79,11 @@ const SharedWithModal = forwardRef((props, ref) => {
         try {
             const userId = username.substring(username.lastIndexOf('#') + 1);
             const res = await addUserToFile(file.id, userId)
-            setFile((file) => ({
-                ...file,
-                sharedWith: res.data.sharedWith.map(user => getUserInfo(user, false)),
-            }));
+            file.sharedWith = res.data.sharedWith.map(user => getUserInfo(user, false));
+            setFile(file);
+
             messageContext.showSuccess(res.message);
-            props.onUpdate();
+            props.onUpdate(file);
         } catch(err) {
             messageContext.showError(err.message);
         }

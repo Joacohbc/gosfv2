@@ -14,6 +14,7 @@ import { seconds, checkTimeFrom } from '../utils/time';
 
 const emptyFile = Object.freeze({ id: null, filename: null, contentType: '', url: '', extension: '', deleted: false });
 
+// Preview state
 const previewReducer = (state, action) => {
     switch (action.type) {
         case 'SET_PREVIEW_FILE':
@@ -32,6 +33,7 @@ function removeDefault(e) {
     e.stopPropagation();
 }
 
+// Files loading state
 const initialFilesLoadingState = {
     files: [],
     progress: 0,
@@ -248,7 +250,7 @@ export default function Files() {
     }, [addJob, undoJob, messageContext]);
     
     const handleFilesUpdate = useCallback((updatedFile) => 
-        dispatchFilesLoading({ type: 'UPDATE_FILE', payload: updatedFile }), 
+        dispatchFilesLoading({ type: 'UPDATE_FILE', payload: updatedFile }),
     []);
 
     const handleOpenPreview = useCallback(async (file) => {        

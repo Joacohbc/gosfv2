@@ -53,6 +53,7 @@ const FileContainer = memo(({ files, progress = files.length, fileLoader = () =>
                         onOpen={handleOpenPreview}
                         onDelete={handleFilesDelete}
                         onUpdate={handleFilesUpdate}
+                        onShare={handleFilesUpdate}
                     />
                 </Col>) }
 
