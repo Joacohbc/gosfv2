@@ -134,7 +134,7 @@ const SearchBar = ({ createFileLoader, setFileLoader  }) => {
 
     useWhatChanged([ sortName, sortDate, shared ]);
     return (
-        <div className="d-flex flex-column flex-sm-row justify-content-center align-items-center mb-4">
+        <div className="d-flex flex-column flex-sm-row justify-content-center align-items-center mb-4 gap-1">
             <input type="text" placeholder="Enter Search" className='search-input' ref={searchRef} onKeyUp={handleSearch}/>
 
             <div className='d-flex justify-content-center align-items-center gap-1'>
