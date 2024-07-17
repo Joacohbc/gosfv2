@@ -125,6 +125,5 @@ const getIcon = () : LocalStorageItem<string> => {
 
 
 const clean = () => {
-    localStorage.removeItem(LS_KEYS.files);
-    localStorage.removeItem(LS_KEYS.numberOfFiles);
+    Object.keys(LS_KEYS).forEach(key => localStorage.removeItem(LS_KEYS[key]));
 }
