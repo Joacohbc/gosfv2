@@ -1,8 +1,10 @@
 {
 	"info": {
-		"_postman_id": "1cb93637-fcdd-4dd7-8277-b9bf97b1972d",
+		"_postman_id": "6dd4ef57-b843-4396-a747-d62aad97e5e4",
 		"name": "Gosf",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23891879",
+		"_collection_link": "https://cloudy-rocket-58040.postman.co/workspace/Gosf-App-v2~3b2d4e56-38a9-484e-a2f9-b8fe2212be02/collection/23891879-6dd4ef57-b843-4396-a747-d62aad97e5e4?action=share&source=collection_link&creator=23891879"
 	},
 	"item": [
 		{
@@ -205,24 +207,17 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:{{port}}/api/files/",
+							"raw": "localhost:{{port}}/api/files",
 							"host": [
 								"localhost"
 							],
 							"port": "{{port}}",
 							"path": [
 								"api",
-								"files",
-								""
-							],
-							"query": [
-								{
-									"key": "filename",
-									"value": "213955.png",
-									"disabled": true
-								}
+								"files"
 							]
-						}
+						},
+						"description": "# API GET /api/files\n\nThis endpoint retrieves a list of files from the server.\n\n## Request\n\n- Method: GET\n    \n- URL: `localhost:{{port}}/api/files`\n    \n\n## Response\n\n- Status: 200 OK / 404 NOT FOUND\n    \n- Content-Type: application/json\n    \n- Body:\n    \n    ``` json\n      [\n        {\n          \"id\": 0,\n          \"owner_id\": 0,\n          \"filename\": \"\",\n          \"shared\": true,\n          \"sharedWith\": [\n            {\n              \"id\": 0,\n              \"username\": \"\"\n            }\n          ],\n          \"isDir\": true,\n          \"createdAt\": \"\",\n          \"updatedAt\": \"\"\n        }\n      ]\n    \n     ```\n    \n\nThe response contains an array of file objects with attributes such as `id`, `owner_id`, `filename`, `shared`, `sharedWith`, `isDir`, `createdAt`, and `updatedAt`."
 					},
 					"response": []
 				},
@@ -242,7 +237,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:{{port}}/api/files/:fileId/info",
+							"raw": "localhost:{{port}}/api/files/:fileId",
 							"host": [
 								"localhost"
 							],
@@ -250,16 +245,16 @@
 							"path": [
 								"api",
 								"files",
-								":fileId",
-								"info"
+								":fileId"
 							],
 							"variable": [
 								{
 									"key": "fileId",
-									"value": "2"
+									"value": "1730"
 								}
 							]
-						}
+						},
+						"description": "# Get File by ID\n\nThis endpoint retrieves a specific file (the binary no the information) by its ID.\n\n### Request\n\n- Method: GET\n    \n- Endpoint: `localhost:{{port}}/api/files/:fileId`\n    \n\n### Response\n\n- Status: 200\n    \n- Content-Type: audio/mpeg"
 					},
 					"response": []
 				},
@@ -293,10 +288,11 @@
 							"variable": [
 								{
 									"key": "fileId",
-									"value": "57"
+									"value": "1730"
 								}
 							]
-						}
+						},
+						"description": "This endpoint makes an HTTP GET request to localhost:{{port}}/api/files/:fileId/info to retrieve information about a specific file identified by its fileId.\n\n### Request\n\n- Method: GET\n    \n- URL: localhost:{{port}}/api/files/:fileId/info\n    \n\n### Response\n\n- Status: 200\n    \n- Headers:\n    \n    - Content-Type: application/json\n        \n- Body:\n    \n    ``` json\n        {\n            \"id\": 0,\n            \"owner_id\": 0,\n            \"filename\": \"\",\n            \"shared\": true,\n            \"isDir\": true,\n            \"createdAt\": \"\"\n        }\n    \n     ```\n    \n\n### Request Body\n\nThis request does not require a request body.\n\n### Response Body\n\n- `id` (number): The unique identifier of the file.\n    \n- `owner_id` (number): The identifier of the owner of the file.\n    \n- `filename` (string): The name of the file.\n    \n- `shared` (boolean): Indicates if the file is shared.\n    \n- `isDir` (boolean): Indicates if the file is a directory.\n    \n- `createdAt` (string): The timestamp indicating when the file was created."
 					},
 					"response": []
 				},
@@ -343,6 +339,50 @@
 					"response": []
 				},
 				{
+					"name": "Delete Batch",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n    1780,\n    1781,\n    1782\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:{{port}}/api/files?force=yes",
+							"host": [
+								"localhost"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"files"
+							],
+							"query": [
+								{
+									"key": "force",
+									"value": "yes"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Update",
 					"request": {
 						"auth": {
@@ -359,7 +399,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"filename\": \"ShareWithAll.png\",\n    \"shared\": true\n}",
+							"raw": "{\n    // \"filename\": \"ShareWithAll.png\",\n    \"shared\": true\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -449,7 +489,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"NewName\"\n}",
+							"raw": "{\n    \"username\": \"Joaco\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -457,15 +497,15 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:{{port}}/api/files/",
+							"raw": "localhost:{{port}}/api/users/rename",
 							"host": [
 								"localhost"
 							],
 							"port": "{{port}}",
 							"path": [
 								"api",
-								"files",
-								""
+								"users",
+								"rename"
 							],
 							"query": [
 								{
@@ -616,7 +656,7 @@
 							"query": [
 								{
 									"key": "",
-									"value": null,
+									"value": "",
 									"disabled": true
 								}
 							]
@@ -653,7 +693,7 @@
 							"query": [
 								{
 									"key": "",
-									"value": null,
+									"value": "",
 									"disabled": true
 								}
 							]
@@ -691,7 +731,7 @@
 							"query": [
 								{
 									"key": "",
-									"value": null,
+									"value": "",
 									"disabled": true
 								}
 							]
@@ -702,8 +742,122 @@
 			]
 		},
 		{
-			"name": "Token",
+			"name": "Authentication",
 			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\":\"Joaco\",\n    \"password\":\"1234\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:{{port}}/auth/register",
+							"host": [
+								"localhost"
+							],
+							"port": "{{port}}",
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "### `POST /auth/register`\n\nRegisters a new user.\n\n**JSON Expected (Request Body):**\n\n``` json\n{\n    \"username\": \"john.doe\", \n    \"password\": \"S0m3P@sswOrd!\"\n}\n\n ```\n\n**Possible Responses:**\n\n**200 OK:** User created successfully.\n\n``` json\n{\n    \"message\": \"User created successfully\"\n}\n\n ```\n\n**400 Bad Request:** Invalid username or password, or username already exists.\n\n``` json\n{\n    \"error\": \"code=400, message=Username already exists\",\n    \"message\": \"Username already exists\"\n}\n\n ```\n\n``` json\n{\n    \"error\": \"code=400, message=Username or password is empty\",\n    \"message\": \"Username or password is empty\"\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "LogOut",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "localhost:{{port}}/auth/logout?cookie=true",
+							"host": [
+								"localhost"
+							],
+							"port": "{{port}}",
+							"path": [
+								"auth",
+								"logout"
+							],
+							"query": [
+								{
+									"key": "cookie",
+									"value": "true",
+									"description": "Indicate to the server they should unset the HTTP-Only Auth Cookie "
+								}
+							]
+						},
+						"description": "### `DELETE /api/auth/logout`\n\nLogs out the user by invalidating the current JWT token.\n\n**Possible Responses:**\n\n- **200 OK:** Logout successful.\n    \n- **401 Unauthorized:** Invalid or expired token"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\":\"Joaco\",\n    \"password\":\"1234\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:{{port}}/auth/login?cookie=true",
+							"host": [
+								"localhost"
+							],
+							"port": "{{port}}",
+							"path": [
+								"auth",
+								"login"
+							],
+							"query": [
+								{
+									"key": "cookie",
+									"value": "true",
+									"description": "Indicate to the server they should set the HTTP-Only Auth Cookie "
+								}
+							]
+						},
+						"description": "### `POST /auth/login`\n\nLogs in a user and returns a JWT.\n\n``` json\n    \"username\": \"john.doe\", \n    \"password\": \"S0m3P@sswOrd!\" \n}\n\n ```\n\n**Possible Responses**\n\n200 OK: Login successful.\n\n``` json\n{\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpX0...\", \n    \"duration\": 30 \n}\n\n ```\n\n401 Unauthorized**:** Invalid username or password.\n\n``` json\n{\n    \"error\": \"code=401, message=Invalid username or password\",\n    \"message\": \"Invalid username or password\"\n}\n\n ```\n\n403 Forbidden: Maximum tokens number reached for the user (the user should log out from other devices or restore the tokens).\n\n``` json\n{\n    \"error\": \"code=403, message=max tokens reached for the user\",\n    \"message\": \"max tokens reached for the user\"\n}\n\n ```"
+					},
+					"response": []
+				},
 				{
 					"name": "Verify Auth",
 					"request": {
@@ -735,24 +889,15 @@
 									"value": "true"
 								}
 							]
-						}
+						},
+						"description": "### `GET /api/auth/verify`\n\nVerifies if the provided JWT token is valid. Requires a valid token.\n\n**Possible Responses:**\n\n**200 OK:** Token is valid.\n\n``` json\n{\n \"message\": \"You are authenticated\", \n \"durationRemaining\": 29\n}\n\n ```"
 					},
 					"response": []
 				},
 				{
 					"name": "Delete All Tokens",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "DELETE",
+						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
@@ -773,7 +918,8 @@
 								"auth",
 								"restore"
 							]
-						}
+						},
+						"description": "### `POST /api/auth/restore`\n\nDeletes all tokens associated with a user's credentials.\n\n**JSON Expected (Request Body):**\n\n``` json\n{\n    \"username\": \"john.doe\", \n    \"password\": \"S0m3P@sswOrd!\" \n}\n\n ```\n\n**Possible Responses:**\n\n**200 OK:** All tokens deleted successfully.\n\n**401 Unauthorized:** Invalid username or password.\n\n``` json\n{\n    \"error\": \"code=401, message=Invalid username or password\",\n    \"message\": \"Invalid username or password\"\n}\n\n ```"
 					},
 					"response": []
 				},
@@ -808,109 +954,13 @@
 									"value": "true"
 								}
 							]
-						}
+						},
+						"description": "### `GET /api/auth/refresh`\n\nRefreshes the JWT token, requiring a valid token in the `Authorization` header or as a query parameter (`api-token`) or cookie (`token`).\n\n**Possible Responses:**\n\n- **200 OK:** Token refreshed successfully. The response is the same as the `/api/auth/login` endpoint.\n    \n- **401 Unauthorized:** Invalid or expired token."
 					},
 					"response": []
 				}
-			]
-		},
-		{
-			"name": "Register",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"username\":\"Tania\",\n    \"password\":\"1234\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "localhost:{{port}}/auth/register",
-					"host": [
-						"localhost"
-					],
-					"port": "{{port}}",
-					"path": [
-						"auth",
-						"register"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Login",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"username\":\"Joaco\",\n    \"password\":\"1234\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "localhost:{{port}}/auth/login",
-					"host": [
-						"localhost"
-					],
-					"port": "{{port}}",
-					"path": [
-						"auth",
-						"login"
-					],
-					"query": [
-						{
-							"key": "cookie",
-							"value": "true",
-							"disabled": true
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "LogOut",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "DELETE",
-				"header": [],
-				"url": {
-					"raw": "localhost:{{port}}/auth/logout?cookie=true",
-					"host": [
-						"localhost"
-					],
-					"port": "{{port}}",
-					"path": [
-						"auth",
-						"logout"
-					],
-					"query": [
-						{
-							"key": "cookie",
-							"value": "true"
-						}
-					]
-				}
-			},
-			"response": []
+			],
+			"description": "GoSF V2 provides flexible authentication options to access its API endpoints.\n\n**1\\. Authorization Header**\n\n``` bash\nAuthorization: Bearer <your_jwt_token>\n\n ```\n\nThis is the standard and recommended approach for most API interactions. After logging in successfully, you'll receive a JWT. Include this token in the Authorization header of subsequent requests.\n\n**2\\. HTTP-Only Cookie**\n\n``` bash\n/api/auth/login?cookie=true\n\n ```\n\nGoSF V2 allows you to store the JWT in a cookie named token. To enable this, include the cookie query parameter with any value (e.g., `?cookie=true`) in the request URL when logging in or refreshing the token (endpoints: `/api/auth/login` and `/api/auth/refresh`). Subsequent requests will then automatically use the JWT stored in this cookie.\n\n**3\\. Query Param**\n\n``` bash\n/api/files?api-token=<your_jwt_token>\n\n ```\n\nYou can also send the JWT as a query parameter named `api-token` with each request\n\n**Prioritization:**\n\nGoSF V2 will try to authenticate you using the following order of precedence:\n\n1. **Authorization Header:** First, it checks for a JWT in the Authorization header (using the Bearer scheme).\n    \n2. **Query Parameter:** If no valid token is found in the header, it looks for an api-token query parameter.\n    \n3. **Cookie:** Finally, if neither of the above methods is used, it checks for a JWT in the token cookie.\n    \n\n**Authorization Errors**\n\nThis section outlines the error responses you might encounter if a JWT (JSON Web Token) is not correctly set in your API requests.\n\n**General Token Errors (Typically 401 Unauthorized)**\n\n| Error Message | Description | Potential Causes |\n| {\"message\": \"Not token provided\"} | No authentication token was provided in the request. | Missing Authorization header, api-token query parameter, or token cookie. |\n| {\"message\": \"missing or malformed jwt\"} | The token format is invalid (e.g., incorrect structure, missing segments). | Incorrect token structure, typos in the token string, or attempts to use an invalid token format. |\n| {\"message\": \"invalid authorization header\"} | The Authorization header is present but does not follow the expected Bearer  format. | Missing or incorrect \"Bearer\" prefix in the Authorization header. |\n| {\"message\": \"Unauthorized\"} | This generic message often indicates an invalid or expired token, or a token with an invalid signature. The server might not provide detailed reasons. | Expired token, incorrect secret key used to generate the token, or other internal validation failures. |\n\n**Token Not Found in Store (401 Unauthorized or 404 Not Found)**\n\n| Error Message | Description | Potential Causes |\n| {\"message\": \"the token is not valid for the current session\"} | The token might have been valid previously, but it's no longer found in the token store (e.g., Redis). | The user logged out, the token was manually revoked, or the token storage mechanism experienced an error. |\n| {\"message\": \"token/s not found in the database for the user\"} | This message more explicitly indicates that the token is not found in the database used for token storage. | Similar causes as the previous error, emphasizing that the token is not present in the persistent storage. |\n\n**Token Store Limit Reached (403 Forbidden)**\n\n| Error Message | Description | Potential Causes |\n| {\"message\": \"max tokens reached for the user\"} | The user has exceeded the maximum number of allowed active tokens. | The user has logged in from too many devices or locations, and the token store limit (defined in your application's configuration) has been reached. |"
 		}
 	]
 }
