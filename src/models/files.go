@@ -365,6 +365,10 @@ func (f fileService) GetFilesShared(userId uint) ([]*ent.File, error) {
 		return nil, err
 	}
 
+	if len(files) == 0 {
+		return nil, ErrFileNotFound
+	}
+
 	return files, nil
 }
 
