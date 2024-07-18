@@ -13,7 +13,7 @@ export default function Register() {
     const messageContext = useContext(MessageContext);
 
     const registerHandler = (e) => {
-        e.preventDefault();
+        e?.preventDefault();
         onRegister(username.current.value, password.current.value)
         .then((res) => {
             messageContext.showSuccess(res);

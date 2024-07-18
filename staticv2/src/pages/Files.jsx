@@ -29,8 +29,8 @@ const previewReducer = (state, action) => {
 };
 
 function removeDefault(e) {
-    e.preventDefault();
-    e.stopPropagation();
+    e?.preventDefault();
+    e?.stopPropagation();
 }
 
 // Files loading state
@@ -183,7 +183,7 @@ export default function Files() {
     }
     
     const handleFileUploadByClick = (e) => {
-        e.preventDefault();
+        e?.preventDefault();
 
         const files = e.target.files;
         if(files.length == 0) {
@@ -199,8 +199,8 @@ export default function Files() {
     }
 
     const handleFileUploadByDrop = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+        e?.preventDefault();
+        e?.stopPropagation();
 
         const files = e.dataTransfer.files;
         if(files.length == 0) {

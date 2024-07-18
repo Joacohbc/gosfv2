@@ -34,7 +34,7 @@ const SharedWithModal = forwardRef((props, ref) => {
 
     const handleMarkAsPublic = (value) => {
         return async (e) => {
-            e.preventDefault();
+            e?.preventDefault();
             try {
                 const res = await updateFile(file.id, { 
                     shared: value,
@@ -52,7 +52,7 @@ const SharedWithModal = forwardRef((props, ref) => {
 
     const handleRemoveUser = (userId) => {
         return async (e) => {
-            e.preventDefault();
+            e?.preventDefault();
             try {
                 const res = await removeUserFromFile(file.id, userId);
                 file.sharedWith = res.data.sharedWith.map(user => getUserInfo(user, false));
@@ -68,7 +68,7 @@ const SharedWithModal = forwardRef((props, ref) => {
     }
 
     const handleAddUser = async (e) => {
-        e.preventDefault();
+        e?.preventDefault();
 
         const username = userIdAdded.current.value;
         if(username.trim() == "") {
@@ -90,7 +90,7 @@ const SharedWithModal = forwardRef((props, ref) => {
     } 
 
     const handleCopyLink = async (e) => {
-        e.preventDefault();
+        e?.preventDefault();
         try {
             await navigator.clipboard.writeText(`${window.location.origin}/shared/${file?.id}`);
             messageContext.showSuccess("Link copied to clipboard");

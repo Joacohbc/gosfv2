@@ -16,7 +16,7 @@ export default function Login() {
     const restoreTokenDialog = useRef();
 
     const loginHandler = (e) => {
-        e.preventDefault();
+        e?.preventDefault();
         auth.onLogin(username.current.value, password.current.value)
         .catch(err => messageContext.showError(err.message));
     };
@@ -28,7 +28,7 @@ export default function Login() {
     };
     
     const showRestoreTokenDialog = (e) => {
-        e.preventDefault();
+        e?.preventDefault();
         restoreTokenDialog.current.show();
     }
 

@@ -22,7 +22,7 @@ export default function Notes() {
     }, [ getNote, messageContext, isLogged ]);
 
     const handleCopy = async (e) => {
-        e.preventDefault();
+        e?.preventDefault();
         try {
             await navigator.clipboard.writeText(text);
             messageContext.showInfo('Link copied to clipboard');

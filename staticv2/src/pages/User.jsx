@@ -44,7 +44,7 @@ export default function User() {
     }, [ getMyInfo, messageContext, getMyIconURL, isLogged, getIconCheckingCache, getUserInfoCheckingCache])
 
     const handleCopyUserId = async (e) => {
-        e.preventDefault();
+        e?.preventDefault();
         try {
             await navigator.clipboard.writeText(`${userInfo.username} #${userInfo.id}`);
             messageContext.showSuccess("Link copied to clipboard");
@@ -54,7 +54,7 @@ export default function User() {
     }
 
     const handleUpdateUser = async (e) => {
-        e.preventDefault();
+        e?.preventDefault();
 
         try {
             if(newUsername.current.value === userInfo.username) {
@@ -71,7 +71,7 @@ export default function User() {
     }
 
     const handleUpdatePassword = async (e) => {
-        e.preventDefault();
+        e?.preventDefault();
 
         if(newPassword.current.value !== confirmPassword.current.value) {
             messageContext.showError('Passwords do not match');
@@ -87,7 +87,7 @@ export default function User() {
     }
 
     const handleUploadIcon = async (e) => {
-        e.preventDefault();
+        e?.preventDefault();
         
         try {
             const res = await uploadIcon(e.target.files[0]);
@@ -101,7 +101,7 @@ export default function User() {
     }
 
     const handleDeleteIcon = async (e) => {
-        e.preventDefault();
+        e?.preventDefault();
 
         try {
             const res = await deleteIcon();
@@ -122,7 +122,7 @@ export default function User() {
     };
 
     const handleDeleteAccountDialog = (e) => {
-        e.preventDefault();
+        e?.preventDefault();
         deleteAccountDialog.current.show();
     }
 

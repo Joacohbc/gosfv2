@@ -67,14 +67,14 @@ const FileItem = memo((props) => {
     };
 
     const handleOpen = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+        e?.preventDefault();
+        e?.stopPropagation();
         props.onOpen(file);
     };
 
     const handleDelete = async (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+        e?.preventDefault();
+        e?.stopPropagation();
         try {
             const res = await getFileInfo(file.id);
             file.shared = res.shared;
@@ -99,8 +99,8 @@ const FileItem = memo((props) => {
     };
 
     const forceFileDelete = async (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+        e?.preventDefault();
+        e?.stopPropagation();
         props.onDelete(async () => {
             try {
                 const res = await deleteFile(file.id, true);
@@ -112,8 +112,8 @@ const FileItem = memo((props) => {
     };
 
     const handleUpdate = async (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+        e?.preventDefault();
+        e?.stopPropagation();
         if (inputUpdate.current.value.trim() == '') {
             messageContext.showError('Filename cannot be empty');
             return;
@@ -141,8 +141,8 @@ const FileItem = memo((props) => {
     }
 
     const openShareModel = async (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+        e?.preventDefault();
+        e?.stopPropagation();
         try {
             shareModal.current.open();
             shareModal.current.setFile(file, false);
@@ -157,8 +157,8 @@ const FileItem = memo((props) => {
     }
 
     const openUpdateNameModel = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+        e?.preventDefault();
+        e?.stopPropagation();
         updateModal.current.show();
     }
 
