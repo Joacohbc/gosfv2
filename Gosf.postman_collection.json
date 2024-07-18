@@ -16,16 +16,6 @@
 						{
 							"name": "Get Share",
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{token}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "GET",
 								"header": [],
 								"url": {
@@ -54,16 +44,6 @@
 						{
 							"name": "Get Share Info",
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{token}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "GET",
 								"header": [],
 								"url": {
@@ -93,16 +73,6 @@
 						{
 							"name": "Add User",
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{token}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "POST",
 								"header": [],
 								"url": {
@@ -118,13 +88,6 @@
 										":idFile",
 										"user",
 										":idUser"
-									],
-									"query": [
-										{
-											"key": "filename",
-											"value": "213955.png",
-											"disabled": true
-										}
 									],
 									"variable": [
 										{
@@ -145,16 +108,6 @@
 						{
 							"name": "Delete User",
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{token}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "DELETE",
 								"header": [],
 								"url": {
@@ -170,13 +123,6 @@
 										":idFile",
 										"user",
 										":idUser"
-									],
-									"query": [
-										{
-											"key": "filename",
-											"value": "213955.png",
-											"disabled": true
-										}
 									],
 									"variable": [
 										{
@@ -197,16 +143,6 @@
 						{
 							"name": "Get Share All",
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{token}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "GET",
 								"header": [],
 								"url": {
@@ -230,16 +166,6 @@
 				{
 					"name": "Get all",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -260,16 +186,6 @@
 				{
 					"name": "Get File",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -297,16 +213,6 @@
 				{
 					"name": "Get Info",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -335,16 +241,6 @@
 				{
 					"name": "Delete",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "DELETE",
 						"header": [],
 						"url": {
@@ -378,16 +274,6 @@
 				{
 					"name": "Delete Batch",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "DELETE",
 						"header": [],
 						"body": {
@@ -423,16 +309,6 @@
 				{
 					"name": "Update",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "PUT",
 						"header": [],
 						"body": {
@@ -462,23 +338,13 @@
 								}
 							]
 						},
-						"description": "### Update a File\n\nUpdates file information (filename or shared status).\n\n**Possible Responses:**\n\n- **200 OK:** File updated successfully.\n    \n- **400 Bad Request:** Invalid file data (for example, attempting to change the file extension) or the file is shared with other users (use `force=yes` query parameter to override).\n    \n\n``` json\n{\n    \"message\": \"Invalid file data\" \n}\n\n ```\n\n``` json\n{\n    \"message\": \"File is shared with other users\" \n}\n\n ```\n\n- **404 Not Found:** File not found.\n    \n\n``` json\n{\n    \"message\": \"file/s not found\"\n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section."
+						"description": "### Update a File\n\nUpdates file information (filename or shared status).\n\n**Possible Responses:**\n\n- **200 OK:** File updated successfully.\n    \n- **400 Bad Request:** Invalid file data (for example, attempting to change the file extension) or the file is shared with other users (use `force=yes` query parameter to override).\n    \n\n``` json\n{\n    \"message\": \"The extension of the file cannot be changed\"\n}\n\n ```\n\n``` json\n{\n    \"message\": \"File is shared with other users\" \n}\n\n ```\n\n- **404 Not Found:** File not found.\n    \n\n``` json\n{\n    \"message\": \"file/s not found\"\n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section."
 					},
 					"response": []
 				},
 				{
 					"name": "Upload",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -516,16 +382,6 @@
 				{
 					"name": "Rename User",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "PUT",
 						"header": [],
 						"body": {
@@ -563,16 +419,6 @@
 				{
 					"name": "Change Password",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "PUT",
 						"header": [],
 						"body": {
@@ -603,16 +449,6 @@
 				{
 					"name": "Delete User",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "DELETE",
 						"header": [],
 						"url": {
@@ -634,16 +470,6 @@
 				{
 					"name": "Get User",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -665,16 +491,6 @@
 				{
 					"name": "Upload Icon",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -697,13 +513,6 @@
 								"api",
 								"users",
 								"icon"
-							],
-							"query": [
-								{
-									"key": "",
-									"value": "",
-									"disabled": true
-								}
 							]
 						},
 						"description": "### Upload User Icon\n\nUploads a new icon for the currently authenticated user.\n\n**Possible Responses:**\n\n- **204 No Content:** Icon uploaded successfully.\n    \n- **400 Bad Request:**\n    \n    - Invalid file format: Only JPEG, PNG, and GIF images are supported.\n        \n    - File too large: The icon size exceeds the maximum allowed limit (512x512 pixels).\n        \n\n``` json\n{\n    \"message\": \"invalid image format, only jpeg/png/gif and png is supported\" \n}\n\n ```\n\n``` json\n{\n    \"message\": \"icon too large (max 512 x 512)\" \n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section."
@@ -713,16 +522,6 @@
 				{
 					"name": "Delete Icon",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "DELETE",
 						"header": [],
 						"url": {
@@ -735,13 +534,6 @@
 								"api",
 								"users",
 								"icon"
-							],
-							"query": [
-								{
-									"key": "",
-									"value": "",
-									"disabled": true
-								}
 							]
 						},
 						"description": "### Delete User\n\nDeletes the currently authenticated user account.\n\n**Possible Responses:**\n\n- **204 No Content:** User account deleted successfully.\n    \n- **400 Bad Request:** User has files and cannot be deleted.\n    \n\n``` json\n{\n    \"message\": \"You can't delete your account because you have files\" \n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section.\n    \n- **404 Not Found:** User not found.\n    \n\n``` json\n{\n    \"message\": \"user/s not found\"\n}\n\n ```"
@@ -751,16 +543,6 @@
 				{
 					"name": "Get Icon",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -774,13 +556,6 @@
 								"users",
 								"icon",
 								"me"
-							],
-							"query": [
-								{
-									"key": "",
-									"value": "",
-									"disabled": true
-								}
 							]
 						},
 						"description": "### Get User Icon\n\nRetrieves the icon of the currently authenticated user.\n\n**Possible Responses:**\n\n- **200 OK:** Icon retrieved successfully (returns the icon file data, which can be an SVG or a previously uploaded image).\n    \n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section.\n    \n- **404 Not Found:** User icon not found.\n    \n\n``` json\n{\n    \"message\": \"Icon not found\"\n}\n\n ```"
@@ -796,6 +571,9 @@
 				{
 					"name": "Register",
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -825,16 +603,6 @@
 				{
 					"name": "LogOut",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "DELETE",
 						"header": [],
 						"url": {
@@ -866,6 +634,20 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"",
+									"pm.test(\"Set Token in the Enviroment\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"token\", jsonData.token);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
 									""
 								],
 								"type": "text/javascript",
@@ -874,11 +656,14 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\":\"AUser\",\n    \"password\":\"1234\"\n}",
+							"raw": "{\n    \"username\":\"Joaco\",\n    \"password\":\"1234\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -910,16 +695,6 @@
 				{
 					"name": "Verify Auth",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -946,6 +721,9 @@
 				{
 					"name": "Delete All Tokens",
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -975,16 +753,6 @@
 				{
 					"name": "Refresh Token",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -1010,6 +778,93 @@
 				}
 			],
 			"description": "GoSF V2 provides flexible authentication options to access its API endpoints.\n\n**1\\. Authorization Header**\n\n``` bash\nAuthorization: Bearer <your_jwt_token>\n\n ```\n\nThis is the standard and recommended approach for most API interactions. After logging in successfully, you'll receive a JWT. Include this token in the Authorization header of subsequent requests.\n\n**2\\. HTTP-Only Cookie**\n\n``` bash\n/api/auth/login?cookie=true\n\n ```\n\nGoSF V2 allows you to store the JWT in a cookie named token. To enable this, include the cookie query parameter with any value (e.g., `?cookie=true`) in the request URL when logging in or refreshing the token (endpoints: `/api/auth/login` and `/api/auth/refresh`). Subsequent requests will then automatically use the JWT stored in this cookie.\n\n**3\\. Query Param**\n\n``` bash\n/api/files?api-token=<your_jwt_token>\n\n ```\n\nYou can also send the JWT as a query parameter named `api-token` with each request\n\n**Prioritization:**\n\nGoSF V2 will try to authenticate you using the following order of precedence:\n\n1. **Authorization Header:** First, it checks for a JWT in the Authorization header (using the Bearer scheme).\n    \n2. **Query Parameter:** If no valid token is found in the header, it looks for an api-token query parameter.\n    \n3. **Cookie:** Finally, if neither of the above methods is used, it checks for a JWT in the token cookie.\n    \n\n## **Authorization Errors**\n\nThis section outlines the error responses you might encounter if a JWT (JSON Web Token) is not correctly set in your API requests.\n\n**General Token Errors (Typically 401 Unauthorized)**\n\n| Error Message | Description | Potential Causes |\n| --- | --- | --- |\n| `{\"message\": \"Not token provided\"}` | No authentication token was provided in the request. | Missing `Authorization` header, `api-token` query parameter, or token cookie. |\n| `{\"message\": \"missing or malformed jwt\"}` | The token format is invalid (e.g., incorrect structure, missing segments). | Incorrect token structure, typos in the token string, or attempts to use an invalid token format. |\n| `{\"message\": \"invalid authorization header\"}` | The `Authorization` header is present but does not follow the expected `Bearer` format. | Missing or incorrect \"Bearer\" prefix in the `Authorization` header (should be: `Authorization: Bearer` ). |\n| `{\"message\": \"Unauthorized\"}` | This generic message often indicates an invalid or expired token, or a token with an invalid signature. The server might not provide detailed reasons. | Expired token, incorrect secret key used to generate the token, or other internal validation failures. |\n\n**Token Not Found in Store (401 Unauthorized or 404 Not Found)**\n\n| Error Message | Description | Potential Causes |\n| --- | --- | --- |\n| `{\"message\": \"the token is not valid for the current session\"}` | The token might have been valid previously, but it's no longer found in the token store (e.g., Redis). | The user logged out, the token was manually revoked, or the token storage mechanism experienced an error. |\n| `{\"message\": \"token/s not found in the database for the user\"}` | This message more explicitly indicates that the token is not found in the database used for token storage. | Similar causes as the previous error, emphasizing that the token is not present in the persistent storage. |\n\n**Token Store Limit Reached (403 Forbidden)**\n\n| Error Message | Description | Potential Causes |\n| --- | --- | --- |\n| `{\"message\": \"max tokens reached for the user\"}` | The user has exceeded the maximum number of allowed active tokens. | The user has logged in from too many devices or locations, and the token store limit (defined in your application's configuration) has been reached. |"
+		},
+		{
+			"name": "Notes",
+			"item": [
+				{
+					"name": "Get Note",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:{{port}}/api/notes",
+							"host": [
+								"localhost"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"notes"
+							]
+						},
+						"description": "### Get User Note\n\nRetrieves the content of the note associated with the currently authenticated user.\n\n**Possible Responses:**\n\n- **200 OK:** Note retrieved successfully.\n    \n\n``` json\n{\n  \"content\": \"This is my note content.\" \n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section.\n    \n- **404 Not Found:** No note found for the user. This likely means a note hasn't been created yet.\n    \n\n``` json\n{\n    \"message\": \"note not found\"\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "Set Note",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"Hola Mundo!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:{{port}}/api/notes",
+							"host": [
+								"localhost"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"notes"
+							]
+						},
+						"description": "### Create/Update User Note\n\nCreates a new note or updates the existing note for the currently authenticated user.\n\n**Possible Responses:**\n\n- **200 OK:** Note created or updated successfully.\n    \n\n``` json\n{\n  \"content\": \"This is my updated note content.\" \n}\n\n ```\n\n- **400 Bad Request:** The request body is missing the \"content\" field, or the content is invalid.\n    \n\n``` json\n{\n    \"message\": \"Missing or Invalid content field\" \n}\n\n ```"
+					},
+					"response": []
+				}
+			],
+			"description": "This part of the API documentation covers how to interact with user notes. Currently, the API provides a simplified way to manage a single note per user. You can retrieve, create or update the content of your notes."
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
 		}
 	]
 }
