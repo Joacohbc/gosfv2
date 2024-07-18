@@ -46,7 +46,47 @@
 											"value": "57"
 										}
 									]
-								}
+								},
+								"description": "### Download a Shared File\n\nDownloads a file that has been shared with the authenticated user.\n\n**Possible Responses:**\n\n- **200 OK:** File downloaded successfully.\n    \n- **403 Forbidden:** The file is not shared with you, request access to the owner.\n    \n\n``` json\n{\n    \"message\": \"The file is not shared with you, request access to the owner\"\n}\n\n ```\n\n- **404 Not Found:** File not found.\n    \n\n``` json\n{\n    \"message\": \"file/s not found\"\n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Share Info",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:{{port}}/api/files/share/:fileId/info",
+									"host": [
+										"localhost"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"files",
+										"share",
+										":fileId",
+										"info"
+									],
+									"variable": [
+										{
+											"key": "fileId",
+											"value": "57"
+										}
+									]
+								},
+								"description": "### Get Shared File Information\n\nRetrieves information about a file that has been shared with the authenticated user.\n\n**Possible Responses:**\n\n- **200 OK:** Shared file information retrieved successfully.\n    \n- **403 Forbidden:** The file is not shared with you, request access to the owner.\n    \n\n``` json\n{\n    \"message\": \"The file is not shared with you, request access to the owner\"\n}\n\n ```\n\n- **404 Not Found:** File not found.\n    \n\n``` json\n{\n    \"message\": \"file/s not found\"\n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section."
 							},
 							"response": []
 						},
@@ -97,7 +137,8 @@
 											"value": "3"
 										}
 									]
-								}
+								},
+								"description": "### Add User to File\n\nAdds a user to the share list of a file. The authenticated user must be the owner of the file.\n\n**Possible Responses:**\n\n- **200 OK:** User added to the share list successfully.\n    \n- **400 Bad Request:** Invalid file ID, invalid user ID, the user is already shared with the file, or the user is the owner of the file.\n    \n\n``` json\n{\n    \"message\": \"The user is the owner of the file\"\n}\n\n ```\n\n``` json\n{\n    \"message\": \"The File is already shared with that user\"\n}\n\n ```\n\n- **404 Not Found:** File or user not found.\n    \n\n``` json\n{\n    \"message\": \"file/s not found\" // If the file is not found\n}\n\n ```\n\n``` json\n{\n    \"message\": \"user/s not found\" // If the user is not found\n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section."
 							},
 							"response": []
 						},
@@ -148,7 +189,8 @@
 											"value": "3"
 										}
 									]
-								}
+								},
+								"description": "### Remove User from File\n\nRemoves a user from the share list of a file. The authenticated user must be the owner of the file.\n\n**Possible Responses:**\n\n- **200 OK:** User removed from the share list successfully.\n    \n- **400 Bad Request:** Invalid file ID, invalid user ID, or the file is not shared with the specified user.\n    \n\n``` json\n{\n    \"message\": \"The File is not shared with that user\"\n}\n\n ```\n\n- **404 Not Found:** File or user not found.\n    \n\n``` json\n{\n    \"message\": \"file/s not found\" // If the file is not found\n}\n\n ```\n\n``` json\n{\n    \"message\": \"user/s not found\" // If the user is not found\n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section."
 							},
 							"response": []
 						},
@@ -177,15 +219,9 @@
 										"api",
 										"files",
 										"share"
-									],
-									"query": [
-										{
-											"key": "filename",
-											"value": "213955.png",
-											"disabled": true
-										}
 									]
-								}
+								},
+								"description": "### Get All Shared Files\n\nRetrieves a list of all files shared with the authenticated user.\n\n**Possible Responses:**\n\n- **200 OK:** Files retrieved successfully.\n    \n- **404 Not Found:** No shared files found.\n    \n\n``` json\n{\n    \"message\": \"file/s not found\"\n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section."
 							},
 							"response": []
 						}
@@ -217,7 +253,7 @@
 								"files"
 							]
 						},
-						"description": "# API GET /api/files\n\nThis endpoint retrieves a list of files from the server.\n\n## Request\n\n- Method: GET\n    \n- URL: `localhost:{{port}}/api/files`\n    \n\n## Response\n\n- Status: 200 OK / 404 NOT FOUND\n    \n- Content-Type: application/json\n    \n- Body:\n    \n    ``` json\n      [\n        {\n          \"id\": 0,\n          \"owner_id\": 0,\n          \"filename\": \"\",\n          \"shared\": true,\n          \"sharedWith\": [\n            {\n              \"id\": 0,\n              \"username\": \"\"\n            }\n          ],\n          \"isDir\": true,\n          \"createdAt\": \"\",\n          \"updatedAt\": \"\"\n        }\n      ]\n    \n     ```\n    \n\nThe response contains an array of file objects with attributes such as `id`, `owner_id`, `filename`, `shared`, `sharedWith`, `isDir`, `createdAt`, and `updatedAt`."
+						"description": "### Get All Files\n\nRetrieves a list of all files owned by the authenticated user.\n\n**Possible Responses:**\n\n- **200 OK:** Files retrieved successfully.\n    \n\n```\n[\n    {\n        \"id\": 1,\n        \"owner_id\": 1,\n        \"filename\": \"my_document.txt\",\n        \"shared\": false,\n        \"sharedWith\": [],\n        \"isDir\": false,\n        \"parentId\": null,\n        \"children\": [],\n        \"createdAt\": \"2023-12-28T21:31:10.426726Z\",\n        \"updatedAt\": \"2023-12-28T21:31:10.426726Z\"\n    }\n]    \n\n ```\n\n- **404 Not Found:** User has no files.\n    \n\n```\n{\n    \"message\": \"file/s not found\"\n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section."
 					},
 					"response": []
 				},
@@ -254,7 +290,7 @@
 								}
 							]
 						},
-						"description": "# Get File by ID\n\nThis endpoint retrieves a specific file (the binary no the information) by its ID.\n\n### Request\n\n- Method: GET\n    \n- Endpoint: `localhost:{{port}}/api/files/:fileId`\n    \n\n### Response\n\n- Status: 200\n    \n- Content-Type: audio/mpeg"
+						"description": "### Download a File\n\nDownloads a specific file owned by the authenticated user.\n\n**Possible Responses:**\n\n- **200 OK:** File downloaded successfully.\n    \n- **404 Not Found:** File not found.\n    \n\n```\n{\n    \"message\": \"file/s not found\"\n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section."
 					},
 					"response": []
 				},
@@ -292,7 +328,7 @@
 								}
 							]
 						},
-						"description": "This endpoint makes an HTTP GET request to localhost:{{port}}/api/files/:fileId/info to retrieve information about a specific file identified by its fileId.\n\n### Request\n\n- Method: GET\n    \n- URL: localhost:{{port}}/api/files/:fileId/info\n    \n\n### Response\n\n- Status: 200\n    \n- Headers:\n    \n    - Content-Type: application/json\n        \n- Body:\n    \n    ``` json\n        {\n            \"id\": 0,\n            \"owner_id\": 0,\n            \"filename\": \"\",\n            \"shared\": true,\n            \"isDir\": true,\n            \"createdAt\": \"\"\n        }\n    \n     ```\n    \n\n### Request Body\n\nThis request does not require a request body.\n\n### Response Body\n\n- `id` (number): The unique identifier of the file.\n    \n- `owner_id` (number): The identifier of the owner of the file.\n    \n- `filename` (string): The name of the file.\n    \n- `shared` (boolean): Indicates if the file is shared.\n    \n- `isDir` (boolean): Indicates if the file is a directory.\n    \n- `createdAt` (string): The timestamp indicating when the file was created."
+						"description": "### Get File Information\n\nRetrieves information about a specific file owned by the authenticated user.\n\n**Possible Responses:**\n\n- **200 OK:** File information retrieved successfully.\n    \n\n``` json\n{\n    \"id\": 1,\n    \"owner_id\": 1,\n    \"filename\": \"my_document.txt\",\n    \"shared\": false,\n    \"sharedWith\": [],\n    \"isDir\": false,\n    \"parentId\": null,\n    \"children\": [],\n    \"createdAt\": \"2023-12-28T21:31:10.426726Z\",\n    \"updatedAt\": \"2023-12-28T21:31:10.426726Z\"\n}   \n\n ```\n\n- **404 Not Found:** File not found.\n    \n\n``` json\n{\n    \"message\": \"file/s not found\"\n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section."
 					},
 					"response": []
 				},
@@ -334,7 +370,8 @@
 									"value": "10"
 								}
 							]
-						}
+						},
+						"description": "### Delete a File\n\nDeletes a specific file owned by the authenticated user.\n\n**Possible Responses:**\n\n- **200 OK:** File deleted successfully.\n    \n- **400 Bad Request:** The file is shared with other users (use `force=yes` query parameter to override).\n    \n\n``` json\n{\n    \"message\": \"File is shared with other users\"\n}\n\n ```\n\n- **404 Not Found:** File not found.\n    \n\n``` json\n{\n    \"message\": \"file/s not found\"\n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section."
 					},
 					"response": []
 				},
@@ -378,7 +415,8 @@
 									"value": "yes"
 								}
 							]
-						}
+						},
+						"description": "### Delete Multiple Files\n\nDeletes multiple files owned by the authenticated user.\n\n**Possible Responses:**\n\n- **200 OK:** Files deleted successfully.\n    \n- **400 Bad Request:** One or more files are shared with other users (use `force=yes` query parameter to override) or no file IDs provided\n    \n\n``` json\n{\n    \"message\": \"File is shared with other users\"\n}\n\n ```\n\n``` json\n{\n    \"message\": \"Invalid files ids\"\n}\n\n ```\n\n- **404 Not Found:** One or more files not found.\n    \n\n``` json\n{\n    \"message\": \"No files to delete\"\n}\n\n ```\n\n``` json\n{\n    \"message\": \"Some files do not exist\"\n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section."
 					},
 					"response": []
 				},
@@ -399,7 +437,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    // \"filename\": \"ShareWithAll.png\",\n    \"shared\": true\n}",
+							"raw": "{\n    \"filename\": \"ShareWithAll.png\",\n    \"shared\": true\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -423,7 +461,8 @@
 									"value": "1"
 								}
 							]
-						}
+						},
+						"description": "### Update a File\n\nUpdates file information (filename or shared status).\n\n**Possible Responses:**\n\n- **200 OK:** File updated successfully.\n    \n- **400 Bad Request:** Invalid file data (for example, attempting to change the file extension) or the file is shared with other users (use `force=yes` query parameter to override).\n    \n\n``` json\n{\n    \"message\": \"Invalid file data\" \n}\n\n ```\n\n``` json\n{\n    \"message\": \"File is shared with other users\" \n}\n\n ```\n\n- **404 Not Found:** File not found.\n    \n\n``` json\n{\n    \"message\": \"file/s not found\"\n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section."
 					},
 					"response": []
 				},
@@ -463,11 +502,13 @@
 								"files",
 								""
 							]
-						}
+						},
+						"description": "### Upload a File\n\nUploads one or more files for the authenticated user.\n\n**Possible Responses:**\n\n- **201 Created:** File(s) uploaded successfully.\n    \n- **400 Bad Request:** Invalid file data (or other file-related errors).\n    \n\n```\n{\n    \"message\": \"Invalid file data\"\n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section."
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "The Files section of the GoSF V2 API provides endpoints for you to manage your files effectively. You can upload, download, share, organize, and delete files securely.\n\n**Key Features:**\n\n- **File Uploads:** Upload single or multiple files with ease.\n    \n- **File Downloads:** Securely download your files.\n    \n- **File Sharing:** Share files with other GoSF V2 users while maintaining control over access.\n    \n- **File Management:** Update filenames, organize files into directories, and more.\n    \n- **Deletion:** Delete files when you no longer need them.\n    \n\n**Authentication**\n\nMost of the endpoints in this section require you to be authenticated using a valid JSON Web Token (JWT). You can obtain a JWT by logging in using the /api/auth/login endpoint. Please refer to the \"Authentication\" section at the beginning of this documentation for details on how to include your JWT in requests (Authorization header, cookie, or query parameter).\n\n**File Data Transfer Object (FileDTO)**\n\nMany File endpoints use a standardized FileDTO (File Data Transfer Object) to represent file information in requests and responses. The FileDTO structure is as follows:\n\n``` json\n{\n    \"id\": 1,                      // File ID\n    \"owner_id\": 1,                // Owner's User ID\n    \"filename\": \"document.txt\",   // File name\n    \"shared\": false,             // Shared status (true or false)\n    \"sharedWith\": [],            // Array of UserDTOs representing users the file is shared with\n    \"isDir\": false,              // Whether the file is a directory (true or false)\n    \"parentId\": null,             // Parent directory ID (null if no parent)\n    \"children\": [],              // Array of FileDTOs representing children (if a directory)\n    \"createdAt\": \"2023-12-27T18:35:16.638926Z\", // Creation timestamp\n    \"updatedAt\": \"2023-12-27T18:35:16.638926Z\"  // Last update timestamp\n}\n\n ```\n\n**Error Handling**\n\nThe Files API endpoints use standard HTTP status codes to indicate success or failure. The most common codes you'll encounter are:\n\n- **200 OK:** The request was successful.\n    \n- **201 Created:** A new resource (file) was created successfully.\n    \n- **400 Bad Request:** There was an error with the request, such as invalid data.\n    \n- **401 Unauthorized:** Authentication failed or a valid token was not provided.\n    \n- **403 Forbidden:** You do not have permission to access the requested resource (file).\n    \n- **404 Not Found:** The requested file was not found.\n    \n- **500 Internal Server Error:** There was an unexpected error on the server.\n    \n\nDetailed error messages and examples are provided in the documentation for each endpoint."
 		},
 		{
 			"name": "User",
@@ -514,7 +555,8 @@
 									"disabled": true
 								}
 							]
-						}
+						},
+						"description": "### Update Username\n\nUpdates the username of the currently authenticated user.\n\n**Possible Responses:**\n\n- **200 OK:** Username updated successfully.\n    \n\n``` json\n{\n  \"id\": 1, \n  \"username\": \"jane.doe\" \n}\n\n ```\n\n- **400 Bad Request:** Invalid username or username already exists.\n    \n\n``` json\n{\n    \"message\": \"Username already exists\" \n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section.\n    \n- **404 Not Found:** User not found.\n    \n\n``` json\n{\n    \"message\": \"user/s not found\"\n}\n\n ```"
 					},
 					"response": []
 				},
@@ -553,7 +595,8 @@
 								"users",
 								"password"
 							]
-						}
+						},
+						"description": "### Change Password\n\nChanges the password of the currently authenticated user.\n\n**Possible Responses:**\n\n- **204 No Content:** Password changed successfully.\n    \n- **400 Bad Request:** Invalid old password, new password does not meet requirements, or an error occurred while hashing the new password.\n    \n\n``` json\n{\n    \"message\": \"Current password is incorrect\" \n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section.\n    \n- **404 Not Found:** User not found.\n    \n\n``` json\n{\n    \"message\": \"user/s not found\"\n}\n\n ```"
 					},
 					"response": []
 				},
@@ -583,7 +626,8 @@
 								"users",
 								""
 							]
-						}
+						},
+						"description": "### Delete User\n\nDeletes the currently authenticated user account.\n\n**Possible Responses:**\n\n- **204 No Content:** User account deleted successfully.\n    \n- **400 Bad Request:** User has files and cannot be deleted.\n    \n\n``` json\n{\n    \"message\": \"You can't delete your account because you have files\" \n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section.\n    \n- **404 Not Found:** User not found.\n    \n\n``` json\n{\n    \"message\": \"user/s not found\"\n}\n\n ```"
 					},
 					"response": []
 				},
@@ -613,7 +657,8 @@
 								"users",
 								"me"
 							]
-						}
+						},
+						"description": "### Get Current User\n\nRetrieves information about the currently authenticated user.\n\n**Possible Responses:**\n\n- **200 OK:** User information retrieved successfully.\n    \n\n``` json\n{\n  \"id\": 1, \n  \"username\": \"john.doe\" \n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section.\n    \n- **404 Not Found:** User not found.\n    \n\n``` json\n{\n    \"message\": \"user/s not found\"\n}\n\n ```"
 					},
 					"response": []
 				},
@@ -660,7 +705,8 @@
 									"disabled": true
 								}
 							]
-						}
+						},
+						"description": "### Upload User Icon\n\nUploads a new icon for the currently authenticated user.\n\n**Possible Responses:**\n\n- **204 No Content:** Icon uploaded successfully.\n    \n- **400 Bad Request:**\n    \n    - Invalid file format: Only JPEG, PNG, and GIF images are supported.\n        \n    - File too large: The icon size exceeds the maximum allowed limit (512x512 pixels).\n        \n\n``` json\n{\n    \"message\": \"invalid image format, only jpeg/png/gif and png is supported\" \n}\n\n ```\n\n``` json\n{\n    \"message\": \"icon too large (max 512 x 512)\" \n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section."
 					},
 					"response": []
 				},
@@ -697,7 +743,8 @@
 									"disabled": true
 								}
 							]
-						}
+						},
+						"description": "### Delete User\n\nDeletes the currently authenticated user account.\n\n**Possible Responses:**\n\n- **204 No Content:** User account deleted successfully.\n    \n- **400 Bad Request:** User has files and cannot be deleted.\n    \n\n``` json\n{\n    \"message\": \"You can't delete your account because you have files\" \n}\n\n ```\n\n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section.\n    \n- **404 Not Found:** User not found.\n    \n\n``` json\n{\n    \"message\": \"user/s not found\"\n}\n\n ```"
 					},
 					"response": []
 				},
@@ -735,11 +782,13 @@
 									"disabled": true
 								}
 							]
-						}
+						},
+						"description": "### Get User Icon\n\nRetrieves the icon of the currently authenticated user.\n\n**Possible Responses:**\n\n- **200 OK:** Icon retrieved successfully (returns the icon file data, which can be an SVG or a previously uploaded image).\n    \n- **401 Unauthorized:** Authentication failed or the token is invalid. See the \"Authentication\" section.\n    \n- **404 Not Found:** User icon not found.\n    \n\n``` json\n{\n    \"message\": \"Icon not found\"\n}\n\n ```"
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "This section of the API documentation focuses on endpoints that allow you to manage user-related actions, including retrieving user details, updating usernames, changing passwords, deleting accounts, and managing user icons. All endpoints in this section, except for retrieving a user's icon by ID, require authentication using a valid JWT token obtained during login."
 		},
 		{
 			"name": "Authentication",
@@ -769,7 +818,7 @@
 								"register"
 							]
 						},
-						"description": "### `POST /auth/register`\n\nRegisters a new user.\n\n**JSON Expected (Request Body):**\n\n``` json\n{\n    \"username\": \"john.doe\", \n    \"password\": \"S0m3P@sswOrd!\"\n}\n\n ```\n\n**Possible Responses:**\n\n**200 OK:** User created successfully.\n\n``` json\n{\n    \"message\": \"User created successfully\"\n}\n\n ```\n\n**400 Bad Request:** Invalid username or password, or username already exists.\n\n``` json\n{\n    \"error\": \"code=400, message=Username already exists\",\n    \"message\": \"Username already exists\"\n}\n\n ```\n\n``` json\n{\n    \"error\": \"code=400, message=Username or password is empty\",\n    \"message\": \"Username or password is empty\"\n}\n\n ```"
+						"description": "### `POST /auth/register`\n\nRegisters a new user.\n\n**JSON Expected (Request Body):**\n\n``` json\n{\n    \"username\": \"john.doe\", \n    \"password\": \"S0m3P@sswOrd!\"\n}\n\n ```\n\n**Possible Responses:**\n\n- **200 OK:** User created successfully.\n    \n\n``` json\n{\n    \"message\": \"User created successfully\"\n}\n\n ```\n\n- **400 Bad Request:** Invalid username or password, or username already exists.\n    \n\n``` json\n{\n    \"error\": \"code=400, message=Username already exists\",\n    \"message\": \"Username already exists\"\n}\n\n ```\n\n``` json\n{\n    \"error\": \"code=400, message=Username or password is empty\",\n    \"message\": \"Username or password is empty\"\n}\n\n ```"
 					},
 					"response": []
 				},
@@ -829,7 +878,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\":\"Joaco\",\n    \"password\":\"1234\"\n}",
+							"raw": "{\n    \"username\":\"AUser\",\n    \"password\":\"1234\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -854,7 +903,7 @@
 								}
 							]
 						},
-						"description": "### `POST /auth/login`\n\nLogs in a user and returns a JWT.\n\n``` json\n    \"username\": \"john.doe\", \n    \"password\": \"S0m3P@sswOrd!\" \n}\n\n ```\n\n**Possible Responses**\n\n200 OK: Login successful.\n\n``` json\n{\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpX0...\", \n    \"duration\": 30 \n}\n\n ```\n\n401 Unauthorized**:** Invalid username or password.\n\n``` json\n{\n    \"error\": \"code=401, message=Invalid username or password\",\n    \"message\": \"Invalid username or password\"\n}\n\n ```\n\n403 Forbidden: Maximum tokens number reached for the user (the user should log out from other devices or restore the tokens).\n\n``` json\n{\n    \"error\": \"code=403, message=max tokens reached for the user\",\n    \"message\": \"max tokens reached for the user\"\n}\n\n ```"
+						"description": "### `POST /auth/login`\n\nLogs in a user and returns a JWT.\n\n``` json\n    \"username\": \"john.doe\", \n    \"password\": \"S0m3P@sswOrd!\" \n}\n\n ```\n\n**Possible Responses**\n\n- **200 OK**: Login successful.\n    \n\n``` json\n{\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpX0...\", \n    \"duration\": 30 \n}\n\n ```\n\n- **401 Unauthorized:** Invalid username or password.\n    \n\n``` json\n{\n    \"error\": \"code=401, message=Invalid username or password\",\n    \"message\": \"Invalid username or password\"\n}\n\n ```\n\n- **403 Forbidden**: Maximum tokens number reached for the user (the user should log out from other devices or restore the tokens).\n    \n\n``` json\n{\n    \"error\": \"code=403, message=max tokens reached for the user\",\n    \"message\": \"max tokens reached for the user\"\n}\n\n ```"
 					},
 					"response": []
 				},
@@ -890,7 +939,7 @@
 								}
 							]
 						},
-						"description": "### `GET /api/auth/verify`\n\nVerifies if the provided JWT token is valid. Requires a valid token.\n\n**Possible Responses:**\n\n**200 OK:** Token is valid.\n\n``` json\n{\n \"message\": \"You are authenticated\", \n \"durationRemaining\": 29\n}\n\n ```"
+						"description": "### `GET /api/auth/verify`\n\nVerifies if the provided JWT token is valid. Requires a valid token.\n\n**Possible Responses:**\n\n- **200 OK:** Token is valid.\n    \n\n``` json\n{\n \"message\": \"You are authenticated\", \n \"durationRemaining\": 29\n}\n\n ```"
 					},
 					"response": []
 				},
@@ -919,7 +968,7 @@
 								"restore"
 							]
 						},
-						"description": "### `POST /api/auth/restore`\n\nDeletes all tokens associated with a user's credentials.\n\n**JSON Expected (Request Body):**\n\n``` json\n{\n    \"username\": \"john.doe\", \n    \"password\": \"S0m3P@sswOrd!\" \n}\n\n ```\n\n**Possible Responses:**\n\n**200 OK:** All tokens deleted successfully.\n\n**401 Unauthorized:** Invalid username or password.\n\n``` json\n{\n    \"error\": \"code=401, message=Invalid username or password\",\n    \"message\": \"Invalid username or password\"\n}\n\n ```"
+						"description": "### `POST /api/auth/restore`\n\nDeletes all tokens associated with a user's credentials.\n\n**JSON Expected (Request Body):**\n\n``` json\n{\n    \"username\": \"john.doe\", \n    \"password\": \"S0m3P@sswOrd!\" \n}\n\n ```\n\n**Possible Responses:**\n\n- **200 OK:** All tokens deleted successfully.\n    \n- **401 Unauthorized:** Invalid username or password.\n    \n\n``` json\n{\n    \"error\": \"code=401, message=Invalid username or password\",\n    \"message\": \"Invalid username or password\"\n}\n\n ```"
 					},
 					"response": []
 				},
@@ -960,7 +1009,7 @@
 					"response": []
 				}
 			],
-			"description": "GoSF V2 provides flexible authentication options to access its API endpoints.\n\n**1\\. Authorization Header**\n\n``` bash\nAuthorization: Bearer <your_jwt_token>\n\n ```\n\nThis is the standard and recommended approach for most API interactions. After logging in successfully, you'll receive a JWT. Include this token in the Authorization header of subsequent requests.\n\n**2\\. HTTP-Only Cookie**\n\n``` bash\n/api/auth/login?cookie=true\n\n ```\n\nGoSF V2 allows you to store the JWT in a cookie named token. To enable this, include the cookie query parameter with any value (e.g., `?cookie=true`) in the request URL when logging in or refreshing the token (endpoints: `/api/auth/login` and `/api/auth/refresh`). Subsequent requests will then automatically use the JWT stored in this cookie.\n\n**3\\. Query Param**\n\n``` bash\n/api/files?api-token=<your_jwt_token>\n\n ```\n\nYou can also send the JWT as a query parameter named `api-token` with each request\n\n**Prioritization:**\n\nGoSF V2 will try to authenticate you using the following order of precedence:\n\n1. **Authorization Header:** First, it checks for a JWT in the Authorization header (using the Bearer scheme).\n    \n2. **Query Parameter:** If no valid token is found in the header, it looks for an api-token query parameter.\n    \n3. **Cookie:** Finally, if neither of the above methods is used, it checks for a JWT in the token cookie.\n    \n\n**Authorization Errors**\n\nThis section outlines the error responses you might encounter if a JWT (JSON Web Token) is not correctly set in your API requests.\n\n**General Token Errors (Typically 401 Unauthorized)**\n\n| Error Message | Description | Potential Causes |\n| {\"message\": \"Not token provided\"} | No authentication token was provided in the request. | Missing Authorization header, api-token query parameter, or token cookie. |\n| {\"message\": \"missing or malformed jwt\"} | The token format is invalid (e.g., incorrect structure, missing segments). | Incorrect token structure, typos in the token string, or attempts to use an invalid token format. |\n| {\"message\": \"invalid authorization header\"} | The Authorization header is present but does not follow the expected Bearer  format. | Missing or incorrect \"Bearer\" prefix in the Authorization header. |\n| {\"message\": \"Unauthorized\"} | This generic message often indicates an invalid or expired token, or a token with an invalid signature. The server might not provide detailed reasons. | Expired token, incorrect secret key used to generate the token, or other internal validation failures. |\n\n**Token Not Found in Store (401 Unauthorized or 404 Not Found)**\n\n| Error Message | Description | Potential Causes |\n| {\"message\": \"the token is not valid for the current session\"} | The token might have been valid previously, but it's no longer found in the token store (e.g., Redis). | The user logged out, the token was manually revoked, or the token storage mechanism experienced an error. |\n| {\"message\": \"token/s not found in the database for the user\"} | This message more explicitly indicates that the token is not found in the database used for token storage. | Similar causes as the previous error, emphasizing that the token is not present in the persistent storage. |\n\n**Token Store Limit Reached (403 Forbidden)**\n\n| Error Message | Description | Potential Causes |\n| {\"message\": \"max tokens reached for the user\"} | The user has exceeded the maximum number of allowed active tokens. | The user has logged in from too many devices or locations, and the token store limit (defined in your application's configuration) has been reached. |"
+			"description": "GoSF V2 provides flexible authentication options to access its API endpoints.\n\n**1\\. Authorization Header**\n\n``` bash\nAuthorization: Bearer <your_jwt_token>\n\n ```\n\nThis is the standard and recommended approach for most API interactions. After logging in successfully, you'll receive a JWT. Include this token in the Authorization header of subsequent requests.\n\n**2\\. HTTP-Only Cookie**\n\n``` bash\n/api/auth/login?cookie=true\n\n ```\n\nGoSF V2 allows you to store the JWT in a cookie named token. To enable this, include the cookie query parameter with any value (e.g., `?cookie=true`) in the request URL when logging in or refreshing the token (endpoints: `/api/auth/login` and `/api/auth/refresh`). Subsequent requests will then automatically use the JWT stored in this cookie.\n\n**3\\. Query Param**\n\n``` bash\n/api/files?api-token=<your_jwt_token>\n\n ```\n\nYou can also send the JWT as a query parameter named `api-token` with each request\n\n**Prioritization:**\n\nGoSF V2 will try to authenticate you using the following order of precedence:\n\n1. **Authorization Header:** First, it checks for a JWT in the Authorization header (using the Bearer scheme).\n    \n2. **Query Parameter:** If no valid token is found in the header, it looks for an api-token query parameter.\n    \n3. **Cookie:** Finally, if neither of the above methods is used, it checks for a JWT in the token cookie.\n    \n\n## **Authorization Errors**\n\nThis section outlines the error responses you might encounter if a JWT (JSON Web Token) is not correctly set in your API requests.\n\n**General Token Errors (Typically 401 Unauthorized)**\n\n| Error Message | Description | Potential Causes |\n| --- | --- | --- |\n| `{\"message\": \"Not token provided\"}` | No authentication token was provided in the request. | Missing `Authorization` header, `api-token` query parameter, or token cookie. |\n| `{\"message\": \"missing or malformed jwt\"}` | The token format is invalid (e.g., incorrect structure, missing segments). | Incorrect token structure, typos in the token string, or attempts to use an invalid token format. |\n| `{\"message\": \"invalid authorization header\"}` | The `Authorization` header is present but does not follow the expected `Bearer` format. | Missing or incorrect \"Bearer\" prefix in the `Authorization` header (should be: `Authorization: Bearer` ). |\n| `{\"message\": \"Unauthorized\"}` | This generic message often indicates an invalid or expired token, or a token with an invalid signature. The server might not provide detailed reasons. | Expired token, incorrect secret key used to generate the token, or other internal validation failures. |\n\n**Token Not Found in Store (401 Unauthorized or 404 Not Found)**\n\n| Error Message | Description | Potential Causes |\n| --- | --- | --- |\n| `{\"message\": \"the token is not valid for the current session\"}` | The token might have been valid previously, but it's no longer found in the token store (e.g., Redis). | The user logged out, the token was manually revoked, or the token storage mechanism experienced an error. |\n| `{\"message\": \"token/s not found in the database for the user\"}` | This message more explicitly indicates that the token is not found in the database used for token storage. | Similar causes as the previous error, emphasizing that the token is not present in the persistent storage. |\n\n**Token Store Limit Reached (403 Forbidden)**\n\n| Error Message | Description | Potential Causes |\n| --- | --- | --- |\n| `{\"message\": \"max tokens reached for the user\"}` | The user has exceeded the maximum number of allowed active tokens. | The user has logged in from too many devices or locations, and the token store limit (defined in your application's configuration) has been reached. |"
 		}
 	]
 }
