@@ -126,3 +126,7 @@ go build -o ./gosfv2 ./src;
 ![User, Home, Notes](/readme//Main%20Pages.png)
 
 ![Share Overlay](/readme/Share%20Overlay.png)
+
+![Delete Overlay PC](/readme/Delete%20Recording%20PC.gif)
+
+![Delete Overlay Mobile](/readme/Delete%20Recording%20Mobile.gif)
