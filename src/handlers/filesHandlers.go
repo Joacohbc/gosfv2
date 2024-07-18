@@ -301,11 +301,11 @@ func (fc *fileController) DeleteFiles(c echo.Context) error {
 	}
 
 	if len(filesToDelete) == 0 {
-		return echo.NewHTTPError(http.StatusBadRequest, "No files to delete")
+		return echo.NewHTTPError(http.StatusNotFound, "No files to delete")
 	}
 
 	if len(filesToDelete) != len(files) {
-		return echo.NewHTTPError(http.StatusBadRequest, "Some files do not exist")
+		return echo.NewHTTPError(http.StatusNotFound, "Some files do not exist")
 	}
 
 	// El QueryParam "force" es opcional, si no viene se asume false
