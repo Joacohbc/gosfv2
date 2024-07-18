@@ -18,11 +18,11 @@ GOSF es un servidor de archivos que permite compartir archivos entre usuario de 
 
 ## Tecnologías
 
-- Go & [Echo Framework](https://echo.labstack.com/guide/)
+- Go & [Echo Framework](https://echo.labstack.com/guide/) & [ent](https://entgo.io/) (ORM)
 - HTML/CSS y JavaScript
-- React / React Router
+- React / React Router / Bootstrap
 - Redis & MySQL
-- Docker y Docker Compose
+- Docker y Docker Compose (Dockerfile, Env Variables, Docker Networks)
 - REST API
 
 ## Tipos de Instalación
