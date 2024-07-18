@@ -1,9 +1,9 @@
 # Configuración de Pre-requisitos
 
-- Go (Solo instalación 1)
-- Docker & Docker Compose (Solo instalación 2)
-- MySQL (Solo instalación 1)
-- Redis (Solo instalación 1)
+- Docker & Docker Compose (Solo instalación 1)
+- Go (Solo instalación 2)
+- MySQL (Solo instalación 2)
+- Redis (Solo instalación 2)
 
 ## Go
 

@@ -29,21 +29,45 @@ GOSF es un servidor de archivos que permite compartir archivos entre usuario de 
 
 La instalación de tiene 2 opciones para su despliegue:
 
-1. Como binario que se ejecuta en el sistema operativo y se conecta a una base de datos MySQL y Redis (Previamente instaladas y configuradas por el usuario)
-2. Utilizando Docker Compose, que despliega un contenedor de GOSF y otro de MySQL y Redis (Ya configurados)
+1. Utilizando Docker Compose, que despliega un contenedor de GOSF y otro de MySQL y Redis (Ya configurados)
+2. Como binario que se ejecuta en el sistema operativo y se conecta a una base de datos MySQL y Redis (Previamente instaladas y configuradas por el usuario)
 
 ## Pre-requisitos
 
-- Go (Solo instalación 1)
-- Docker & Docker Compose (Solo instalación 2)
-- MySQL (Solo instalación 1)
-- Redis (Solo instalación 1)
+- Docker & Docker Compose (Solo instalación 1)
+- Go (Solo instalación 2)
+- MySQL (Solo instalación 2)
+- Redis (Solo instalación 2)
 
 Como configurar los pre-requisitos [aquí](./readme/Prerequisites.md).
 
 ## Instalación
 
-### Opción 1
+### Opción 1 (Recomendada)
+
+Para iniciar basta con "ejecutar" el [docker-compose.yml](./docker-compose.yml).
+
+Por defecto el servicio corre en el puerto 80, para cambiar esto basta con modificar el puerto que se expone en el [config.env](./config.env). Ademas se puede cambiar otros parámetros de configuración del servicio (como la Volume path, y versiones de Tags, etc) en el mismo archivo.
+
+- Clonar el repositorio
+
+```bash
+git clone https://github.com/Joacohbc/gosfv2; cd ./gosfv2;
+```
+
+- Crear los contenedores
+
+```bash
+docker compose build --no-cache
+```
+
+- Iniciar los contenedores
+
+```bash
+docker compose --env-file config.env up
+```
+
+### Opción 2
 
 Para iniciar basta con ejecutar el binario (con las 2 base de datos corriendo)
 
@@ -93,30 +117,6 @@ go build -o ./gosfv2 ./src;
 
 ```bash
 ./gosfv2 -config ./config.json;
-```
-
-### Opción 2 (Recomendada)
-
-Para iniciar basta con "ejecutar" el [docker-compose.yml](./docker-compose.yml).
-
-Por defecto el servicio corre en el puerto 80, para cambiar esto basta con modificar el puerto que se expone en el [config.env](./config.env). Ademas se puede cambiar otros parámetros de configuración del servicio (como la Volume path, y versiones de Tags, etc) en el mismo archivo.
-
-- Clonar el repositorio
-
-```bash
-git clone https://github.com/Joacohbc/gosfv2; cd ./gosfv2;
-```
-
-- Crear los contenedores
-
-```bash
-docker compose build --no-cache
-```
-
-- Iniciar los contenedores
-
-```bash
-docker compose --env-file config.env up
 ```
 
 ## Frontend Implementado
