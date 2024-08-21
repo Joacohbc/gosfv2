@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+
+  redis-gosf:
+    image: arm64v8/redis:7.0
+    container_name: redis-gosf
+    healthcheck:
+      test: "redis-cli ping"
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    restart: always
+
+  mysql-gosf:
+    image: arm64v8/mysql:8.0
+    container_name: mysql-gosf
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: "gosf"
+      MYSQL_USER: "gosf"
+      MYSQL_PASSWORD: "gosf"
+      MYSQL_ROOT_PASSWORD: 1234
+    healthcheck:
+      test: "mysql $$MYSQL_DATABASE -u$$MYSQL_USER -p$$MYSQL_PASSWORD -e 'SHOW TABLES;'"
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    restart: always
+
+  app-gosf:
+    container_name: app-gosf
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - ./config-gosf.env
+    ports:
+      - "${GOSF_PORT:-3000}:80"
+    depends_on:
+      mysql-gosf:
+        condition: service_healthy
+      redis-gosf:
+    restart: alway
