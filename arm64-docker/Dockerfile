@@ -1,7 +1,9 @@
-FROM golang:1.21 
+# La imagen base es la oficial de Go (ultima versión estable) en Alpine
+FROM arm64v8/golang:1.21
 
 WORKDIR /app
 
+# Copio los cosas que necesito para compilar
 COPY . .
 
 RUN apt update
