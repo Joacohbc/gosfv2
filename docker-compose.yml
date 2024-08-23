@@ -1,7 +1,4 @@
 # Docker-compose.yml con MySQL 8.0 y Redis 7.0.5
-
-version: '3'
-
 services:
 
   redis-gosf:

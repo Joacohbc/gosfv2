@@ -3,7 +3,6 @@ import { useCallback, useRef, useState } from 'react';
 import { handleKeyUpWithTimeout } from '../utils/input-text';
 import PropTypes from "prop-types";
 import ToolTip from './ToolTip';
-import { useWhatChanged } from '@simbathesailor/use-what-changed';
 
 const sortByName = (order) => {
     return (data) => data.sort((a, b) => {
@@ -132,7 +131,6 @@ const SearchBar = ({ createFileLoader, setFileLoader  }) => {
         loadInfo();
     }, [ setSortName, setSortDate, setDisableSort, setFileLoader, createFileLoader, searchRef, handleSearch ]);
 
-    useWhatChanged([ sortName, sortDate, shared ]);
     return (
         <div className="d-flex flex-column flex-sm-row justify-content-center align-items-center mb-4 gap-1">
             <input type="text" placeholder="Enter Search" className='search-input' ref={searchRef} onKeyUp={handleSearch}/>

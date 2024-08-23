@@ -1,16 +1,21 @@
-# La imagen base es la oficial de Go (ultima versión estable) en Alpine 
-FROM golang:alpine 
-RUN apk add --no-cache git gcc libc-dev
+FROM golang:1.21 
 
 WORKDIR /app
 
-# Copio los cosas que necesito para compilar
 COPY . .
+
+RUN apt update
+RUN apt install nodejs npm -y
+WORKDIR /app/staticv2
+RUN npm install
+RUN npm audit fix
+RUN npm run build
+WORKDIR /app
 
 # Compilo y creo el ejecutable
 RUN go get ./src
 RUN go build -o ./gosfv2 ./src
-RUN apk --no-cache add ca-certificates
+RUN apt install ca-certificates
 
 # Agrego permisos de ejecución
 RUN chmod +x ./docker-entrypoint.sh
