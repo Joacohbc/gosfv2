@@ -41,4 +41,5 @@ services:
       mysql-gosf:
         condition: service_healthy
       redis-gosf:
+        condition: service_healthy
     restart: alway
