@@ -64,7 +64,15 @@ docker compose build --no-cache
 - Iniciar los contenedores
 
 ```bash
-docker compose --env-file config.env up
+docker compose up -d
+```
+
+- Dentro del volumen del contenedor, se encuentra el archivo de configuración `config.json` que debe ser modificado para que se ajuste a las necesidades de su sistema
+
+```bash
+# gosf-data es el volumen del contenedor
+# Revisar el config_example.json como base para la configuración
+nano gosf-data/config/config.json
 ```
 
 ### Opción 2
