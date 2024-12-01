@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"errors"
 	"fmt"
 	"gosfV2/src/auth/jwt"
 	"gosfV2/src/ent"
@@ -15,20 +14,7 @@ import (
 	"gosfV2/src/utils"
 
 	"github.com/labstack/echo/v4"
-	"golang.org/x/crypto/bcrypt"
 )
-
-// Compara el password con el hash de la base de datos
-func CheckPassword(password, bdHash string) (bool, error) {
-	err := bcrypt.CompareHashAndPassword([]byte(bdHash), []byte(password))
-	if err != nil {
-		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			return false, nil
-		}
-		return false, err
-	}
-	return true, nil
-}
 
 // Registra un nuevo usuario
 func RegisterUser(c echo.Context) error {

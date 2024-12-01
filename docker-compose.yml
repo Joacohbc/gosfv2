@@ -1,13 +1,8 @@
-# Docker-compose.yml con MySQL 8.0 y Redis 7.0.5
 services:
 
   redis-gosf:
-    image: redis:${REDIS_TAG:-7.0.5}
+    image: redis:7.0.5
     container_name: redis-gosf
-    #ports:
-      # - "6379:6379"
-    # volumes:
-    #   - ${VOLUME_PATH}/redis:/data
     healthcheck:
       test: "redis-cli ping"
       interval: 20s
@@ -17,13 +12,9 @@ services:
     restart: always
   
   mysql-gosf:
-    image: mysql:${MYSQL_TAG:-8.0-debian}
+    image: mysql:8.0-debian
     container_name: mysql-gosf
     command: --default-authentication-plugin=mysql_native_password
-    #ports:
-      # - "3306:3306"
-    # volumes:
-    #   - ${VOLUME_PATH}/mysql:/var/lib/mysql
     environment:
       MYSQL_DATABASE: "gosf"
       MYSQL_USER: "gosf"
@@ -42,16 +33,15 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
-    env_file:
-      - ./config-gosf.env
     ports:
-      - "${GOSF_PORT:-3000}:80" 
+      - "3000:80" 
     depends_on:
       mysql-gosf:
         condition: service_healthy
       redis-gosf:
         condition: service_healthy
-    # volumes:
-      # - ${VOLUME_PATH}/files:/app/files
-      # - ${VOLUME_PATH}/static:/app/static
+    volumes:
+      - ./gosf-data/config:/app/config
+      - ./gosf-data/files:/app/files
+      - ./gosf-data/logs:/app/logs
     restart: always
