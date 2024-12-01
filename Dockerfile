@@ -1,26 +1,36 @@
-FROM golang:1.21 
+# Etapa 1: Construcción de la aplicación Node.js
+FROM node:lts-alpine AS build-node
+
+WORKDIR /app/staticv2
+
+COPY ./staticv2/package*.json ./
+RUN npm install
+RUN npm audit fix --force
+
+COPY ./staticv2/ ./
+RUN npm run build
+
+# Etapa 2: Construcción de la aplicación Go
+FROM golang:1.21-alpine AS build-go
 
 WORKDIR /app
 
 COPY . .
-
-RUN apt update
-RUN apt install nodejs npm -y
-WORKDIR /app/staticv2
-RUN npm install
-RUN npm audit fix
-RUN npm run build
-WORKDIR /app
-
-# Compilo y creo el ejecutable
 RUN go get ./src
 RUN go build -o ./gosfv2 ./src
-RUN apt install ca-certificates
 
-# Agrego permisos de ejecución
+# Etapa 3: Imagen final
+FROM alpine
+
+WORKDIR /app
+
+# Copiar los archivos necesarios de las etapas anteriores
+COPY --from=build-node /app/staticv2/dist ./static
+COPY --from=build-go /app/gosfv2 .
+COPY ./docker-entrypoint.sh .
+
 RUN chmod +x ./docker-entrypoint.sh
 RUN chmod +x ./gosfv2
 
 LABEL Name=gosfv2 Version=1.0.0
-EXPOSE 80
-ENTRYPOINT [ "/app/docker-entrypoint.sh" ]
+CMD [ "/app/gosfv2", "-config", "/app/config/config.json" ]
