@@ -30,16 +30,18 @@ services:
 
   app-gosf:
     container_name: app-gosf
-    build:
+    build: 
       context: .
       dockerfile: Dockerfile
-    env_file:
-      - ./config-gosf.env
     ports:
-      - "${GOSF_PORT:-3000}:80"
+      - "3000:80" 
     depends_on:
       mysql-gosf:
         condition: service_healthy
       redis-gosf:
         condition: service_healthy
-    restart: alway
+    volumes:
+      - ./gosf-data/config:/app/config
+      - ./gosf-data/files:/app/files
+      - ./gosf-data/logs:/app/logs
+    restart: always
