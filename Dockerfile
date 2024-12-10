@@ -27,9 +27,6 @@ WORKDIR /app
 # Copiar los archivos necesarios de las etapas anteriores
 COPY --from=build-node /app/staticv2/dist ./static
 COPY --from=build-go /app/gosfv2 .
-COPY ./docker-entrypoint.sh .
-
-RUN chmod +x ./docker-entrypoint.sh
 RUN chmod +x ./gosfv2
 
 LABEL Name=gosfv2 Version=1.0.0
