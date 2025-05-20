@@ -29,7 +29,15 @@ func (User) Fields() []ent.Field {
 			Unique().
 			StructTag(`json:"username"`),
 		field.String("password").
-			NotEmpty(),
+			Optional(),
+		field.String("google_id").
+			Optional().
+			Unique().
+			StructTag(`json:"google_id,omitempty"`),
+		field.String("email").
+			Optional().
+			Unique().
+			StructTag(`json:"email,omitempty"`),
 	}
 }
 

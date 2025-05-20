@@ -22,6 +22,10 @@ const (
 	FieldUsername = "username"
 	// FieldPassword holds the string denoting the password field in the database.
 	FieldPassword = "password"
+	// FieldGoogleID holds the string denoting the google_id field in the database.
+	FieldGoogleID = "google_id"
+	// FieldEmail holds the string denoting the email field in the database.
+	FieldEmail = "email"
 	// EdgeFiles holds the string denoting the files edge name in mutations.
 	EdgeFiles = "files"
 	// EdgeSharedFiles holds the string denoting the shared_files edge name in mutations.
@@ -65,6 +69,8 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldUsername,
 	FieldPassword,
+	FieldGoogleID,
+	FieldEmail,
 }
 
 var (
@@ -93,8 +99,6 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// UsernameValidator is a validator for the "username" field. It is called by the builders before save.
 	UsernameValidator func(string) error
-	// PasswordValidator is a validator for the "password" field. It is called by the builders before save.
-	PasswordValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the User queries.
@@ -123,6 +127,16 @@ func ByUsername(opts ...sql.OrderTermOption) OrderOption {
 // ByPassword orders the results by the password field.
 func ByPassword(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPassword, opts...).ToFunc()
+}
+
+// ByGoogleID orders the results by the google_id field.
+func ByGoogleID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldGoogleID, opts...).ToFunc()
+}
+
+// ByEmail orders the results by the email field.
+func ByEmail(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEmail, opts...).ToFunc()
 }
 
 // ByFilesCount orders the results by files count.

@@ -30,6 +30,7 @@ type NoteQuery struct {
 	withParent     *NoteQuery
 	withFiles      *FileQuery
 	withFKs        bool
+	modifiers      []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -536,6 +537,9 @@ func (nq *NoteQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Note, e
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(nq.modifiers) > 0 {
+		_spec.Modifiers = nq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -771,6 +775,9 @@ func (nq *NoteQuery) loadFiles(ctx context.Context, query *FileQuery, nodes []*N
 
 func (nq *NoteQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := nq.querySpec()
+	if len(nq.modifiers) > 0 {
+		_spec.Modifiers = nq.modifiers
+	}
 	_spec.Node.Columns = nq.ctx.Fields
 	if len(nq.ctx.Fields) > 0 {
 		_spec.Unique = nq.ctx.Unique != nil && *nq.ctx.Unique
@@ -833,6 +840,9 @@ func (nq *NoteQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if nq.ctx.Unique != nil && *nq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range nq.modifiers {
+		m(selector)
+	}
 	for _, p := range nq.predicates {
 		p(selector)
 	}
@@ -848,6 +858,12 @@ func (nq *NoteQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (nq *NoteQuery) Modify(modifiers ...func(s *sql.Selector)) *NoteSelect {
+	nq.modifiers = append(nq.modifiers, modifiers...)
+	return nq.Select()
 }
 
 // NoteGroupBy is the group-by builder for Note entities.
@@ -938,4 +954,10 @@ func (ns *NoteSelect) sqlScan(ctx context.Context, root *NoteQuery, v any) error
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (ns *NoteSelect) Modify(modifiers ...func(s *sql.Selector)) *NoteSelect {
+	ns.modifiers = append(ns.modifiers, modifiers...)
+	return ns
 }

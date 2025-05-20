@@ -44,7 +44,15 @@ export default function Register() {
                 </div>
             </Form>
 
-            <div className="link text-center">
+            {/* New Google Sign-In Button */}
+            <div className="mt-3 d-flex justify-content-center">
+                <a href="/auth/google/login" className="btn btn-outline-primary flex-fill" role="button">
+                    Sign in with Google
+                </a>
+            </div>
+            {/* End of New Google Sign-In Button */}
+
+            <div className="link text-center mt-2"> {/* Added mt-2 for spacing */}
                 <Link to="/login">{"Already have an account? Log in!"}</Link>
             </div>
         </div>

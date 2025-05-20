@@ -30,6 +30,7 @@ type FileQuery struct {
 	withChildren   *FileQuery
 	withNotes      *NoteQuery
 	withFKs        bool
+	modifiers      []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -536,6 +537,9 @@ func (fq *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(fq.modifiers) > 0 {
+		_spec.Modifiers = fq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -771,6 +775,9 @@ func (fq *FileQuery) loadNotes(ctx context.Context, query *NoteQuery, nodes []*F
 
 func (fq *FileQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := fq.querySpec()
+	if len(fq.modifiers) > 0 {
+		_spec.Modifiers = fq.modifiers
+	}
 	_spec.Node.Columns = fq.ctx.Fields
 	if len(fq.ctx.Fields) > 0 {
 		_spec.Unique = fq.ctx.Unique != nil && *fq.ctx.Unique
@@ -833,6 +840,9 @@ func (fq *FileQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if fq.ctx.Unique != nil && *fq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range fq.modifiers {
+		m(selector)
+	}
 	for _, p := range fq.predicates {
 		p(selector)
 	}
@@ -848,6 +858,12 @@ func (fq *FileQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (fq *FileQuery) Modify(modifiers ...func(s *sql.Selector)) *FileSelect {
+	fq.modifiers = append(fq.modifiers, modifiers...)
+	return fq.Select()
 }
 
 // FileGroupBy is the group-by builder for File entities.
@@ -938,4 +954,10 @@ func (fs *FileSelect) sqlScan(ctx context.Context, root *FileQuery, v any) error
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (fs *FileSelect) Modify(modifiers ...func(s *sql.Selector)) *FileSelect {
+	fs.modifiers = append(fs.modifiers, modifiers...)
+	return fs
 }

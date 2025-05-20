@@ -1857,6 +1857,8 @@ type UserMutation struct {
 	updated_at          *time.Time
 	username            *string
 	password            *string
+	google_id           *string
+	email               *string
 	clearedFields       map[string]struct{}
 	files               map[uint]struct{}
 	removedfiles        map[uint]struct{}
@@ -2131,9 +2133,120 @@ func (m *UserMutation) OldPassword(ctx context.Context) (v string, err error) {
 	return oldValue.Password, nil
 }
 
+// ClearPassword clears the value of the "password" field.
+func (m *UserMutation) ClearPassword() {
+	m.password = nil
+	m.clearedFields[user.FieldPassword] = struct{}{}
+}
+
+// PasswordCleared returns if the "password" field was cleared in this mutation.
+func (m *UserMutation) PasswordCleared() bool {
+	_, ok := m.clearedFields[user.FieldPassword]
+	return ok
+}
+
 // ResetPassword resets all changes to the "password" field.
 func (m *UserMutation) ResetPassword() {
 	m.password = nil
+	delete(m.clearedFields, user.FieldPassword)
+}
+
+// SetGoogleID sets the "google_id" field.
+func (m *UserMutation) SetGoogleID(s string) {
+	m.google_id = &s
+}
+
+// GoogleID returns the value of the "google_id" field in the mutation.
+func (m *UserMutation) GoogleID() (r string, exists bool) {
+	v := m.google_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoogleID returns the old "google_id" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldGoogleID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoogleID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoogleID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoogleID: %w", err)
+	}
+	return oldValue.GoogleID, nil
+}
+
+// ClearGoogleID clears the value of the "google_id" field.
+func (m *UserMutation) ClearGoogleID() {
+	m.google_id = nil
+	m.clearedFields[user.FieldGoogleID] = struct{}{}
+}
+
+// GoogleIDCleared returns if the "google_id" field was cleared in this mutation.
+func (m *UserMutation) GoogleIDCleared() bool {
+	_, ok := m.clearedFields[user.FieldGoogleID]
+	return ok
+}
+
+// ResetGoogleID resets all changes to the "google_id" field.
+func (m *UserMutation) ResetGoogleID() {
+	m.google_id = nil
+	delete(m.clearedFields, user.FieldGoogleID)
+}
+
+// SetEmail sets the "email" field.
+func (m *UserMutation) SetEmail(s string) {
+	m.email = &s
+}
+
+// Email returns the value of the "email" field in the mutation.
+func (m *UserMutation) Email() (r string, exists bool) {
+	v := m.email
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEmail returns the old "email" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldEmail(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEmail is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEmail requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEmail: %w", err)
+	}
+	return oldValue.Email, nil
+}
+
+// ClearEmail clears the value of the "email" field.
+func (m *UserMutation) ClearEmail() {
+	m.email = nil
+	m.clearedFields[user.FieldEmail] = struct{}{}
+}
+
+// EmailCleared returns if the "email" field was cleared in this mutation.
+func (m *UserMutation) EmailCleared() bool {
+	_, ok := m.clearedFields[user.FieldEmail]
+	return ok
+}
+
+// ResetEmail resets all changes to the "email" field.
+func (m *UserMutation) ResetEmail() {
+	m.email = nil
+	delete(m.clearedFields, user.FieldEmail)
 }
 
 // AddFileIDs adds the "files" edge to the File entity by ids.
@@ -2386,7 +2499,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 6)
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
 	}
@@ -2398,6 +2511,12 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.password != nil {
 		fields = append(fields, user.FieldPassword)
+	}
+	if m.google_id != nil {
+		fields = append(fields, user.FieldGoogleID)
+	}
+	if m.email != nil {
+		fields = append(fields, user.FieldEmail)
 	}
 	return fields
 }
@@ -2415,6 +2534,10 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Username()
 	case user.FieldPassword:
 		return m.Password()
+	case user.FieldGoogleID:
+		return m.GoogleID()
+	case user.FieldEmail:
+		return m.Email()
 	}
 	return nil, false
 }
@@ -2432,6 +2555,10 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldUsername(ctx)
 	case user.FieldPassword:
 		return m.OldPassword(ctx)
+	case user.FieldGoogleID:
+		return m.OldGoogleID(ctx)
+	case user.FieldEmail:
+		return m.OldEmail(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -2469,6 +2596,20 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPassword(v)
 		return nil
+	case user.FieldGoogleID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoogleID(v)
+		return nil
+	case user.FieldEmail:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEmail(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -2502,6 +2643,15 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldUpdatedAt) {
 		fields = append(fields, user.FieldUpdatedAt)
 	}
+	if m.FieldCleared(user.FieldPassword) {
+		fields = append(fields, user.FieldPassword)
+	}
+	if m.FieldCleared(user.FieldGoogleID) {
+		fields = append(fields, user.FieldGoogleID)
+	}
+	if m.FieldCleared(user.FieldEmail) {
+		fields = append(fields, user.FieldEmail)
+	}
 	return fields
 }
 
@@ -2518,6 +2668,15 @@ func (m *UserMutation) ClearField(name string) error {
 	switch name {
 	case user.FieldUpdatedAt:
 		m.ClearUpdatedAt()
+		return nil
+	case user.FieldPassword:
+		m.ClearPassword()
+		return nil
+	case user.FieldGoogleID:
+		m.ClearGoogleID()
+		return nil
+	case user.FieldEmail:
+		m.ClearEmail()
 		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
@@ -2538,6 +2697,12 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldPassword:
 		m.ResetPassword()
+		return nil
+	case user.FieldGoogleID:
+		m.ResetGoogleID()
+		return nil
+	case user.FieldEmail:
+		m.ResetEmail()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
