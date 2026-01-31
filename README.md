@@ -14,12 +14,11 @@
 
 ---
 
-## 🚀 El Gancho
 GOSF v2 no es solo un servidor de archivos; es tu propia nube privada, rápida y altamente configurable. Diseñado para quienes buscan simplicidad sin sacrificar la seguridad, permite gestionar tus datos con total control, ofreciendo autenticación robusta y un despliegue ágil mediante contenedores. Ya sea para uso público o privado, GOSF v2 es el puente seguro entre tus archivos y tus usuarios.
 
-## 🛠️ Built With
+## 🛠️ Tech Stack
 
-### Backend & Core
+### Backend
 [![Go](https://img.shields.io/badge/Go-%2300ADD8.svg?&logo=go&logoColor=white)](#)
 [![Echo](https://img.shields.io/badge/Echo-00ADD8?logo=echo&logoColor=white)](#)
 [![ent](https://img.shields.io/badge/ent-5487A6?logo=ent&logoColor=white)](#)
