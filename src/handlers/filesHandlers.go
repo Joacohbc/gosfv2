@@ -4,6 +4,7 @@ import (
 	"gosfV2/src/auth"
 	"gosfV2/src/dtos"
 	"gosfV2/src/models"
+	"gosfV2/src/utils"
 	"net/http"
 	"path/filepath"
 
@@ -40,7 +41,7 @@ func (fc *fileController) GetFile(c echo.Context) error {
 		return HandleFileError(err)
 	}
 
-	return c.Inline(models.Files().GetPath(file.ID, file.Filename), file.Filename)
+	return utils.ServeFileSafe(c, models.Files().GetPath(file.ID, file.Filename), file.Filename)
 }
 
 // Obtiene el Id del URL para retornar la información del archivo
@@ -92,12 +93,12 @@ func (fc *fileController) GetSharedFile(c echo.Context) error {
 
 	// Si el usuario es el dueño del archivo, lo envío directamente
 	if file.Edges.Owner.ID == idCurrentUser {
-		return c.File(models.Files().GetPath(file.ID, file.Filename))
+		return utils.ServeFileSafe(c, models.Files().GetPath(file.ID, file.Filename), file.Filename)
 	}
 
 	// Si esta compartido lo envió directamente
 	if file.IsShared {
-		return c.File(models.Files().GetPath(file.ID, file.Filename))
+		return utils.ServeFileSafe(c, models.Files().GetPath(file.ID, file.Filename), file.Filename)
 	}
 
 	sharedWithMe, err := models.Files().IsSharedWith(file.ID, idCurrentUser)
@@ -109,7 +110,7 @@ func (fc *fileController) GetSharedFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, "The file is not shared with you, request access to the owner")
 	}
 
-	return c.File(models.Files().GetPath(file.ID, file.Filename))
+	return utils.ServeFileSafe(c, models.Files().GetPath(file.ID, file.Filename), file.Filename)
 }
 
 // Obtiene el Id del URL para retornar la informacion del archivo
