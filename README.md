@@ -1,29 +1,52 @@
+<div align="center">
+
 # GOSF v2
 
-GOSF es un servidor de archivos que permite compartir archivos entre usuario de forma sencilla y segura, de forma pública o privada.
+**La solución definitiva para la gestión y compartición de archivos: potencia, seguridad y simplicidad en un solo servidor auto-alojado.**
+
+[![Go](https://img.shields.io/badge/Go-%2300ADD8.svg?&logo=go&logoColor=white)](#)
+[![React](https://img.shields.io/badge/React-%2320232a.svg?logo=react&logoColor=%2361DAFB)](#)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff)](#)
+[![MySQL](https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=fff)](#)
+[![Redis](https://img.shields.io/badge/Redis-%23DD0031.svg?logo=redis&logoColor=white)](#)
+
+</div>
+
+---
+
+## 🚀 El Gancho
+GOSF v2 no es solo un servidor de archivos; es tu propia nube privada, rápida y altamente configurable. Diseñado para quienes buscan simplicidad sin sacrificar la seguridad, permite gestionar tus datos con total control, ofreciendo autenticación robusta y un despliegue ágil mediante contenedores. Ya sea para uso público o privado, GOSF v2 es el puente seguro entre tus archivos y tus usuarios.
+
+## 🛠️ Built With
+
+### Backend & Core
+[![Go](https://img.shields.io/badge/Go-%2300ADD8.svg?&logo=go&logoColor=white)](#)
+[![Echo](https://img.shields.io/badge/Echo-00ADD8?logo=echo&logoColor=white)](#)
+[![ent](https://img.shields.io/badge/ent-5487A6?logo=ent&logoColor=white)](#)
+[![Postman](https://img.shields.io/badge/Postman-FF6C37?logo=postman&logoColor=white)](#)
+
+### Frontend
+[![React](https://img.shields.io/badge/React-%2320232a.svg?logo=react&logoColor=%2361DAFB)](#)
+[![React Router](https://img.shields.io/badge/React_Router-CA4245?logo=react-router&logoColor=white)](#)
+[![Bootstrap](https://img.shields.io/badge/Bootstrap-7952B3?logo=bootstrap&logoColor=fff)](#)
+[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=000)](#)
+
+### Infraestructura & Base de Datos
+[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff)](#)
+[![MySQL](https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=fff)](#)
+[![Redis](https://img.shields.io/badge/Redis-%23DD0031.svg?logo=redis&logoColor=white)](#)
+
+---
 
 ## Características
 
-1. Autenticación de usuarios con **JWT Token**
-    - Cantidad de **tiempo de expiración** configurable
-    - **Cantidad de Tokens** por usuario configurable (cantidad sesiones activas)
-2. **Subir**, **descargar**, **eliminar** y **modificar** archivos de forma sencilla
-3. **Compartir archivos** de forma pública o privada, siempre y cuando el usuario esté autenticado  
-4. **Control de acceso** a los archivos (solo el usuario que subió el archivo puede modificarlo o eliminarlo)
-5. Altamente **configurable**, se puede configurar:
-    - El puerto en el que se ejecuta el servidor
-    - La ruta en la que se guardan los archivos
-    - La ruta en la que se guardan los logs
-    - Se pueden modificar la características de las conexiones a la base de datos de Redis y MySQL (host, puerto, usuario, contraseña, etc)
-
-## Tecnologías
-
-- Go & [Echo Framework](https://echo.labstack.com/guide/) & [ent](https://entgo.io/) (ORM)
-- HTML/CSS y JavaScript
-- React / React Router / Bootstrap
-- Redis & MySQL
-- Docker y Docker Compose (Dockerfile, Env Variables, Docker Networks)
-- REST API
+1. **Autenticación de usuarios con JWT Token**
+    - Cantidad de **tiempo de expiración** configurable.
+    - **Cantidad de Tokens** por usuario configurable (sesiones activas).
+2. **Gestión completa**: Subir, descargar, eliminar y modificar archivos de forma sencilla.
+3. **Compartición Flexible**: Archivos públicos o privados para usuarios autenticados.
+4. **Control de Acceso**: Seguridad garantizada; solo el propietario puede modificar o eliminar sus archivos.
+5. **Altamente Configurable**: Personaliza puertos, rutas de almacenamiento, logs y conexiones a bases de datos.
 
 ## Tipos de Instalación
 
